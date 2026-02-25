@@ -1,0 +1,53 @@
+# ----------------------------------------
+# GLOBAL
+# ----------------------------------------
+*.log
+*.tmp
+*.swp
+*.DS_Store
+*.idea/
+*.iml
+*.classpath
+*.project
+*.settings/
+*.vscode/
+node_modules/
+dist/
+.env
+.env.*
+/target/
+out/
+build/
+
+# ----------------------------------------
+# BACKEND (Java + Spring Boot)
+# ----------------------------------------
+/backend/target/
+/backend/*.jar
+/backend/*.war
+/backend/*.iml
+/backend/.mvn/wrapper/maven-wrapper.jar
+
+# ----------------------------------------
+# ANDROID (Mobile)
+# ----------------------------------------
+/mobile/.gradle/
+/mobile/.idea/
+/mobile/build/
+/mobile/app/build/
+/mobile/local.properties
+/mobile/.cxx/
+
+# ----------------------------------------
+# WEB (Angular)
+# ----------------------------------------
+/web/node_modules/
+/web/dist/
+/web/.angular/
+/web/.env*
+
+# ----------------------------------------
+# LOGS
+# ----------------------------------------
+*.log
+logs/
