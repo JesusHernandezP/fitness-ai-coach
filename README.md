@@ -12,3 +12,5 @@ mobile/ → App Android (Kotlin + MVVM)
 web/ → Panel Web (Angular)
  
 docs/ → Documentación del proyecto
+
+📄 Modelo de dominio inicial: ver [`docs/domain-model.md`](docs/domain-model.md).
