@@ -1,33 +1,78 @@
-HELP.md
+# ----------------------------------------
+# GLOBAL
+# ----------------------------------------
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Node modules (Angular, etc)
+node_modules/
+dist/
+tmp/
+out-tsc/
+
+# Environment files
+.env
+*.env.local
+*.env.development
+*.env.production
+
+# ----------------------------------------
+# JAVA / SPRING BOOT (backend)
+# ----------------------------------------
 target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Maven
+.mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+mvnw
+mvnw.cmd
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IntelliJ / Idea
+.idea/
 *.iml
+*.iws
 *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Logs
+spring.log
 
-### VS Code ###
-.vscode/
+# ----------------------------------------
+# ANDROID (Mobile app)
+# ----------------------------------------
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.aar
+
+# Android keystore (nunca subir)
+*.keystore
+*.jks
+
+# ----------------------------------------
+# DOCUMENTACIÓN
+# ----------------------------------------
+docs/**/*.pdf
+docs/**/*.docx
+docs/**/*.png
+docs/**/*.jpg
+docs/**/*.jpeg
+
+# Allow README.md files in empty folders
+!docs/README.md
+!backend/README.md
+!mobile/README.md
+!web/README.md
