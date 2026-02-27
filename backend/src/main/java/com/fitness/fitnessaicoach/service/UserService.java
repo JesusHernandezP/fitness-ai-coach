@@ -1,30 +1,71 @@
 package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.dto.UserRequest;
+import com.fitness.fitnessaicoach.dto.UserResponse;
+import com.fitness.fitnessaicoach.exception.UserNotFoundException;
+import com.fitness.fitnessaicoach.exception.EmailAlreadyUsedException;
 import com.fitness.fitnessaicoach.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    // Crear usuario (registro)
+    public UserResponse create(UserRequest request) {
 
-    public List<User> findAll() {
-        return userRepository.findAll();
-    }
-
-    public User createDemoUser() {
-        User user = new User("Demo User", "demo@example.com");
-
-        if (!userRepository.existsByEmail(user.getEmail())) {
-            return userRepository.save(user);
+        // Validación de email duplicado
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new EmailAlreadyUsedException("El email ya está en uso.");
         }
-        return userRepository.findAll().stream().findFirst().orElse(null);
+
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .passwordHash(request.getPassword()) // luego BCrypt
+                .age(request.getAge())
+                .heightCm(request.getHeightCm())
+                .weightKg(request.getWeightKg())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        User saved = userRepository.save(user);
+
+        return toResponse(saved);
+    }
+
+    // Obtener un usuario por ID
+    public UserResponse getById(UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado."));
+        return toResponse(user);
+    }
+
+    // Listar todos los usuarios
+    public java.util.List<UserResponse> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    // Conversión User → UserResponse
+    private UserResponse toResponse(User user) {
+        return UserResponse.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .age(user.getAge())
+                .heightCm(user.getHeightCm())
+                .weightKg(user.getWeightKg())
+                .createdAt(user.getCreatedAt())
+                .build();
     }
 }
