@@ -10,24 +10,35 @@ jobs:
   build-backend:
     runs-on: ubuntu-latest
 
-    # Por defecto, todos los "run" se ejecutan dentro de /backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: jesus
+          POSTGRES_PASSWORD: jesus
+          POSTGRES_DB: fitness_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U jesus -d fitness_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     defaults:
       run:
         working-directory: backend
 
     steps:
-      # 1) Descargar el código del repo en el robot
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2) Instalar Java 17 en el robot
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # 3) Cache de dependencias Maven (para que las siguientes builds sean más rápidas)
       - name: Cache Maven dependencies
         uses: actions/cache@v4
         with:
@@ -36,11 +47,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      # 4) Compilar y ejecutar tests
+      # MUY IMPORTANTE: esperar a que postgres esté ready
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..10}; do
+            nc -z localhost 5432 && echo "Postgres is up" && break
+            echo "Waiting for Postgres..."
+            sleep 3
+          done
+
       - name: Build and test with Maven
         run: mvn -B clean verify
 
-      # 5) Guardar el JAR como "caja" descargable
       - name: Upload jar artifact
         uses: actions/upload-artifact@v4
         with:
