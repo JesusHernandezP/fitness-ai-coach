@@ -1,0 +1,40 @@
+@startuml FitnessAICoach_Enhanced
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' Configuración de visualización
+LAYOUT_WITH_LEGEND()
+LAYOUT_TOP_DOWN()
+
+Person(user, "Usuario", "Atleta o cliente que busca mejorar su salud física.")
+
+System_Boundary(c1, "Fitness AI Coach System") {
+
+    Container(android, "App Móvil", "Kotlin, MVVM", "Interfaz principal para el seguimiento diario y visualización de rutinas.")
+    Container(web, "Web App", "Angular", "Panel administrativo y gestión de perfil de usuario.")
+
+    Container(api, "Backend API", "Spring Boot 3, Java 17", "Orquestador de lógica, seguridad y conectividad con IA.", "gears")
+
+    ContainerDb(db, "PostgreSQL", "Docker Container", "Almacenamiento persistente de perfiles, dietas y métricas.", "postgresql")
+}
+
+' Sistemas Externos
+System_Ext(openai, "OpenAI API", "GPT-4 / DALL-E", "Motor de IA para generación de planes personalizados.")
+System_Ext(ci, "GitHub Actions", "CI/CD Pipeline", "Automatización de despliegue y ejecución de pruebas unitarias.")
+
+' Relaciones de Usuario
+Rel(user, android, "Visualiza progreso y rutinas", "HTTPS/Mobile")
+Rel(user, web, "Gestiona configuración y reportes", "HTTPS/Web")
+
+' Relaciones de Aplicación (Layout optimizado)
+Rel_D(android, api, "Consume servicios REST", "JSON/HTTPS")
+Rel_D(web, api, "Consume servicios REST", "JSON/HTTPS")
+
+' Relaciones de Backend
+Rel_R(api, db, "Persiste y consulta datos", "JPA/Hibernate")
+Rel_L(api, openai, "Solicita sugerencias inteligentes", "REST API Key")
+
+' Relaciones de Infraestructura
+Rel_U(ci, api, "Despliega y testea código")
+Rel_U(ci, db, "Prepara esquemas de prueba")
+
+@enduml
