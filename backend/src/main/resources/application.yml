@@ -15,3 +15,9 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:change-this-in-env-to-a-32-byte-minimum-secret-key}
+      expiration-ms: ${JWT_EXPIRATION_MS:86400000}
