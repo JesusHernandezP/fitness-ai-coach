@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,6 +18,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
+    @Value("${app.swagger.public:false}")
+    private boolean swaggerPublic;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -24,15 +27,24 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
 
-                .authorizeHttpRequests(auth -> auth
+                .authorizeHttpRequests(auth -> {
+                        var rules = auth
 
                         .requestMatchers(
                                 "/api/auth/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll();
 
-                        .anyRequest().authenticated()
-                )
+                        if (swaggerPublic) {
+                            rules.requestMatchers(
+                                    "/v3/api-docs/**",
+                                    "/swagger-ui/**",
+                                    "/swagger-ui.html"
+                            ).permitAll();
+                        }
+
+                        rules.anyRequest().authenticated();
+                })
 
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
