@@ -47,4 +47,18 @@ public class ExerciseService {
                         .build())
                 .toList();
     }
+    public List<ExerciseResponse> getExercisesByMuscleGroup(String muscleGroup) {
+
+        return exerciseRepository.findByMuscleGroupIgnoreCase(muscleGroup)
+                .stream()
+                .map(exercise -> ExerciseResponse.builder()
+                        .id(exercise.getId())
+                        .name(exercise.getName())
+                        .muscleGroup(exercise.getMuscleGroup())
+                        .equipment(exercise.getEquipment())
+                        .description(exercise.getDescription())
+                        .build())
+                .toList();
+    }
+
 }

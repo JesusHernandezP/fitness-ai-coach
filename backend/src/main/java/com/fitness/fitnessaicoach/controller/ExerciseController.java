@@ -34,8 +34,14 @@ public class ExerciseController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all exercises")
-    public List<ExerciseResponse> getAllExercises() {
+    public List<ExerciseResponse> getExercises(
+            @RequestParam(required = false) String muscleGroup) {
+
+        if (muscleGroup != null) {
+            return exerciseService.getExercisesByMuscleGroup(muscleGroup);
+        }
+
         return exerciseService.getAllExercises();
     }
+
 }
