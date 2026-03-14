@@ -24,7 +24,7 @@ public class Goal {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private GoalType goalType;
+    private UserGoalType goalType;
 
     @Column(nullable = false)
     private Double targetWeight;

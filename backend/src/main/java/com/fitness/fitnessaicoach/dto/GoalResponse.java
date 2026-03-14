@@ -1,6 +1,6 @@
 package com.fitness.fitnessaicoach.dto;
 
-import com.fitness.fitnessaicoach.domain.GoalType;
+import com.fitness.fitnessaicoach.domain.UserGoalType;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -12,7 +12,7 @@ public class GoalResponse {
 
     private UUID id;
 
-    private GoalType goalType;
+    private UserGoalType goalType;
 
     private Double targetWeight;
 

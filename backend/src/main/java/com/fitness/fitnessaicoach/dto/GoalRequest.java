@@ -1,6 +1,6 @@
 package com.fitness.fitnessaicoach.dto;
 
-import com.fitness.fitnessaicoach.domain.GoalType;
+import com.fitness.fitnessaicoach.domain.UserGoalType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Getter;
@@ -16,7 +16,7 @@ public class GoalRequest {
     private UUID userId;
 
     @NotNull
-    private GoalType goalType;
+    private UserGoalType goalType;
 
     @NotNull
     @Positive(message = "Target weight must be greater than 0.")
