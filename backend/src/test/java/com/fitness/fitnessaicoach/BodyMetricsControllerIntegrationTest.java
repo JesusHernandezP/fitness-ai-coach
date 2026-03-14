@@ -92,6 +92,47 @@ public class BodyMetricsControllerIntegrationTest {
                 .andExpect(status().isNoContent());
     }
 
+    @Test
+    void bodyMetricsRequestShouldRejectInvalidBodyFatAndMuscleMass() throws Exception {
+        UserContext user = registerAndLogin();
+        String token = user.token();
+
+        String invalidBodyFat = """
+                {
+                  "userId": "%s",
+                  "weight": 82.5,
+                  "bodyFat": 150,
+                  "muscleMass": -10,
+                  "date": "2026-04-15"
+                }
+                """.formatted(user.userId());
+
+        mockMvc.perform(post("/api/body-metrics")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidBodyFat))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.bodyFat").exists())
+                .andExpect(jsonPath("$.errors.muscleMass").exists());
+
+        String invalidWeight = """
+                {
+                  "userId": "%s",
+                  "weight": -1,
+                  "bodyFat": 20,
+                  "muscleMass": 10,
+                  "date": "2026-04-15"
+                }
+                """.formatted(user.userId());
+
+        mockMvc.perform(post("/api/body-metrics")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidWeight))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errors.weight").exists());
+    }
+
     private UserContext registerAndLogin() throws Exception {
         String email = "bodymetrics-" + UUID.randomUUID() + "@example.com";
         String password = "Passw0rd!";
