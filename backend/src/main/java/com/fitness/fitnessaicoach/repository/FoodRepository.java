@@ -7,3 +7,4 @@ import java.util.UUID;
 
 public interface FoodRepository extends JpaRepository<Food, UUID> {
 }
+ 
