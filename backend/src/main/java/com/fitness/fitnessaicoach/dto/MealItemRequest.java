@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.dto;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,5 +18,6 @@ public class MealItemRequest {
     private UUID foodId;
 
     @NotNull
+    @Positive(message = "Quantity must be greater than 0.")
     private Double quantity;
 }
