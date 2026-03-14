@@ -5,6 +5,7 @@ import com.fitness.fitnessaicoach.domain.Exercise;
 import com.fitness.fitnessaicoach.domain.WorkoutSession;
 import com.fitness.fitnessaicoach.dto.WorkoutSessionRequest;
 import com.fitness.fitnessaicoach.dto.WorkoutSessionResponse;
+import com.fitness.fitnessaicoach.exception.ExerciseNotFoundException;
 import com.fitness.fitnessaicoach.exception.DailyLogNotFoundException;
 import com.fitness.fitnessaicoach.exception.WorkoutSessionNotFoundException;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
@@ -29,7 +30,7 @@ public class WorkoutSessionService {
                 .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
 
         Exercise exercise = exerciseRepository.findById(request.getExerciseId())
-                .orElseThrow(() -> new WorkoutSessionNotFoundException("Exercise not found."));
+                .orElseThrow(() -> new ExerciseNotFoundException("Exercise not found."));
 
         WorkoutSession workoutSession = WorkoutSession.builder()
                 .dailyLog(dailyLog)
