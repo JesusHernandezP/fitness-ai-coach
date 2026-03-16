@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.controller;
 
 import com.fitness.fitnessaicoach.dto.DailyLogRequest;
 import com.fitness.fitnessaicoach.dto.DailyLogResponse;
+import com.fitness.fitnessaicoach.dto.DailyLogSummaryResponseDto;
 import com.fitness.fitnessaicoach.service.DailyLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -51,5 +52,12 @@ public class DailyLogController {
     public ResponseEntity<Void> deleteDailyLog(@PathVariable UUID id) {
         dailyLogService.deleteDailyLog(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/summary")
+    @Operation(summary = "Get daily log summary by id")
+    public ResponseEntity<DailyLogSummaryResponseDto> getDailyLogSummary(@PathVariable UUID id) {
+        DailyLogSummaryResponseDto response = dailyLogService.getDailyLogSummary(id);
+        return ResponseEntity.ok(response);
     }
 }
