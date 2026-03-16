@@ -8,17 +8,17 @@ import java.util.UUID;
 
 @Getter
 @Builder
-public class DailyLogResponse {
+public class BodyMetricsResponse {
 
     private UUID id;
 
-    private LocalDate date;
-
-    private Integer steps;
-
-    private Double caloriesConsumed;
-
-    private Double caloriesBurned;
-
     private UUID userId;
+
+    private Double weight;
+
+    private Double bodyFat;
+
+    private Double muscleMass;
+
+    private LocalDate date;
 }
