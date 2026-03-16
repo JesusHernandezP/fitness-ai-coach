@@ -4,6 +4,7 @@ import com.fitness.fitnessaicoach.domain.DailyLog;
 import com.fitness.fitnessaicoach.domain.User;
 import com.fitness.fitnessaicoach.dto.DailyLogRequest;
 import com.fitness.fitnessaicoach.dto.DailyLogResponse;
+import com.fitness.fitnessaicoach.dto.CalorieBalanceResponse;
 import com.fitness.fitnessaicoach.dto.DailyLogSummaryResponseDto;
 import com.fitness.fitnessaicoach.exception.DailyLogNotFoundException;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
@@ -24,6 +25,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class DailyLogService {
+
+    private static final int CALORIE_SCALE = 2;
+    private static final RoundingMode CALORIE_ROUNDING = RoundingMode.HALF_UP;
 
     private final DailyLogRepository dailyLogRepository;
     private final MealRepository mealRepository;
@@ -87,6 +91,23 @@ public class DailyLogService {
                 .build();
     }
 
+    public CalorieBalanceResponse getDailyLogCalorieBalance(UUID id) {
+        DailyLog dailyLog = dailyLogRepository.findById(id)
+                .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
+
+        BigDecimal caloriesConsumed = toBigDecimalOrZero(mealItemRepository.sumCalculatedCaloriesByDailyLogId(dailyLog.getId()));
+        BigDecimal caloriesBurned = toBigDecimalOrZero(workoutSessionRepository.sumCaloriesBurnedByDailyLogId(dailyLog.getId()));
+        BigDecimal calorieBalance = caloriesConsumed.subtract(caloriesBurned)
+                .setScale(CALORIE_SCALE, CALORIE_ROUNDING);
+
+        return CalorieBalanceResponse.builder()
+                .dailyLogId(dailyLog.getId())
+                .caloriesConsumed(caloriesConsumed)
+                .caloriesBurned(caloriesBurned)
+                .calorieBalance(calorieBalance)
+                .build();
+    }
+
     private int toIntSafe(long value) {
         if (value > Integer.MAX_VALUE) {
             throw new IllegalStateException("Daily log summary aggregate exceeds supported integer range.");
@@ -97,7 +118,7 @@ public class DailyLogService {
 
     private BigDecimal toBigDecimalOrZero(Double value) {
         return BigDecimal.valueOf(value != null ? value : 0)
-                .setScale(2, RoundingMode.HALF_UP);
+                .setScale(CALORIE_SCALE, CALORIE_ROUNDING);
     }
 
     public List<DailyLogResponse> getDailyLogsByUserId(UUID userId) {

@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.controller;
 
 import com.fitness.fitnessaicoach.dto.DailyLogRequest;
 import com.fitness.fitnessaicoach.dto.DailyLogResponse;
+import com.fitness.fitnessaicoach.dto.CalorieBalanceResponse;
 import com.fitness.fitnessaicoach.dto.DailyLogSummaryResponseDto;
 import com.fitness.fitnessaicoach.service.DailyLogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -60,6 +61,13 @@ public class DailyLogController {
     @Operation(summary = "Get daily log summary by id")
     public ResponseEntity<DailyLogSummaryResponseDto> getDailyLogSummary(@PathVariable UUID id) {
         DailyLogSummaryResponseDto response = dailyLogService.getDailyLogSummary(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{id}/calorie-balance")
+    @Operation(summary = "Get calorie balance for a daily log")
+    public ResponseEntity<CalorieBalanceResponse> getDailyLogCalorieBalance(@PathVariable UUID id) {
+        CalorieBalanceResponse response = dailyLogService.getDailyLogCalorieBalance(id);
         return ResponseEntity.ok(response);
     }
 
