@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface GoalRepository extends JpaRepository<Goal, UUID> {
 
-    Optional<Goal> findTopByUserIdOrderByIdDesc(UUID userId);
+    Optional<Goal> findTopByUserIdOrderByCreatedAtDescIdDesc(UUID userId);
 }

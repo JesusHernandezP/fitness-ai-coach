@@ -57,11 +57,11 @@ public class AIAnalysisService {
                 .setScale(CALORIE_SCALE, CALORIE_ROUNDING);
 
         Goal goal = userId != null
-                ? goalRepository.findTopByUserIdOrderByIdDesc(userId).orElse(null)
+                ? goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(userId).orElse(null)
                 : null;
 
         BodyMetrics latestBodyMetrics = userId != null
-                ? bodyMetricsRepository.findTopByUserIdOrderByDateDesc(userId).orElse(null)
+                ? bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(userId).orElse(null)
                 : null;
 
         return AIAnalysisResponse.builder()

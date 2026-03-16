@@ -8,5 +8,5 @@ import java.util.UUID;
 
 public interface BodyMetricsRepository extends JpaRepository<BodyMetrics, UUID> {
 
-    Optional<BodyMetrics> findTopByUserIdOrderByDateDesc(UUID userId);
+    Optional<BodyMetrics> findTopByUserIdOrderByDateDescIdDesc(UUID userId);
 }
