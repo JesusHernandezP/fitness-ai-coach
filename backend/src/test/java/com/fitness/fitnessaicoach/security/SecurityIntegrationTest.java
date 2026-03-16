@@ -36,7 +36,63 @@ class SecurityIntegrationTest {
     }
 
     @Test
+    void getExercisesWithoutTokenShouldReturn401() throws Exception {
+        mockMvc.perform(get("/api/exercises"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void createExerciseWithoutTokenShouldReturn401() throws Exception {
+        String exerciseBody = """
+                {
+                  "name": "Push Up",
+                  "muscleGroup": "Chest",
+                  "equipment": "Bodyweight",
+                  "description": "Basic push exercise"
+                }
+                """;
+
+        mockMvc.perform(post("/api/exercises")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(exerciseBody))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void exerciseEndpointsWithValidTokenShouldReturnSuccess() throws Exception {
+        String token = registerAndLogin();
+
+        String exerciseBody = """
+                {
+                  "name": "Push Up",
+                  "muscleGroup": "Chest",
+                  "equipment": "Bodyweight",
+                  "description": "Basic push exercise"
+                }
+                """;
+
+        mockMvc.perform(post("/api/exercises")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(exerciseBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Push Up"));
+
+        mockMvc.perform(get("/api/exercises")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void getUsersWithValidTokenShouldReturn200() throws Exception {
+        String token = registerAndLogin();
+
+        mockMvc.perform(get("/api/users")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    private String registerAndLogin() throws Exception {
         String email = "security-" + UUID.randomUUID() + "@example.com";
         String password = "Passw0rd!";
 
@@ -71,10 +127,6 @@ class SecurityIntegrationTest {
                 .andReturn();
 
         JsonNode jsonNode = objectMapper.readTree(loginResult.getResponse().getContentAsString());
-        String token = jsonNode.get("token").asText();
-
-        mockMvc.perform(get("/api/users")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+        return jsonNode.get("token").asText();
     }
 }
