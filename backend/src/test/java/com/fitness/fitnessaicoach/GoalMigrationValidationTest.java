@@ -46,7 +46,7 @@ public class GoalMigrationValidationTest {
 
     @Test
     void goalCreatedAtMigrationScriptShouldBePresent() throws IOException {
-        ClassPathResource migrationResource = new ClassPathResource("db/migration/026_add_goal_created_at.sql");
+        ClassPathResource migrationResource = new ClassPathResource("db/migration/V026__add_goal_created_at.sql");
         assertTrue(migrationResource.exists());
         assertTrue(migrationResource.contentLength() > 0);
     }
