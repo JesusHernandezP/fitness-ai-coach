@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -99,10 +100,29 @@ public class DailyLogService {
                 .setScale(2, RoundingMode.HALF_UP);
     }
 
+    public List<DailyLogResponse> getDailyLogsByUserId(UUID userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        return dailyLogRepository.findByUserId(userId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public DailyLogResponse getDailyLogByUserIdAndDate(UUID userId, LocalDate date) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(userId, date)
+                .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
+
+        return toResponse(dailyLog);
+    }
+
     private DailyLogResponse toResponse(DailyLog dailyLog) {
         return DailyLogResponse.builder()
                 .id(dailyLog.getId())
-                .logDate(dailyLog.getLogDate())
+                .date(dailyLog.getLogDate())
                 .steps(dailyLog.getSteps())
                 .caloriesConsumed(dailyLog.getCaloriesConsumed())
                 .caloriesBurned(dailyLog.getCaloriesBurned())

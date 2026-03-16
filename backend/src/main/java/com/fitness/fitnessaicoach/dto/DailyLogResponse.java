@@ -12,7 +12,7 @@ public class DailyLogResponse {
 
     private UUID id;
 
-    private LocalDate logDate;
+    private LocalDate date;
 
     private Integer steps;
 

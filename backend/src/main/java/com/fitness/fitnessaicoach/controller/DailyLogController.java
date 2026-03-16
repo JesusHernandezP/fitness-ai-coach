@@ -8,11 +8,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,6 +60,22 @@ public class DailyLogController {
     @Operation(summary = "Get daily log summary by id")
     public ResponseEntity<DailyLogSummaryResponseDto> getDailyLogSummary(@PathVariable UUID id) {
         DailyLogSummaryResponseDto response = dailyLogService.getDailyLogSummary(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/user/{userId}")
+    @Operation(summary = "Get daily logs by user id")
+    public List<DailyLogResponse> getDailyLogsByUserId(@PathVariable UUID userId) {
+        return dailyLogService.getDailyLogsByUserId(userId);
+    }
+
+    @GetMapping("/user/{userId}/date/{date}")
+    @Operation(summary = "Get daily log for a user by date")
+    public ResponseEntity<DailyLogResponse> getDailyLogByUserIdAndDate(
+            @PathVariable UUID userId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        DailyLogResponse response = dailyLogService.getDailyLogByUserIdAndDate(userId, date);
         return ResponseEntity.ok(response);
     }
 }
