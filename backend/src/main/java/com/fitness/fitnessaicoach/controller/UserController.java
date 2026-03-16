@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Users", description = "User management endpoints")
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
@@ -22,14 +23,14 @@ public class UserController {
 
     private final UserService userService;
 
-
+    @Operation(summary = "Create a new user")
     @PostMapping
     @Operation(summary = "Register a new user", security = {})
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
         UserResponse created = userService.create(request);
         return ResponseEntity.ok(created);
     }
-
+    @Operation(summary = "Get user by id")
     @GetMapping("/{id}")
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth")
