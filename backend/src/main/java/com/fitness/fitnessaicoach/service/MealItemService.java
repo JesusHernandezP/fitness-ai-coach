@@ -32,7 +32,7 @@ public class MealItemService {
         Food food = foodRepository.findById(request.getFoodId())
                 .orElseThrow(() -> new FoodNotFoundException("Food not found."));
 
-        Double calculatedCalories = food.getCalories() * (request.getQuantity() / 100.0);
+        Double calculatedCalories = food.getCalories() * request.getQuantity();
 
         MealItem mealItem = MealItem.builder()
                 .meal(meal)

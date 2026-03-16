@@ -50,8 +50,8 @@ public class DailyLogSummaryIntegrationTest {
         UUID mealId = createMeal(token, dailyLogId);
         UUID firstFoodId = createFood(token, "Avocado", 200.0);
         UUID secondFoodId = createFood(token, "Yogurt", 50.0);
-        createMealItem(token, mealId, firstFoodId, 100);
-        createMealItem(token, mealId, secondFoodId, 100);
+        createMealItem(token, mealId, firstFoodId, 1);
+        createMealItem(token, mealId, secondFoodId, 1);
 
         UUID exerciseId = createExercise(token);
         createWorkoutSession(token, dailyLogId, exerciseId, 100.0);

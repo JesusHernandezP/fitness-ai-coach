@@ -58,7 +58,7 @@ public class MealItemControllerIntegrationTest {
                 {
                   "mealId": "%s",
                   "foodId": "%s",
-                  "quantity": 100
+                  "quantity": 2
                 }
                 """.formatted(mealId, foodId);
 
@@ -69,7 +69,7 @@ public class MealItemControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.mealId").value(mealId.toString()))
                 .andExpect(jsonPath("$.foodId").value(foodId.toString()))
-                .andExpect(jsonPath("$.quantity").value(100.0))
+                .andExpect(jsonPath("$.quantity").value(2.0))
                 .andReturn();
 
         String mealItemId = objectMapper.readTree(createMealItemResult.getResponse().getContentAsString())
@@ -78,7 +78,7 @@ public class MealItemControllerIntegrationTest {
 
         assertThat(objectMapper.readTree(createMealItemResult.getResponse().getContentAsString())
                 .get("calculatedCalories").asDouble())
-                .isEqualTo(150.0);
+                .isEqualTo(300.0);
 
         mockMvc.perform(get("/api/meal-items")
                         .header("Authorization", "Bearer " + token))
