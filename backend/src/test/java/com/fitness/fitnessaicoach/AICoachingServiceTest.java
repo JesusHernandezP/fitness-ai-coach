@@ -2,9 +2,9 @@ package com.fitness.fitnessaicoach;
 
 import com.fitness.fitnessaicoach.ai.provider.groq.GroqClient;
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
-import com.fitness.fitnessaicoach.dto.ai.AICoachingAdviceResponse;
 import com.fitness.fitnessaicoach.dto.ai.AIMealSummaryResponse;
 import com.fitness.fitnessaicoach.dto.ai.AIWorkoutSummaryResponse;
+import com.fitness.fitnessaicoach.dto.ai.AICoachingResponse;
 import com.fitness.fitnessaicoach.service.AICoachingService;
 import com.fitness.fitnessaicoach.service.AIAnalysisService;
 import com.fitness.fitnessaicoach.service.PromptBuilder;
@@ -54,7 +54,7 @@ class AICoachingServiceTest {
         when(promptBuilder.buildPrompt(analysis)).thenReturn(builtPrompt);
         when(groqClient.getCoachingResponse("prompt-text")).thenReturn("Advice from Groq");
 
-        AICoachingAdviceResponse response = aiCoachingService.generateCoachingAdvice(dailyLogId);
+        AICoachingResponse response = aiCoachingService.getCoaching(dailyLogId);
 
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(aiAnalysisService).getDailyLogAiAnalysis(idCaptor.capture());
@@ -62,7 +62,7 @@ class AICoachingServiceTest {
         verify(groqClient).getCoachingResponse("prompt-text");
 
         assertThat(idCaptor.getValue()).isEqualTo(dailyLogId);
-        assertThat(response.getDailyLogId()).isEqualTo(dailyLogId);
+        assertThat(response.getAnalysis().getDailyLogId()).isEqualTo(dailyLogId);
         assertThat(response.getAdvice()).isEqualTo("Advice from Groq");
     }
 }

@@ -15,8 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -49,11 +49,11 @@ class AICoachingIntegrationTest {
     void swaggerSpecShouldExposeAICoachingEndpoint() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$['paths']['/api/ai-coaching/daily-log/{dailyLogId}']['get']").exists());
+                .andExpect(jsonPath("$['paths']['/api/ai-coach/daily-log/{dailyLogId}']['get']").exists());
     }
 
     @Test
-    void aiCoachingShouldReturnGeneratedAdvice() throws Exception {
+    void aiCoachingShouldReturnCombinedAnalysisAndAdvice() throws Exception {
         String token = registerAndLogin().token();
 
         UUID dailyLogId = UUID.randomUUID();
@@ -74,11 +74,12 @@ class AICoachingIntegrationTest {
         when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
         when(groqClient.getCoachingResponse(anyString())).thenReturn("Great job, keep hydration steady.");
 
-        mockMvc.perform(get("/api/ai-coaching/daily-log/" + dailyLogId)
+        mockMvc.perform(get("/api/ai-coach/daily-log/" + dailyLogId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.dailyLogId").value(dailyLogId.toString()))
+                .andExpect(jsonPath("$.analysis.dailyLogId").value(dailyLogId.toString()))
+                .andExpect(jsonPath("$.analysis.totalCaloriesConsumed").value(1500.0))
                 .andExpect(jsonPath("$.advice").value("Great job, keep hydration steady."));
     }
 
