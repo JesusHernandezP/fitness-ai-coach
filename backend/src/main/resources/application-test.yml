@@ -15,8 +15,22 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
 
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
 app:
+  swagger:
+    public: true
   security:
     jwt:
       secret: test-secret-key-for-ci-and-local-tests-32b
       expiration-ms: 86400000
+
+groq:
+  api:
+    key: test-groq-key
+    url: https://api.groq.com/openai/v1/chat/completions
+    model: llama3-70b-8192

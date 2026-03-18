@@ -3,6 +3,7 @@ package com.fitness.fitnessaicoach.dto.ai;
 import com.fitness.fitnessaicoach.domain.UserGoalType;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 @Getter
 @Builder
+@ToString
 public class AIAnalysisResponse {
 
     private UUID dailyLogId;
