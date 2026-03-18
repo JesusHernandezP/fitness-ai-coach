@@ -65,4 +65,24 @@ class AICoachingServiceTest {
         assertThat(response.getAnalysis().getDailyLogId()).isEqualTo(dailyLogId);
         assertThat(response.getAdvice()).isEqualTo("Advice from Groq");
     }
+
+    @Test
+    void getCoachingReturnsFallbackAdviceOnGroqFailure() {
+        UUID dailyLogId = UUID.randomUUID();
+        AIAnalysisResponse analysis = AIAnalysisResponse.builder()
+                .dailyLogId(dailyLogId)
+                .totalMeals(0)
+                .totalWorkoutSessions(0)
+                .build();
+
+        String builtPrompt = "prompt-text";
+        when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
+        when(promptBuilder.buildPrompt(analysis)).thenReturn(builtPrompt);
+        when(groqClient.getCoachingResponse("prompt-text")).thenThrow(new IllegalStateException("groq timeout"));
+
+        AICoachingResponse response = aiCoachingService.getCoaching(dailyLogId);
+
+        assertThat(response.getAdvice())
+                .isEqualTo("AI coaching is temporarily unavailable. Please review your daily log summary and try again later.");
+    }
 }
