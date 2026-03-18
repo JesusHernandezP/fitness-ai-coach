@@ -22,6 +22,8 @@ springdoc:
     enabled: true
 
 app:
+  swagger:
+    public: true
   security:
     jwt:
       secret: test-secret-key-for-ci-and-local-tests-32b
