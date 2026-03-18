@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+
 @Configuration
 public class GroqConfig {
 
@@ -23,7 +26,7 @@ public class GroqConfig {
     }
 
     public String getApiKey() {
-        return apiKey;
+        return decodeIfEncrypted(apiKey);
     }
 
     public String getApiUrl() {
@@ -35,6 +38,20 @@ public class GroqConfig {
     }
 
     public boolean hasApiKey() {
-        return apiKey != null && !apiKey.isBlank();
+        String key = getApiKey();
+        return key != null && !key.isBlank();
+    }
+
+    private String decodeIfEncrypted(String value) {
+        if (value == null || value.isBlank()) {
+            return value;
+        }
+
+        String trimmed = value.trim();
+        if (trimmed.startsWith("ENC(") && trimmed.endsWith(")")) {
+            String encoded = trimmed.substring(4, trimmed.length() - 1);
+            return new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
+        }
+        return value;
     }
 }
