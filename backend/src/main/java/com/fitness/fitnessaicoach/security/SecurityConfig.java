@@ -34,6 +34,7 @@ public class SecurityConfig {
                                 "/api/auth/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll();
+                        rules.requestMatchers("/api/health/**").permitAll();
 
                         if (swaggerPublic) {
                             rules.requestMatchers(
