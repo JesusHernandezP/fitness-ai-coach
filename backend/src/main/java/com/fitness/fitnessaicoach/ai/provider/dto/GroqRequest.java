@@ -1,5 +1,7 @@
 package com.fitness.fitnessaicoach.ai.provider.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 
 public class GroqRequest {
@@ -8,12 +10,21 @@ public class GroqRequest {
 
     private List<GroqMessage> messages;
 
+    @JsonProperty("max_tokens")
+    private Integer maxTokens;
+
     public GroqRequest() {
     }
 
     public GroqRequest(String model, List<GroqMessage> messages) {
         this.model = model;
         this.messages = messages;
+    }
+
+    public GroqRequest(String model, List<GroqMessage> messages, Integer maxTokens) {
+        this.model = model;
+        this.messages = messages;
+        this.maxTokens = maxTokens;
     }
 
     public String getModel() {
@@ -30,6 +41,14 @@ public class GroqRequest {
 
     public void setMessages(List<GroqMessage> messages) {
         this.messages = messages;
+    }
+
+    public Integer getMaxTokens() {
+        return maxTokens;
+    }
+
+    public void setMaxTokens(Integer maxTokens) {
+        this.maxTokens = maxTokens;
     }
 
     public static class GroqMessage {

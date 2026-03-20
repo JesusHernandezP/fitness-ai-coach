@@ -33,4 +33,4 @@ groq:
   api:
     key: test-groq-key
     url: https://api.groq.com/openai/v1/chat/completions
-    model: llama3-70b-8192
+    model: llama-3.1-8b-instant
