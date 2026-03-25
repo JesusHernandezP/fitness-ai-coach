@@ -37,6 +37,13 @@ public class FoodController {
         return foodService.getAllFoods();
     }
 
+    @GetMapping("/search")
+    @Operation(summary = "Search foods by name")
+    public ResponseEntity<List<FoodResponse>> searchFoods(@RequestParam(required = false) String query) {
+        List<FoodResponse> response = foodService.searchFoods(query);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get food by id")
     public ResponseEntity<FoodResponse> getFoodById(@PathVariable UUID id) {
