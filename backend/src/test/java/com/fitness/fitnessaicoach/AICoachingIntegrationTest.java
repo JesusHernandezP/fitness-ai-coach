@@ -2,7 +2,9 @@ package com.fitness.fitnessaicoach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fitness.fitnessaicoach.ai.provider.groq.GroqClient;
+import com.fitness.fitnessaicoach.domain.AIRecommendation;
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
+import com.fitness.fitnessaicoach.repository.AIRecommendationRepository;
 import com.fitness.fitnessaicoach.service.AIAnalysisService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.notNullValue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -38,6 +41,9 @@ class AICoachingIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private AIRecommendationRepository aiRecommendationRepository;
 
     @MockBean
     private AIAnalysisService aiAnalysisService;
@@ -81,6 +87,12 @@ class AICoachingIntegrationTest {
                 .andExpect(jsonPath("$.analysis.dailyLogId").value(dailyLogId.toString()))
                 .andExpect(jsonPath("$.analysis.totalCaloriesConsumed").value(1500.0))
                 .andExpect(jsonPath("$.advice").value("Great job, keep hydration steady."));
+
+        List<AIRecommendation> savedRecommendations = aiRecommendationRepository.findByDailyLogId(dailyLogId);
+        assertThat(savedRecommendations).hasSize(1);
+        assertThat(savedRecommendations.get(0).getAdvice()).isEqualTo("Great job, keep hydration steady.");
+        assertThat(savedRecommendations.get(0).getAnalysisSnapshot()).contains(dailyLogId.toString());
+        assertThat(savedRecommendations.get(0).getModel()).isNotBlank();
     }
 
     private UserContext registerAndLogin() throws Exception {
