@@ -7,6 +7,7 @@ import com.fitness.fitnessaicoach.repository.ExerciseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -38,27 +39,43 @@ public class ExerciseService {
     public List<ExerciseResponse> getAllExercises() {
         return exerciseRepository.findAll()
                 .stream()
-                .map(exercise -> ExerciseResponse.builder()
-                        .id(exercise.getId())
-                        .name(exercise.getName())
-                        .muscleGroup(exercise.getMuscleGroup())
-                        .equipment(exercise.getEquipment())
-                        .description(exercise.getDescription())
-                        .build())
+                .map(this::toResponse)
                 .toList();
     }
+
     public List<ExerciseResponse> getExercisesByMuscleGroup(String muscleGroup) {
 
         return exerciseRepository.findByMuscleGroupIgnoreCase(muscleGroup)
                 .stream()
-                .map(exercise -> ExerciseResponse.builder()
-                        .id(exercise.getId())
-                        .name(exercise.getName())
-                        .muscleGroup(exercise.getMuscleGroup())
-                        .equipment(exercise.getEquipment())
-                        .description(exercise.getDescription())
-                        .build())
+                .map(this::toResponse)
                 .toList();
+    }
+
+    public List<ExerciseResponse> searchExercises(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+
+        String trimmedQuery = query.trim();
+
+        if (trimmedQuery.isEmpty()) {
+            return List.of();
+        }
+
+        return exerciseRepository.findByNameContainingIgnoreCase(trimmedQuery).stream()
+                .sorted(Comparator.comparing(Exercise::getName, String.CASE_INSENSITIVE_ORDER))
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private ExerciseResponse toResponse(Exercise exercise) {
+        return ExerciseResponse.builder()
+                .id(exercise.getId())
+                .name(exercise.getName())
+                .muscleGroup(exercise.getMuscleGroup())
+                .equipment(exercise.getEquipment())
+                .description(exercise.getDescription())
+                .build();
     }
 
 }
