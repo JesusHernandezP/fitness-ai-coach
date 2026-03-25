@@ -7,6 +7,7 @@ import com.fitness.fitnessaicoach.exception.UserNotFoundException;
 import com.fitness.fitnessaicoach.exception.EmailAlreadyUsedException;
 import com.fitness.fitnessaicoach.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // Crear usuario (registro)
     public UserResponse create(UserRequest request) {
@@ -29,7 +31,7 @@ public class UserService {
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
-                .passwordHash(request.getPassword()) // luego BCrypt
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .age(request.getAge())
                 .heightCm(request.getHeightCm())
                 .weightKg(request.getWeightKg())

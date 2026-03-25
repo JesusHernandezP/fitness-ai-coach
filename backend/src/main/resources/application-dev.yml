@@ -1,0 +1,16 @@
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+spring:
+  flyway:
+    enabled: false
+
+app:
+  swagger:
+    public: true
+
+groq:
+  api:
+    model: llama-3.1-8b-instant
