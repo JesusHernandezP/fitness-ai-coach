@@ -40,7 +40,8 @@ public class DailyLogSearchIntegrationTest {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}']['get']").exists())
-                .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/date/{date}']['get']").exists());
+                .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/date/{date}']['get']").exists())
+                .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/today']['get']").exists());
     }
 
     @Test
@@ -83,6 +84,61 @@ public class DailyLogSearchIntegrationTest {
         createDailyLog(token, user.userId(), LocalDate.parse("2026-04-14"), 8000);
 
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/date/2026-04-15")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturnExistingTodayLog() throws Exception {
+        UserContext user = registerAndLogin();
+        String token = user.token();
+        LocalDate today = LocalDate.now();
+
+        createDailyLog(token, user.userId(), today, 1234);
+
+        mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/today")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(today.toString()))
+                .andExpect(jsonPath("$.steps").value(1234))
+                .andExpect(jsonPath("$.userId").value(user.userId()));
+    }
+
+    @Test
+    void shouldCreateTodayLogWhenMissing() throws Exception {
+        UserContext user = registerAndLogin();
+        String token = user.token();
+        LocalDate today = LocalDate.now();
+
+        mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/today")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(today.toString()))
+                .andExpect(jsonPath("$.steps").value(0))
+                .andExpect(jsonPath("$.caloriesConsumed").value(0.0))
+                .andExpect(jsonPath("$.caloriesBurned").value(0.0))
+                .andExpect(jsonPath("$.userId").value(user.userId()));
+
+        mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/today")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(today.toString()))
+                .andExpect(jsonPath("$.steps").value(0))
+                .andExpect(jsonPath("$.userId").value(user.userId()));
+
+        mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].date").value(today.toString()));
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenUserDoesNotExistForTodayEndpoint() throws Exception {
+        UserContext user = registerAndLogin();
+        String token = user.token();
+
+        mockMvc.perform(get("/api/daily-logs/user/" + UUID.randomUUID() + "/today")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNotFound());
     }

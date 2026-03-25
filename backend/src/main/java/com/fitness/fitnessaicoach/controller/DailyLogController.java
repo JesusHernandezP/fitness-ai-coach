@@ -86,4 +86,11 @@ public class DailyLogController {
         DailyLogResponse response = dailyLogService.getDailyLogByUserIdAndDate(userId, date);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/user/{userId}/today")
+    @Operation(summary = "Get or create today's daily log for a user")
+    public ResponseEntity<DailyLogResponse> getOrCreateTodayLog(@PathVariable UUID userId) {
+        DailyLogResponse response = dailyLogService.getOrCreateTodayLog(userId);
+        return ResponseEntity.ok(response);
+    }
 }

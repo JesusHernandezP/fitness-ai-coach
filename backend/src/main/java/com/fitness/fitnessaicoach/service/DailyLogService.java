@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -138,6 +139,31 @@ public class DailyLogService {
                 .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
 
         return toResponse(dailyLog);
+    }
+
+    public DailyLogResponse getOrCreateTodayLog(UUID userId) {
+        Objects.requireNonNull(userId, "userId must not be null");
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        LocalDate today = LocalDate.now();
+
+        return dailyLogRepository.findByUserIdAndLogDate(userId, today)
+                .map(this::toResponse)
+                .orElseGet(() -> createTodayLog(user, today));
+    }
+
+    private DailyLogResponse createTodayLog(User user, LocalDate today) {
+        DailyLog dailyLog = new DailyLog();
+        dailyLog.setLogDate(today);
+        dailyLog.setSteps(0);
+        dailyLog.setCaloriesConsumed(0.0);
+        dailyLog.setCaloriesBurned(0.0);
+        dailyLog.setUser(user);
+
+        DailyLog savedDailyLog = dailyLogRepository.save(dailyLog);
+        return toResponse(savedDailyLog);
     }
 
     private DailyLogResponse toResponse(DailyLog dailyLog) {
