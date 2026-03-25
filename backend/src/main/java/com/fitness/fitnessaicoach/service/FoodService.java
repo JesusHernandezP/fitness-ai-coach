@@ -8,7 +8,9 @@ import com.fitness.fitnessaicoach.repository.FoodRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -51,6 +53,24 @@ public class FoodService {
                 .orElseThrow(() -> new FoodNotFoundException("Food not found."));
 
         foodRepository.delete(food);
+    }
+
+    public List<FoodResponse> searchFoods(String query) {
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+
+        String trimmedQuery = query.trim();
+
+        if (trimmedQuery.isEmpty()) {
+            return List.of();
+        }
+
+        return foodRepository.findByNameContainingIgnoreCase(trimmedQuery).stream()
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparing(Food::getName, String.CASE_INSENSITIVE_ORDER))
+                .map(this::toResponse)
+                .toList();
     }
 
     private FoodResponse toResponse(Food food) {
