@@ -3,6 +3,7 @@ package com.fitness.fitnessaicoach.di
 import com.fitness.fitnessaicoach.BuildConfig
 import com.fitness.fitnessaicoach.data.remote.api.ApiClient
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
+import com.fitness.fitnessaicoach.data.remote.api.AuthTokenInterceptor
 import com.fitness.fitnessaicoach.data.remote.api.CoachApi
 import com.fitness.fitnessaicoach.data.remote.api.DailyLogApi
 import com.fitness.fitnessaicoach.data.remote.api.MealApi
@@ -31,12 +32,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(authTokenInterceptor: AuthTokenInterceptor): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         return OkHttpClient.Builder()
+            .addInterceptor(authTokenInterceptor)
             .addInterceptor(loggingInterceptor)
             .build()
     }

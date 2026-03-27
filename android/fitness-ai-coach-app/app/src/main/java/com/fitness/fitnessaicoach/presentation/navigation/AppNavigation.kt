@@ -20,7 +20,15 @@ fun AppNavigation() {
         startDestination = AppDestination.Login.route
     ) {
         composable(AppDestination.Login.route) {
-            LoginScreen()
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(AppDestination.Home.route) {
+                        popUpTo(AppDestination.Login.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
         composable(AppDestination.Home.route) {
             HomeScreen()

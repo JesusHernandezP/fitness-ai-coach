@@ -1,4 +1,4 @@
-package com.fitness.fitnessaicoach.data.local
+package com.fitness.fitnessaicoach.data.local.datastore
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.fitness.fitnessaicoach.core.constants.NetworkConstants
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -17,6 +18,10 @@ class DataStoreTokenStorage @Inject constructor(
 
     override fun observeToken(): Flow<String?> {
         return dataStore.data.map { preferences -> preferences[tokenKey] }
+    }
+
+    override suspend fun getToken(): String? {
+        return dataStore.data.first()[tokenKey]
     }
 
     override suspend fun saveToken(token: String) {

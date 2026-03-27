@@ -5,8 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.fitness.fitnessaicoach.core.constants.NetworkConstants
-import com.fitness.fitnessaicoach.data.local.DataStoreTokenStorage
-import com.fitness.fitnessaicoach.data.local.TokenStorage
+import com.fitness.fitnessaicoach.data.local.datastore.DataStoreTokenStorage
+import com.fitness.fitnessaicoach.data.local.datastore.TokenStorage
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
 import com.fitness.fitnessaicoach.data.repository.AuthRepositoryImpl
 import com.fitness.fitnessaicoach.domain.repository.AuthRepository
