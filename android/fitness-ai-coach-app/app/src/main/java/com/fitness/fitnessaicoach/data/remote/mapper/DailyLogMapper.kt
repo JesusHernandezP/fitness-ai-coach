@@ -1,13 +1,13 @@
 package com.fitness.fitnessaicoach.data.remote.mapper
 
-import com.fitness.fitnessaicoach.data.remote.dto.DailyLogResponseDto
+import com.fitness.fitnessaicoach.data.remote.dto.DailyLogDto
 import com.fitness.fitnessaicoach.domain.model.DailyLog
 
-fun DailyLogResponseDto.toDomain(): DailyLog = DailyLog(
-    id = id,
+fun DailyLogDto.toDomain(): DailyLog = DailyLog(
     date = date,
-    steps = steps,
-    caloriesConsumed = caloriesConsumed,
-    caloriesBurned = caloriesBurned,
-    userId = userId
+    totalCalories = caloriesConsumed ?: 0.0,
+    calorieGoal = 0.0,
+    protein = 0.0,
+    meals = 0,
+    workouts = 0
 )

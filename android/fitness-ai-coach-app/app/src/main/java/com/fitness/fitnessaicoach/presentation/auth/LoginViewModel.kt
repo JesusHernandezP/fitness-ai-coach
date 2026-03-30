@@ -55,6 +55,8 @@ class LoginViewModel @Inject constructor(
             }
 
             when (val result = loginUseCase(currentState.email.trim(), currentState.password)) {
+                AppResult.Loading -> Unit
+
                 is AppResult.Success -> {
                     _uiState.update { state ->
                         state.copy(
