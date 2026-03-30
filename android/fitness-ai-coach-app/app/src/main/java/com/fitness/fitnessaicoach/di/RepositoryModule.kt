@@ -9,6 +9,7 @@ import com.fitness.fitnessaicoach.data.local.datastore.DataStoreTokenStorage
 import com.fitness.fitnessaicoach.data.local.datastore.TokenStorage
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
 import com.fitness.fitnessaicoach.data.remote.api.DailyLogApi
+import com.fitness.fitnessaicoach.data.remote.api.UserApi
 import com.fitness.fitnessaicoach.data.repository.AuthRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.DailyLogRepositoryImpl
 import com.fitness.fitnessaicoach.domain.repository.AuthRepository
@@ -55,10 +56,14 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideDailyLogRepository(
-        dailyLogApi: DailyLogApi
+        dailyLogApi: DailyLogApi,
+        userApi: UserApi,
+        tokenStorage: TokenStorage
     ): DailyLogRepository {
         return DailyLogRepositoryImpl(
-            dailyLogApi = dailyLogApi
+            dailyLogApi = dailyLogApi,
+            userApi = userApi,
+            tokenStorage = tokenStorage
         )
     }
 }

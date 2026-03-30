@@ -3,6 +3,7 @@ package com.fitness.fitnessaicoach.presentation.home
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,6 +35,19 @@ fun HomeScreen(
             }
 
             is AppResult.Success -> {
+                Button(
+                    onClick = {
+                        viewModel.saveDailyLog(
+                            state.data.copy(
+                                caloriesConsumed = (state.data.caloriesConsumed ?: state.data.totalCalories) + 100.0,
+                                totalCalories = state.data.totalCalories + 100.0
+                            )
+                        )
+                    }
+                ) {
+                    Text(text = "Save daily log")
+                }
+
                 Text(
                     text = buildString {
                         appendLine("Today's summary")
@@ -42,6 +56,7 @@ fun HomeScreen(
                         appendLine("Calorie goal: ${state.data.calorieGoal}")
                         appendLine("Protein: ${state.data.protein}")
                         appendLine("Meals: ${state.data.meals}")
+                        appendLine("Steps: ${state.data.steps ?: 0}")
                         append("Workouts: ${state.data.workouts}")
                     }
                 )

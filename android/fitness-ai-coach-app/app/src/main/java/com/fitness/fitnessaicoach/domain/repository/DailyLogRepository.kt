@@ -5,4 +5,5 @@ import com.fitness.fitnessaicoach.domain.model.DailyLog
 
 interface DailyLogRepository {
     suspend fun getTodayDailyLog(): AppResult<DailyLog>
+    suspend fun saveDailyLog(dailyLog: DailyLog): DailyLog
 }
