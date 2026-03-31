@@ -8,7 +8,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "daily_logs")
+@Table(
+        name = "daily_logs",
+        uniqueConstraints = @UniqueConstraint(name = "uk_daily_logs_user_date", columnNames = {"user_id", "log_date"})
+)
 @Getter
 @Setter
 public class DailyLog {

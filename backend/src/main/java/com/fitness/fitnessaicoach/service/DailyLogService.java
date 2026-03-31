@@ -40,8 +40,12 @@ public class DailyLogService {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado."));
 
-        DailyLog dailyLog = new DailyLog();
-        dailyLog.setLogDate(request.getLogDate());
+        LocalDate logDate = Objects.requireNonNull(request.getLogDate(), "logDate must not be null");
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(user.getId(), logDate)
+                .orElseGet(DailyLog::new);
+
+        dailyLog.setLogDate(logDate);
         dailyLog.setSteps(request.getSteps());
         dailyLog.setCaloriesConsumed(request.getCaloriesConsumed());
         dailyLog.setCaloriesBurned(request.getCaloriesBurned());
@@ -152,6 +156,15 @@ public class DailyLogService {
         return dailyLogRepository.findByUserIdAndLogDate(userId, today)
                 .map(this::toResponse)
                 .orElseGet(() -> createTodayLog(user, today));
+    }
+
+    public DailyLogResponse getOrCreateTodayLogForAuthenticatedUser(String email) {
+        Objects.requireNonNull(email, "email must not be null");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        return getOrCreateTodayLog(user.getId());
     }
 
     private DailyLogResponse createTodayLog(User user, LocalDate today) {

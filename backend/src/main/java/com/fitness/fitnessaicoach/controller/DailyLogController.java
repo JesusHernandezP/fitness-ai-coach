@@ -13,6 +13,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -91,6 +92,13 @@ public class DailyLogController {
     @Operation(summary = "Get or create today's daily log for a user")
     public ResponseEntity<DailyLogResponse> getOrCreateTodayLog(@PathVariable UUID userId) {
         DailyLogResponse response = dailyLogService.getOrCreateTodayLog(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/today")
+    @Operation(summary = "Get or create today's daily log for the authenticated user")
+    public ResponseEntity<DailyLogResponse> getOrCreateTodayLog(Authentication authentication) {
+        DailyLogResponse response = dailyLogService.getOrCreateTodayLogForAuthenticatedUser(authentication.getName());
         return ResponseEntity.ok(response);
     }
 }

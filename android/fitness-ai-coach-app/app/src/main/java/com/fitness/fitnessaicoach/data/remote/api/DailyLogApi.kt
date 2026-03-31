@@ -7,7 +7,7 @@ import retrofit2.http.POST
 import retrofit2.http.Body
 
 interface DailyLogApi {
-    @GET("daily-log/today")
+    @GET("daily-logs/today")
     suspend fun getTodayDailyLog(): DailyLogDto
 
     @POST("daily-logs")
