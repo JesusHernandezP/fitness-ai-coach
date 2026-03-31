@@ -46,7 +46,7 @@ fun HomeScreen(
             is AppResult.Success -> {
                 DailyLogSummary(
                     log = state.data,
-                    onSaveClick = { viewModel.saveDailyLog(state.data) }
+                    onSaveClick = { updatedLog -> viewModel.saveDailyLog(updatedLog) }
                 )
             }
         }
