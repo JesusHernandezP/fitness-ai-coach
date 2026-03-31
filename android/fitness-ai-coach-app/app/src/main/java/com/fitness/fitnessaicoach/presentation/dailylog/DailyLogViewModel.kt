@@ -22,10 +22,6 @@ class DailyLogViewModel @Inject constructor(
     private val _dailyLogState = MutableStateFlow<AppResult<DailyLog>>(AppResult.Loading)
     val dailyLogState: StateFlow<AppResult<DailyLog>> = _dailyLogState.asStateFlow()
 
-    init {
-        loadTodayDailyLog()
-    }
-
     fun loadTodayDailyLog() {
         viewModelScope.launch {
             _dailyLogState.value = AppResult.Loading
@@ -34,9 +30,17 @@ class DailyLogViewModel @Inject constructor(
     }
 
     fun saveDailyLog(dailyLog: DailyLog) {
+
         viewModelScope.launch {
+
             _dailyLogState.value = AppResult.Loading
-            _dailyLogState.value = saveDailyLogUseCase(dailyLog)
+
+            val result = saveDailyLogUseCase(dailyLog)
+
+            _dailyLogState.value = result
+
+            loadTodayDailyLog()
+
         }
     }
 }
