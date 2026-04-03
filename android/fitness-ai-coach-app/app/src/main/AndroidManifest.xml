@@ -6,8 +6,9 @@
     <application
         android:name=".FitnessAiCoachApplication"
         android:allowBackup="true"
-        android:label="@string/app_name"
+        android:label="Fitness AI Coach"
         android:supportsRtl="true"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.FitnessAiCoach">
         <activity
             android:name=".MainActivity"
