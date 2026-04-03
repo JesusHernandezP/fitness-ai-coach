@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -24,8 +25,8 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    // Se guardará más adelante con BCrypt
-    private String passwordHash;
+    @Column(name = "password_hash", nullable = false)
+    private String password;
 
     private Integer age;
 
