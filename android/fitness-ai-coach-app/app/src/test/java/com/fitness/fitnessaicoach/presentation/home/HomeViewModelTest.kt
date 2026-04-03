@@ -1,0 +1,72 @@
+package com.fitness.fitnessaicoach.presentation.home
+
+import com.fitness.fitnessaicoach.core.result.AppResult
+import com.fitness.fitnessaicoach.domain.model.DailyLog
+import com.fitness.fitnessaicoach.domain.repository.DailyLogRepository
+import com.fitness.fitnessaicoach.domain.usecase.GetTodayDailyLogUseCase
+import com.fitness.fitnessaicoach.domain.usecase.SaveDailyLogUseCase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+@OptIn(ExperimentalCoroutinesApi::class)
+class HomeViewModelTest {
+
+    private val testDispatcher = StandardTestDispatcher()
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `loads today's daily log on init and keeps zero values`() = runTest {
+        val expectedLog = DailyLog(
+            id = "log-id",
+            date = "2026-04-03",
+            totalCalories = 0.0,
+            calorieGoal = 0.0,
+            protein = 0.0,
+            meals = 0,
+            workouts = 0,
+            steps = 0,
+            caloriesConsumed = 0.0,
+            caloriesBurned = 0.0,
+            userId = "user-id"
+        )
+        val repository = FakeDailyLogRepository(AppResult.Success(expectedLog))
+
+        val viewModel = HomeViewModel(
+            getTodayDailyLogUseCase = GetTodayDailyLogUseCase(repository),
+            saveDailyLogUseCase = SaveDailyLogUseCase(repository)
+        )
+
+        advanceUntilIdle()
+
+        val state = viewModel.dailyLogState.value
+        assertTrue(state is AppResult.Success)
+        assertEquals(expectedLog, (state as AppResult.Success).data)
+    }
+
+    private class FakeDailyLogRepository(
+        private val result: AppResult<DailyLog>
+    ) : DailyLogRepository {
+        override suspend fun getTodayDailyLog(): AppResult<DailyLog> = result
+
+        override suspend fun saveDailyLog(dailyLog: DailyLog): DailyLog = dailyLog
+    }
+}
