@@ -11,11 +11,23 @@ class AuthTokenInterceptor @Inject constructor(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
+        val originalRequest = chain.request()
+        if (originalRequest.url.encodedPath in UNAUTHENTICATED_PATHS) {
+            return chain.proceed(originalRequest)
+        }
+
         val token = runBlocking { tokenStorage.getToken() }
-        val request = chain.request().newBuilder().apply {
+        val request = originalRequest.newBuilder().apply {
             token?.takeIf { it.isNotBlank() }?.let { header("Authorization", "Bearer $it") }
         }.build()
 
         return chain.proceed(request)
+    }
+
+    private companion object {
+        private val UNAUTHENTICATED_PATHS = setOf(
+            "/api/auth/login",
+            "/api/users"
+        )
     }
 }
