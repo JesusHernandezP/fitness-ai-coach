@@ -8,6 +8,7 @@ import com.fitness.fitnessaicoach.presentation.auth.LoginScreen
 import com.fitness.fitnessaicoach.presentation.bodymetrics.BodyMetricsScreen
 import com.fitness.fitnessaicoach.presentation.coach.CoachScreen
 import com.fitness.fitnessaicoach.presentation.dailylog.DailyLogScreen
+import com.fitness.fitnessaicoach.presentation.goals.GoalsScreen
 import com.fitness.fitnessaicoach.presentation.home.HomeScreen
 import com.fitness.fitnessaicoach.presentation.meal.MealScreen
 import com.fitness.fitnessaicoach.presentation.workout.WorkoutScreen
@@ -35,11 +36,17 @@ fun AppNavigation() {
             HomeScreen(
                 onOpenBodyMetrics = {
                     navController.navigate(AppDestination.BodyMetrics.route)
+                },
+                onOpenGoals = {
+                    navController.navigate(AppDestination.Goals.route)
                 }
             )
         }
         composable(AppDestination.BodyMetrics.route) {
             BodyMetricsScreen()
+        }
+        composable(AppDestination.Goals.route) {
+            GoalsScreen()
         }
         composable(AppDestination.DailyLog.route) {
             DailyLogScreen()

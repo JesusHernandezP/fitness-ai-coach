@@ -53,12 +53,11 @@ public class GoalControllerIntegrationTest {
 
         String goalBody = """
                 {
-                  "userId": "%s",
                   "goalType": "LOSE_WEIGHT",
                   "targetWeight": 75,
                   "targetCalories": 2000
                 }
-                """.formatted(user.userId());
+                """;
 
         String createResult = mockMvc.perform(post("/api/goals")
                         .header("Authorization", "Bearer " + token)
@@ -77,7 +76,8 @@ public class GoalControllerIntegrationTest {
 
         mockMvc.perform(get("/api/goals")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(goalId));
 
         mockMvc.perform(get("/api/goals/" + goalId)
                         .header("Authorization", "Bearer " + token))
@@ -88,6 +88,27 @@ public class GoalControllerIntegrationTest {
         mockMvc.perform(delete("/api/goals/" + goalId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void goalShouldAllowMissingTargetWeight() throws Exception {
+        UserContext user = registerAndLogin();
+
+        String goalBody = """
+                {
+                  "goalType": "MAINTAIN",
+                  "targetCalories": 2200
+                }
+                """;
+
+        mockMvc.perform(post("/api/goals")
+                        .header("Authorization", "Bearer " + user.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(goalBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.goalType").value("MAINTAIN"))
+                .andExpect(jsonPath("$.targetWeight").isEmpty())
+                .andExpect(jsonPath("$.targetCalories").value(2200));
     }
 
     private UserContext registerAndLogin() throws Exception {

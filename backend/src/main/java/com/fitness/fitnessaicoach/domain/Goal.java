@@ -28,7 +28,7 @@ public class Goal {
     @Column(nullable = false)
     private UserGoalType goalType;
 
-    @Column(nullable = false)
+    @Column
     private Double targetWeight;
 
     @Column(nullable = false)

@@ -21,8 +21,8 @@ public class GoalService {
     private final GoalRepository goalRepository;
     private final UserRepository userRepository;
 
-    public GoalResponse createGoal(GoalRequest request) {
-        User user = userRepository.findById(request.getUserId())
+    public GoalResponse createGoal(String email, GoalRequest request) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         Goal goal = Goal.builder()
@@ -36,22 +36,31 @@ public class GoalService {
         return toResponse(saved);
     }
 
-    public List<GoalResponse> getAllGoals() {
-        return goalRepository.findAll()
+    public List<GoalResponse> getAllGoals(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        return goalRepository.findAllByUserIdOrderByCreatedAtDescIdDesc(user.getId())
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public GoalResponse getGoalById(UUID id) {
-        Goal goal = goalRepository.findById(id)
+    public GoalResponse getGoalById(String email, UUID id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        Goal goal = goalRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new GoalNotFoundException("Goal not found."));
 
         return toResponse(goal);
     }
 
-    public void deleteGoal(UUID id) {
-        Goal goal = goalRepository.findById(id)
+    public void deleteGoal(String email, UUID id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        Goal goal = goalRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new GoalNotFoundException("Goal not found."));
 
         goalRepository.delete(goal);

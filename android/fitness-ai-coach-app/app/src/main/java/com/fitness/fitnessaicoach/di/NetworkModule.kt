@@ -7,6 +7,7 @@ import com.fitness.fitnessaicoach.data.remote.api.AuthTokenInterceptor
 import com.fitness.fitnessaicoach.data.remote.api.BodyMetricsApi
 import com.fitness.fitnessaicoach.data.remote.api.CoachApi
 import com.fitness.fitnessaicoach.data.remote.api.DailyLogApi
+import com.fitness.fitnessaicoach.data.remote.api.GoalsApi
 import com.fitness.fitnessaicoach.data.remote.api.MealApi
 import com.fitness.fitnessaicoach.data.remote.api.UserApi
 import com.fitness.fitnessaicoach.data.remote.api.WorkoutApi
@@ -69,6 +70,10 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideDailyLogApi(retrofit: Retrofit): DailyLogApi = retrofit.create(DailyLogApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideGoalsApi(retrofit: Retrofit): GoalsApi = retrofit.create(GoalsApi::class.java)
 
     @Provides
     @Singleton

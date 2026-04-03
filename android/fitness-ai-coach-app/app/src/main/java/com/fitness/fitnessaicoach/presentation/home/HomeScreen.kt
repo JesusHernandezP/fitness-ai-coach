@@ -21,6 +21,7 @@ import com.fitness.fitnessaicoach.presentation.home.components.LoadingView
 @Composable
 fun HomeScreen(
     onOpenBodyMetrics: () -> Unit,
+    onOpenGoals: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val dailyLogState by viewModel.dailyLogState.collectAsStateWithLifecycle()
@@ -32,6 +33,10 @@ fun HomeScreen(
     ) {
         Button(onClick = onOpenBodyMetrics) {
             Text("Body metrics")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(onClick = onOpenGoals) {
+            Text("Goals")
         }
         Spacer(modifier = Modifier.height(16.dp))
 
