@@ -1,22 +1,18 @@
 package com.fitness.fitnessaicoach.dto;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
 public class BodyMetricsRequest {
-
-    @NotNull
-    private UUID userId;
 
     @NotNull
     @Positive(message = "Weight must be greater than 0.")

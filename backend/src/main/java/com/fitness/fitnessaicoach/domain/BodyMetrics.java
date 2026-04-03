@@ -11,7 +11,13 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "body_metrics")
+@Table(
+        name = "body_metrics",
+        uniqueConstraints = @UniqueConstraint(
+                name = "unique_body_metrics_user_date",
+                columnNames = {"user_id", "date"}
+        )
+)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -20,7 +26,7 @@ import java.util.UUID;
 public class BodyMetrics {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(optional = false)
