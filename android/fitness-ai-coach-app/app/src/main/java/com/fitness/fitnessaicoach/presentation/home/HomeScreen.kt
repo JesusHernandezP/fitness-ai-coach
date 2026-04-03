@@ -1,8 +1,12 @@
 package com.fitness.fitnessaicoach.presentation.home
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -16,6 +20,7 @@ import com.fitness.fitnessaicoach.presentation.home.components.LoadingView
 
 @Composable
 fun HomeScreen(
+    onOpenBodyMetrics: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val dailyLogState by viewModel.dailyLogState.collectAsStateWithLifecycle()
@@ -25,6 +30,11 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
+        Button(onClick = onOpenBodyMetrics) {
+            Text("Body metrics")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
         when (val state = dailyLogState) {
             AppResult.Loading -> {
                 LoadingView()

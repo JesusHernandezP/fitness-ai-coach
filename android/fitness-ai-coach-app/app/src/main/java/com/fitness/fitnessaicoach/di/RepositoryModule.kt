@@ -8,11 +8,14 @@ import com.fitness.fitnessaicoach.core.constants.NetworkConstants
 import com.fitness.fitnessaicoach.data.local.datastore.DataStoreTokenStorage
 import com.fitness.fitnessaicoach.data.local.datastore.TokenStorage
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
+import com.fitness.fitnessaicoach.data.remote.api.BodyMetricsApi
 import com.fitness.fitnessaicoach.data.remote.api.DailyLogApi
 import com.fitness.fitnessaicoach.data.remote.api.UserApi
 import com.fitness.fitnessaicoach.data.repository.AuthRepositoryImpl
+import com.fitness.fitnessaicoach.data.repository.BodyMetricsRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.DailyLogRepositoryImpl
 import com.fitness.fitnessaicoach.domain.repository.AuthRepository
+import com.fitness.fitnessaicoach.domain.repository.BodyMetricsRepository
 import com.fitness.fitnessaicoach.domain.repository.DailyLogRepository
 import dagger.Module
 import dagger.Provides
@@ -50,6 +53,16 @@ object RepositoryModule {
         return AuthRepositoryImpl(
             authApi = authApi,
             tokenStorage = tokenStorage
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideBodyMetricsRepository(
+        bodyMetricsApi: BodyMetricsApi
+    ): BodyMetricsRepository {
+        return BodyMetricsRepositoryImpl(
+            bodyMetricsApi = bodyMetricsApi
         )
     }
 

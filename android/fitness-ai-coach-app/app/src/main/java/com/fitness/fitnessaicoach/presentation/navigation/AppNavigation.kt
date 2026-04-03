@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fitness.fitnessaicoach.presentation.auth.LoginScreen
+import com.fitness.fitnessaicoach.presentation.bodymetrics.BodyMetricsScreen
 import com.fitness.fitnessaicoach.presentation.coach.CoachScreen
 import com.fitness.fitnessaicoach.presentation.dailylog.DailyLogScreen
 import com.fitness.fitnessaicoach.presentation.home.HomeScreen
@@ -31,7 +32,14 @@ fun AppNavigation() {
             )
         }
         composable(AppDestination.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                onOpenBodyMetrics = {
+                    navController.navigate(AppDestination.BodyMetrics.route)
+                }
+            )
+        }
+        composable(AppDestination.BodyMetrics.route) {
+            BodyMetricsScreen()
         }
         composable(AppDestination.DailyLog.route) {
             DailyLogScreen()
