@@ -41,7 +41,8 @@ public class DailyLogSearchIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}']['get']").exists())
                 .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/date/{date}']['get']").exists())
-                .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/today']['get']").exists());
+                .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/today']['get']").exists())
+                .andExpect(jsonPath("$['paths']['/api/daily-logs/today']['get']").exists());
     }
 
     @Test
@@ -131,6 +132,39 @@ public class DailyLogSearchIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].date").value(today.toString()));
+    }
+
+    @Test
+    void shouldReturnTodayLogForAuthenticatedUser() throws Exception {
+        UserContext user = registerAndLogin();
+        String token = user.token();
+        LocalDate today = LocalDate.now();
+
+        createDailyLog(token, user.userId(), today, 4321);
+
+        mockMvc.perform(get("/api/daily-logs/today")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(today.toString()))
+                .andExpect(jsonPath("$.steps").value(4321))
+                .andExpect(jsonPath("$.userId").value(user.userId()));
+    }
+
+    @Test
+    void shouldNotCreateDuplicateDailyLogForSameUserAndDate() throws Exception {
+        UserContext user = registerAndLogin();
+        String token = user.token();
+        LocalDate today = LocalDate.now();
+
+        createDailyLog(token, user.userId(), today, 1000);
+        createDailyLog(token, user.userId(), today, 2000);
+
+        mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].date").value(today.toString()))
+                .andExpect(jsonPath("$[0].steps").value(2000));
     }
 
     @Test
