@@ -3,10 +3,13 @@ package com.fitness.fitnessaicoach.presentation.home
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +29,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val dailyLogState by viewModel.dailyLogState.collectAsStateWithLifecycle()
+    val aiCoachingState by viewModel.aiCoachingState.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -59,6 +63,40 @@ fun HomeScreen(
                     log = state.data,
                     onSaveClick = { updatedLog -> viewModel.saveDailyLog(updatedLog) }
                 )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "AI Coach",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                when (val coachingState = aiCoachingState) {
+                    AppResult.Loading -> {
+                        CircularProgressIndicator()
+                    }
+
+                    is AppResult.Error -> {
+                        Text(
+                            text = "Unable to load coaching advice",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    is AppResult.Success -> {
+                        if (coachingState.data.analysis.isNotBlank()) {
+                            Text(
+                                text = coachingState.data.analysis,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        Text(
+                            text = coachingState.data.advice,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                }
             }
         }
     }

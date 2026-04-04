@@ -1,8 +1,11 @@
 package com.fitness.fitnessaicoach.presentation.home
 
 import com.fitness.fitnessaicoach.core.result.AppResult
+import com.fitness.fitnessaicoach.domain.model.AICoachAdvice
 import com.fitness.fitnessaicoach.domain.model.DailyLog
+import com.fitness.fitnessaicoach.domain.repository.AICoachRepository
 import com.fitness.fitnessaicoach.domain.repository.DailyLogRepository
+import com.fitness.fitnessaicoach.domain.usecase.GetDailyCoachingUseCase
 import com.fitness.fitnessaicoach.domain.usecase.GetTodayDailyLogUseCase
 import com.fitness.fitnessaicoach.domain.usecase.SaveDailyLogUseCase
 import kotlinx.coroutines.Dispatchers
@@ -49,10 +52,19 @@ class HomeViewModelTest {
             userId = "user-id"
         )
         val repository = FakeDailyLogRepository(AppResult.Success(expectedLog))
+        val coachRepository = FakeAICoachRepository(
+            AppResult.Success(
+                AICoachAdvice(
+                    analysis = "Steps: 0",
+                    advice = "Keep moving."
+                )
+            )
+        )
 
         val viewModel = HomeViewModel(
             getTodayDailyLogUseCase = GetTodayDailyLogUseCase(repository),
-            saveDailyLogUseCase = SaveDailyLogUseCase(repository)
+            saveDailyLogUseCase = SaveDailyLogUseCase(repository),
+            getDailyCoachingUseCase = GetDailyCoachingUseCase(coachRepository)
         )
 
         advanceUntilIdle()
@@ -60,6 +72,7 @@ class HomeViewModelTest {
         val state = viewModel.dailyLogState.value
         assertTrue(state is AppResult.Success)
         assertEquals(expectedLog, (state as AppResult.Success).data)
+        assertTrue(viewModel.aiCoachingState.value is AppResult.Success)
     }
 
     private class FakeDailyLogRepository(
@@ -68,5 +81,11 @@ class HomeViewModelTest {
         override suspend fun getTodayDailyLog(): AppResult<DailyLog> = result
 
         override suspend fun saveDailyLog(dailyLog: DailyLog): DailyLog = dailyLog
+    }
+
+    private class FakeAICoachRepository(
+        private val result: AppResult<AICoachAdvice>
+    ) : AICoachRepository {
+        override suspend fun getCoaching(dailyLogId: String): AppResult<AICoachAdvice> = result
     }
 }

@@ -9,13 +9,16 @@ import com.fitness.fitnessaicoach.data.local.datastore.DataStoreTokenStorage
 import com.fitness.fitnessaicoach.data.local.datastore.TokenStorage
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
 import com.fitness.fitnessaicoach.data.remote.api.BodyMetricsApi
+import com.fitness.fitnessaicoach.data.remote.api.CoachApi
 import com.fitness.fitnessaicoach.data.remote.api.DailyLogApi
 import com.fitness.fitnessaicoach.data.remote.api.GoalsApi
 import com.fitness.fitnessaicoach.data.remote.api.UserApi
+import com.fitness.fitnessaicoach.data.repository.AICoachRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.AuthRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.BodyMetricsRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.DailyLogRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.GoalsRepositoryImpl
+import com.fitness.fitnessaicoach.domain.repository.AICoachRepository
 import com.fitness.fitnessaicoach.domain.repository.AuthRepository
 import com.fitness.fitnessaicoach.domain.repository.BodyMetricsRepository
 import com.fitness.fitnessaicoach.domain.repository.DailyLogRepository
@@ -90,6 +93,16 @@ object RepositoryModule {
     ): GoalsRepository {
         return GoalsRepositoryImpl(
             goalsApi = goalsApi
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAICoachRepository(
+        coachApi: CoachApi
+    ): AICoachRepository {
+        return AICoachRepositoryImpl(
+            coachApi = coachApi
         )
     }
 }
