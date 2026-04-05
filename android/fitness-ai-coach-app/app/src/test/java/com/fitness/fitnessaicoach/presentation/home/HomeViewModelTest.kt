@@ -75,6 +75,47 @@ class HomeViewModelTest {
         assertTrue(viewModel.aiCoachingState.value is AppResult.Success)
     }
 
+    @Test
+    fun `refreshes ai coaching after saving daily log`() = runTest {
+        val expectedLog = DailyLog(
+            id = "log-id",
+            date = "2026-04-03",
+            totalCalories = 0.0,
+            calorieGoal = 0.0,
+            protein = 0.0,
+            meals = 0,
+            workouts = 0,
+            steps = 0,
+            caloriesConsumed = 0.0,
+            caloriesBurned = 0.0,
+            userId = "user-id"
+        )
+        val repository = FakeDailyLogRepository(AppResult.Success(expectedLog))
+        val coachRepository = FakeAICoachRepository(
+            AppResult.Success(
+                AICoachAdvice(
+                    analysis = "Stored analysis",
+                    advice = "Stored advice"
+                )
+            )
+        )
+
+        val viewModel = HomeViewModel(
+            getTodayDailyLogUseCase = GetTodayDailyLogUseCase(repository),
+            saveDailyLogUseCase = SaveDailyLogUseCase(repository),
+            getDailyCoachingUseCase = GetDailyCoachingUseCase(coachRepository)
+        )
+
+        advanceUntilIdle()
+        viewModel.saveDailyLog(expectedLog.copy(steps = 1234))
+        advanceUntilIdle()
+
+        val coachingState = viewModel.aiCoachingState.value
+        assertTrue(coachingState is AppResult.Success)
+        assertEquals("Stored analysis", (coachingState as AppResult.Success).data.analysis)
+        assertEquals(2, coachRepository.requestCount)
+    }
+
     private class FakeDailyLogRepository(
         private val result: AppResult<DailyLog>
     ) : DailyLogRepository {
@@ -86,6 +127,9 @@ class HomeViewModelTest {
     private class FakeAICoachRepository(
         private val result: AppResult<AICoachAdvice>
     ) : AICoachRepository {
+        var requestCount: Int = 0
+
         override suspend fun getCoaching(dailyLogId: String): AppResult<AICoachAdvice> = result
+            .also { requestCount++ }
     }
 }

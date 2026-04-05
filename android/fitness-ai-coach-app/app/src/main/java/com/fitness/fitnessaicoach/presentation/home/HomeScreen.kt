@@ -81,12 +81,19 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     when (val coachingState = aiCoachingState) {
                         AppResult.Loading -> {
-                            CircularProgressIndicator()
+                            Column {
+                                CircularProgressIndicator()
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Generating recommendation...",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
 
                         is AppResult.Error -> {
                             Text(
-                                text = "Unable to load coaching advice",
+                                text = "AI recommendation unavailable",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }

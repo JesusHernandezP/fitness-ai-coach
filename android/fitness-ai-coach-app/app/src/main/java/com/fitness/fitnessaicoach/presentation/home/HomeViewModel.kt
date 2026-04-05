@@ -33,12 +33,13 @@ class HomeViewModel @Inject constructor(
     fun loadTodayDailyLog() {
         viewModelScope.launch {
             _dailyLogState.value = AppResult.Loading
+            _aiCoachingState.value = AppResult.Loading
             val dailyLogResult = getTodayDailyLogUseCase()
             _dailyLogState.value = dailyLogResult
             when (dailyLogResult) {
                 is AppResult.Success -> loadCoachingForDailyLog(dailyLogResult.data.id)
                 is AppResult.Error -> _aiCoachingState.value =
-                    AppResult.Error("Unable to load coaching advice.", dailyLogResult.throwable)
+                    AppResult.Error("AI recommendation unavailable", dailyLogResult.throwable)
                 AppResult.Loading -> Unit
             }
         }
@@ -47,20 +48,29 @@ class HomeViewModel @Inject constructor(
     fun saveDailyLog(dailyLog: DailyLog) {
         viewModelScope.launch {
             _dailyLogState.value = AppResult.Loading
-            _dailyLogState.value = saveDailyLogUseCase(dailyLog)
-            if (_dailyLogState.value is AppResult.Success) {
+            _aiCoachingState.value = AppResult.Loading
+            val saveResult = saveDailyLogUseCase(dailyLog)
+            _dailyLogState.value = saveResult
+            if (saveResult is AppResult.Success) {
                 val refreshedDailyLog = getTodayDailyLogUseCase()
                 _dailyLogState.value = refreshedDailyLog
                 if (refreshedDailyLog is AppResult.Success) {
                     loadCoachingForDailyLog(refreshedDailyLog.data.id)
+                } else if (refreshedDailyLog is AppResult.Error) {
+                    _aiCoachingState.value = AppResult.Error(
+                        "AI recommendation unavailable",
+                        refreshedDailyLog.throwable
+                    )
                 }
+            } else if (saveResult is AppResult.Error) {
+                _aiCoachingState.value = AppResult.Error("AI recommendation unavailable", saveResult.throwable)
             }
         }
     }
 
     private suspend fun loadCoachingForDailyLog(dailyLogId: String?) {
         if (dailyLogId.isNullOrBlank()) {
-            _aiCoachingState.value = AppResult.Error("Unable to load coaching advice.")
+            _aiCoachingState.value = AppResult.Error("AI recommendation unavailable")
             return
         }
 
