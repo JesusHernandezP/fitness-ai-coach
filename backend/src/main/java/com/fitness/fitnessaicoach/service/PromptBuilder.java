@@ -17,6 +17,8 @@ public class PromptBuilder {
         String calorieBalance = analysis.getCalorieBalance() != null ? analysis.getCalorieBalance().toPlainString() : "0";
         String steps = analysis.getTotalSteps() != null ? String.valueOf(analysis.getTotalSteps()) : "0";
         String latestWeight = analysis.getLatestWeight() != null ? String.valueOf(analysis.getLatestWeight()) : "unknown";
+        String sex = analysis.getSex() != null ? analysis.getSex().name() : "unknown";
+        String activityLevel = analysis.getActivityLevel() != null ? analysis.getActivityLevel().name() : "unknown";
         String workoutsPerformed = analysis.getTotalWorkoutSessions() != null
                 ? String.valueOf(analysis.getTotalWorkoutSessions())
                 : "0";
@@ -43,6 +45,8 @@ public class PromptBuilder {
                 - calorieBalance: %s
                 - steps: %s
                 - latestWeight: %s
+                - sex: %s
+                - activityLevel: %s
                 - workoutsPerformed: %s
 
                 Coaching priorities, in this order:
@@ -83,6 +87,8 @@ public class PromptBuilder {
                 calorieBalance,
                 steps,
                 latestWeight,
+                sex,
+                activityLevel,
                 workoutsPerformed,
                 analysis
         );

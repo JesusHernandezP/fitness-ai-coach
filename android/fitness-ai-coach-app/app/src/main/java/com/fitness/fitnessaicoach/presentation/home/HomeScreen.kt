@@ -31,6 +31,7 @@ import com.fitness.fitnessaicoach.presentation.home.components.LoadingView
 
 @Composable
 fun HomeScreen(
+    onOpenProfile: () -> Unit,
     onOpenBodyMetrics: () -> Unit,
     onOpenGoals: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
@@ -50,6 +51,15 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            Button(
+                onClick = onOpenProfile,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+            ) {
+                Text("Profile")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = onOpenBodyMetrics,
                 modifier = Modifier

@@ -11,6 +11,7 @@ import com.fitness.fitnessaicoach.presentation.dailylog.DailyLogScreen
 import com.fitness.fitnessaicoach.presentation.goals.GoalsScreen
 import com.fitness.fitnessaicoach.presentation.home.HomeScreen
 import com.fitness.fitnessaicoach.presentation.meal.MealScreen
+import com.fitness.fitnessaicoach.presentation.profile.MetabolicProfileScreen
 import com.fitness.fitnessaicoach.presentation.workout.WorkoutScreen
 
 @Composable
@@ -34,6 +35,9 @@ fun AppNavigation() {
         }
         composable(AppDestination.Home.route) {
             HomeScreen(
+                onOpenProfile = {
+                    navController.navigate(AppDestination.Profile.route)
+                },
                 onOpenBodyMetrics = {
                     navController.navigate(AppDestination.BodyMetrics.route)
                 },
@@ -41,6 +45,9 @@ fun AppNavigation() {
                     navController.navigate(AppDestination.Goals.route)
                 }
             )
+        }
+        composable(AppDestination.Profile.route) {
+            MetabolicProfileScreen()
         }
         composable(AppDestination.BodyMetrics.route) {
             BodyMetricsScreen()

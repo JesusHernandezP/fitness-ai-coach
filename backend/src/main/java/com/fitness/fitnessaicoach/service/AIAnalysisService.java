@@ -81,6 +81,8 @@ public class AIAnalysisService {
                 .targetCarbs(goal != null ? goal.getTargetCarbs() : null)
                 .targetFat(goal != null ? goal.getTargetFat() : null)
                 .latestWeight(latestBodyMetrics != null ? latestBodyMetrics.getWeight() : null)
+                .sex(user != null ? user.getSex() : null)
+                .activityLevel(user != null ? user.getActivityLevel() : null)
                 .meals(buildMealSummaries(dailyLogId))
                 .workouts(buildWorkoutSummaries(dailyLogId))
                 .build();

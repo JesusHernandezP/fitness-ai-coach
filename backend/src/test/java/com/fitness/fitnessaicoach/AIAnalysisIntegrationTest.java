@@ -82,6 +82,8 @@ public class AIAnalysisIntegrationTest {
                 .andExpect(jsonPath("$.targetFat").value(65.6))
                 .andExpect(jsonPath("$.targetCarbs").value(305.09))
                 .andExpect(jsonPath("$.latestWeight").value(80.7))
+                .andExpect(jsonPath("$.sex").value("MALE"))
+                .andExpect(jsonPath("$.activityLevel").value("MODERATE"))
                 .andExpect(jsonPath("$.meals.length()").value(2))
                 .andExpect(jsonPath("$.meals[0].mealType").value("BREAKFAST"))
                 .andExpect(jsonPath("$.meals[0].totalItems").value(1))
@@ -118,6 +120,8 @@ public class AIAnalysisIntegrationTest {
                 .andExpect(jsonPath("$.targetFat").value(nullValue()))
                 .andExpect(jsonPath("$.targetCarbs").value(nullValue()))
                 .andExpect(jsonPath("$.latestWeight").value(nullValue()))
+                .andExpect(jsonPath("$.sex").value("MALE"))
+                .andExpect(jsonPath("$.activityLevel").value("MODERATE"))
                 .andExpect(jsonPath("$.meals.length()").value(0))
                 .andExpect(jsonPath("$.workouts.length()").value(0));
     }

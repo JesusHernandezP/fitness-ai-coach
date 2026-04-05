@@ -18,11 +18,13 @@ import com.fitness.fitnessaicoach.data.repository.AuthRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.BodyMetricsRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.DailyLogRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.GoalsRepositoryImpl
+import com.fitness.fitnessaicoach.data.repository.UserRepositoryImpl
 import com.fitness.fitnessaicoach.domain.repository.AICoachRepository
 import com.fitness.fitnessaicoach.domain.repository.AuthRepository
 import com.fitness.fitnessaicoach.domain.repository.BodyMetricsRepository
 import com.fitness.fitnessaicoach.domain.repository.DailyLogRepository
 import com.fitness.fitnessaicoach.domain.repository.GoalsRepository
+import com.fitness.fitnessaicoach.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -93,6 +95,18 @@ object RepositoryModule {
     ): GoalsRepository {
         return GoalsRepositoryImpl(
             goalsApi = goalsApi
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        userApi: UserApi,
+        tokenStorage: TokenStorage
+    ): UserRepository {
+        return UserRepositoryImpl(
+            userApi = userApi,
+            tokenStorage = tokenStorage
         )
     }
 
