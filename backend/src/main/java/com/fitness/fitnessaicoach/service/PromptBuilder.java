@@ -7,24 +7,75 @@ import org.springframework.stereotype.Component;
 public class PromptBuilder {
 
     public String buildPrompt(AIAnalysisResponse analysis) {
+        String goalType = analysis.getGoalType() != null ? analysis.getGoalType().name() : "UNKNOWN";
+        String targetCalories = analysis.getTargetCalories() != null ? String.valueOf(analysis.getTargetCalories()) : "unknown";
+        String caloriesConsumed = analysis.getTotalCaloriesConsumed() != null ? analysis.getTotalCaloriesConsumed().toPlainString() : "0";
+        String caloriesBurned = analysis.getTotalCaloriesBurned() != null ? analysis.getTotalCaloriesBurned().toPlainString() : "0";
+        String calorieBalance = analysis.getCalorieBalance() != null ? analysis.getCalorieBalance().toPlainString() : "0";
+        String steps = analysis.getTotalSteps() != null ? String.valueOf(analysis.getTotalSteps()) : "0";
+        String latestWeight = analysis.getLatestWeight() != null ? String.valueOf(analysis.getLatestWeight()) : "unknown";
+        String workoutsPerformed = analysis.getTotalWorkoutSessions() != null
+                ? String.valueOf(analysis.getTotalWorkoutSessions())
+                : "0";
+
         return """
-                You are a professional fitness coach.
+                You are an AI fitness coach writing personalized daily coaching for a mobile app.
 
-                Daily log analysis:
+                The backend already returns the final API shape as:
+                {
+                  "analysis": string,
+                  "advice": string
+                }
+
+                Your job is to generate the advice content only. Do not return JSON, markdown, bullets, or labels.
+
+                Structured input:
+                - goalType: %s
+                - targetCalories: %s
+                - caloriesConsumed: %s
+                - caloriesBurned: %s
+                - calorieBalance: %s
+                - steps: %s
+                - latestWeight: %s
+                - workoutsPerformed: %s
+
+                Coaching priorities, in this order:
+                1. Adherence to the calorie target.
+                2. Activity level versus the 7000 steps baseline.
+                3. Consistency with the current goalType.
+                4. Weight trend direction using the latest available weight.
+
+                Goal-specific guidance:
+                - LOSE_WEIGHT: favor a sustainable calorie deficit, more walking when steps are low, and lower-calorie food choices.
+                - BUILD_MUSCLE: support adequate protein, resistance training, and a controlled calorie surplus.
+                - MAINTAIN: support stable intake, stable activity, and avoidance of large calorie swings.
+
+                Tone requirements:
+                - supportive
+                - clear
+                - actionable
+                - specific, not generic
+                - avoid repetition and vague motivational filler
+
+                Output requirements:
+                - Write 3 to 4 sentences maximum.
+                - First sentence should objectively explain the most important pattern in the data.
+                - Remaining sentence(s) should give concrete next actions for the next day.
+                - Mention calorie target adherence, steps, and goal alignment when relevant.
+                - If some data are missing, say so briefly and still give the best next action.
+
+                Full analysis object for reference:
                 %s
-
-                Evaluate:
-                - calorie balance versus targetCalories
-                - steps versus the 7000 minimum
-                - whether workouts were performed
-                - the user's goalType context
-
-                Behavior rules:
-                - If goalType is LOSE_WEIGHT, recommend a calorie deficit, encourage more steps when below target, and suggest lower calorie foods.
-                - If goalType is BUILD_MUSCLE, encourage protein intake, resistance training, and allow a slight calorie surplus.
-                - If goalType is MAINTAIN, encourage balanced intake and avoiding large calorie deviations.
-
-                Return short, actionable advice in 2-3 sentences.
-                """.formatted(analysis);
+                """.formatted(
+                goalType,
+                targetCalories,
+                caloriesConsumed,
+                caloriesBurned,
+                calorieBalance,
+                steps,
+                latestWeight,
+                workoutsPerformed,
+                analysis
+        );
     }
 }
