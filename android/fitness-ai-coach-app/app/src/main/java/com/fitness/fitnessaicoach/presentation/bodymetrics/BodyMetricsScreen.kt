@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,7 +44,7 @@ fun BodyMetricsScreen(
                     text = "Body metrics",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Track your weight, body fat, and muscle mass.",
                     style = MaterialTheme.typography.bodyMedium
@@ -119,7 +120,9 @@ fun BodyMetricsScreen(
             Button(
                 onClick = viewModel::saveBodyMetrics,
                 enabled = !uiState.isLoading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
@@ -135,7 +138,7 @@ fun BodyMetricsScreen(
         item {
             Text(
                 text = "History",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleLarge
             )
         }
 
@@ -145,9 +148,9 @@ fun BodyMetricsScreen(
             ) {
                 Text(
                     text = "Weight progress",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleLarge
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Current weight: ${uiState.currentWeight?.toString() ?: "-"}"
                 )
@@ -160,10 +163,23 @@ fun BodyMetricsScreen(
             }
         }
 
-        if (uiState.bodyMetrics.isEmpty() && !uiState.isLoading) {
+        if (uiState.isLoading && uiState.bodyMetrics.isEmpty()) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator()
+                    Text(
+                        text = "Loading your body metrics...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        } else if (uiState.bodyMetrics.isEmpty()) {
             item {
                 Text(
-                    text = "No body metrics recorded yet.",
+                    text = "No body metrics yet. Save your first entry to start tracking progress.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -50,7 +51,7 @@ fun GoalsScreen(
                     text = "Goals",
                     style = MaterialTheme.typography.headlineMedium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 Text(
                     text = "Set your current fitness objective and calorie target.",
                     style = MaterialTheme.typography.bodyMedium
@@ -71,7 +72,9 @@ fun GoalsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = { expanded = true },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
                 ) {
                     Text("Select goal type")
                 }
@@ -138,7 +141,9 @@ fun GoalsScreen(
             Button(
                 onClick = viewModel::saveGoal,
                 enabled = !uiState.isLoading,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
@@ -154,14 +159,27 @@ fun GoalsScreen(
         item {
             Text(
                 text = "Saved goals",
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.titleLarge
             )
         }
 
-        if (uiState.goals.isEmpty() && !uiState.isLoading) {
+        if (uiState.isLoading && uiState.goals.isEmpty()) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator()
+                    Text(
+                        text = "Loading your goals...",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        } else if (uiState.goals.isEmpty()) {
             item {
                 Text(
-                    text = "No goals saved yet.",
+                    text = "No goals yet. Add one to keep your plan focused.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
