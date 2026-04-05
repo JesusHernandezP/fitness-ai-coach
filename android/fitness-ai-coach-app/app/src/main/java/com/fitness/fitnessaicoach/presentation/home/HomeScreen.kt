@@ -1,15 +1,19 @@
 package com.fitness.fitnessaicoach.presentation.home
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,70 +35,77 @@ fun HomeScreen(
     val dailyLogState by viewModel.dailyLogState.collectAsStateWithLifecycle()
     val aiCoachingState by viewModel.aiCoachingState.collectAsStateWithLifecycle()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .padding(16.dp)
-    ) {
-        Button(onClick = onOpenBodyMetrics) {
-            Text("Body metrics")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = onOpenGoals) {
-            Text("Goals")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (val state = dailyLogState) {
-            AppResult.Loading -> {
-                LoadingView()
+    Scaffold(
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .padding(innerPadding)
+                .imePadding()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp)
+        ) {
+            Button(onClick = onOpenBodyMetrics) {
+                Text("Body metrics")
             }
-
-            is AppResult.Error -> {
-                ErrorView(
-                    message = state.message,
-                    onRetry = { viewModel.loadTodayDailyLog() }
-                )
+            Spacer(modifier = Modifier.height(8.dp))
+            Button(onClick = onOpenGoals) {
+                Text("Goals")
             }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            is AppResult.Success -> {
-                DailyLogSummary(
-                    log = state.data,
-                    onSaveClick = { updatedLog -> viewModel.saveDailyLog(updatedLog) }
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = "AI Coach",
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                when (val coachingState = aiCoachingState) {
-                    AppResult.Loading -> {
-                        CircularProgressIndicator()
-                    }
+            when (val state = dailyLogState) {
+                AppResult.Loading -> {
+                    LoadingView()
+                }
 
-                    is AppResult.Error -> {
-                        Text(
-                            text = "Unable to load coaching advice",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
+                is AppResult.Error -> {
+                    ErrorView(
+                        message = state.message,
+                        onRetry = { viewModel.loadTodayDailyLog() }
+                    )
+                }
 
-                    is AppResult.Success -> {
-                        if (coachingState.data.analysis.isNotBlank()) {
+                is AppResult.Success -> {
+                    DailyLogSummary(
+                        log = state.data,
+                        onSaveClick = { updatedLog -> viewModel.saveDailyLog(updatedLog) }
+                    )
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = "AI Coach",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    when (val coachingState = aiCoachingState) {
+                        AppResult.Loading -> {
+                            CircularProgressIndicator()
+                        }
+
+                        is AppResult.Error -> {
                             Text(
-                                text = coachingState.data.analysis,
-                                style = MaterialTheme.typography.bodyMedium,
+                                text = "Unable to load coaching advice",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        is AppResult.Success -> {
+                            if (coachingState.data.analysis.isNotBlank()) {
+                                Text(
+                                    text = coachingState.data.analysis,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                            Text(
+                                text = coachingState.data.advice,
+                                style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.fillMaxWidth()
                             )
-                            Spacer(modifier = Modifier.height(8.dp))
                         }
-                        Text(
-                            text = coachingState.data.advice,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.fillMaxWidth()
-                        )
                     }
                 }
             }
