@@ -46,7 +46,7 @@ fun BodyMetricsScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Track your weight, body fat, and muscle mass.",
+                    text = "Track your weight history.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -57,28 +57,6 @@ fun BodyMetricsScreen(
                 value = uiState.weight,
                 onValueChange = viewModel::onWeightChanged,
                 label = { Text("Weight") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true
-            )
-        }
-
-        item {
-            OutlinedTextField(
-                value = uiState.bodyFat,
-                onValueChange = viewModel::onBodyFatChanged,
-                label = { Text("Body fat") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                singleLine = true
-            )
-        }
-
-        item {
-            OutlinedTextField(
-                value = uiState.muscleMass,
-                onValueChange = viewModel::onMuscleMassChanged,
-                label = { Text("Muscle mass") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
@@ -195,8 +173,6 @@ fun BodyMetricsScreen(
                         style = MaterialTheme.typography.titleSmall
                     )
                     Text("Weight: ${metric.weight}")
-                    Text("Body fat: ${metric.bodyFat}")
-                    Text("Muscle mass: ${metric.muscleMass}")
                 }
             }
         }

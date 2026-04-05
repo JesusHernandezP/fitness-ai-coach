@@ -40,16 +40,12 @@ class BodyMetricsViewModelTest {
                 id = "metric-2",
                 userId = "user-1",
                 weight = 81.0,
-                bodyFat = 18.8,
-                muscleMass = 38.0,
                 date = "2026-04-14"
             ),
             BodyMetrics(
                 id = "metric-1",
                 userId = "user-1",
                 weight = 82.5,
-                bodyFat = 18.2,
-                muscleMass = 38.5,
                 date = "2026-04-15"
             )
         )
@@ -80,8 +76,6 @@ class BodyMetricsViewModelTest {
                 id = "metric-1",
                 userId = "user-1",
                 weight = 82.5,
-                bodyFat = 18.2,
-                muscleMass = 38.5,
                 date = "2026-04-15"
             )
         )

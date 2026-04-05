@@ -17,8 +17,6 @@ import kotlinx.coroutines.launch
 
 data class BodyMetricsUiState(
     val weight: String = "",
-    val bodyFat: String = "",
-    val muscleMass: String = "",
     val date: String = LocalDate.now().toString(),
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
@@ -44,14 +42,6 @@ class BodyMetricsViewModel @Inject constructor(
 
     fun onWeightChanged(value: String) {
         _uiState.update { it.copy(weight = value, errorMessage = null, successMessage = null) }
-    }
-
-    fun onBodyFatChanged(value: String) {
-        _uiState.update { it.copy(bodyFat = value, errorMessage = null, successMessage = null) }
-    }
-
-    fun onMuscleMassChanged(value: String) {
-        _uiState.update { it.copy(muscleMass = value, errorMessage = null, successMessage = null) }
     }
 
     fun loadBodyMetrics() {
@@ -90,19 +80,9 @@ class BodyMetricsViewModel @Inject constructor(
     fun saveBodyMetrics() {
         val currentState = _uiState.value
         val weight = currentState.weight.toDoubleOrNull()
-        val bodyFat = currentState.bodyFat.toDoubleOrNull()
-        val muscleMass = currentState.muscleMass.toDoubleOrNull()
 
         if (weight == null || weight <= 0.0) {
             _uiState.update { it.copy(errorMessage = "Weight must be positive.") }
-            return
-        }
-        if (bodyFat == null || bodyFat <= 0.0) {
-            _uiState.update { it.copy(errorMessage = "Body fat must be positive.") }
-            return
-        }
-        if (muscleMass == null || muscleMass <= 0.0) {
-            _uiState.update { it.copy(errorMessage = "Muscle mass must be positive.") }
             return
         }
 
@@ -110,8 +90,6 @@ class BodyMetricsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
             val bodyMetrics = BodyMetrics(
                 weight = weight,
-                bodyFat = bodyFat,
-                muscleMass = muscleMass,
                 date = currentState.date
             )
 
@@ -122,8 +100,6 @@ class BodyMetricsViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             weight = "",
-                            bodyFat = "",
-                            muscleMass = "",
                             date = LocalDate.now().toString(),
                             successMessage = "Body metrics saved.",
                             errorMessage = null
