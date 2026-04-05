@@ -4,8 +4,9 @@ $root = Split-Path -Parent $PSScriptRoot
 Set-Location "$root\backend"
 
 $composeFile = Join-Path $PWD "docker-compose.yml"
-$dbHost = "localhost"
-$dbPort = 5432
+$dbHost = if ($env:DB_HOST) { $env:DB_HOST } else { "127.0.0.1" }
+$dbPort = if ($env:DB_PORT) { [int]$env:DB_PORT } else { 5432 }
+$dbName = if ($env:DB_NAME) { $env:DB_NAME } else { "fitness_db" }
 $dbWaitSeconds = 45
 $postgresContainerName = "fitness-postgres"
 
@@ -13,11 +14,6 @@ if (Get-Command docker -ErrorAction SilentlyContinue) {
     if (Test-Path $composeFile) {
         Write-Host "Levantando PostgreSQL con Docker Compose..."
         docker compose up -d postgres | Out-Host
-
-        $containerIp = docker inspect $postgresContainerName --format "{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}" 2>$null
-        if ($containerIp) {
-            $dbHost = $containerIp.Trim()
-        }
     }
 } else {
     Write-Warning "Docker no esta disponible en PATH. El backend requiere PostgreSQL en $dbHost`:$dbPort."
@@ -55,7 +51,7 @@ if (-not $env:GROQ_API_KEY) {
 }
 
 if (-not $env:DB_URL) {
-    $env:DB_URL = "jdbc:postgresql://$dbHost`:$dbPort/fitness_db?sslmode=disable"
+    $env:DB_URL = "jdbc:postgresql://${dbHost}:$dbPort/${dbName}?sslmode=disable"
 }
 
 if (-not $env:DB_USERNAME) {
