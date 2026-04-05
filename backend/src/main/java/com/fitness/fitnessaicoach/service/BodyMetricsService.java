@@ -27,7 +27,7 @@ public class BodyMetricsService {
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         if (bodyMetricsRepository.existsByUserIdAndDate(user.getId(), request.getDate())) {
-            throw new BodyMetricsAlreadyExistsException("Body metrics for this date already exist.");
+            throw new BodyMetricsAlreadyExistsException("You already recorded your weight today");
         }
 
         BodyMetrics bodyMetrics = BodyMetrics.builder()

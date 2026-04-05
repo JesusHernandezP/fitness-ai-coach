@@ -109,6 +109,31 @@ public class GoalControllerIntegrationTest {
                 .andExpect(jsonPath("$.targetCalories").value(2751.25));
     }
 
+    @Test
+    void shouldRejectDuplicateGoalForSameDay() throws Exception {
+        UserContext user = registerAndLogin();
+
+        String goalBody = """
+                {
+                  "goalType": "LOSE_WEIGHT",
+                  "targetWeight": 75
+                }
+                """;
+
+        mockMvc.perform(post("/api/goals")
+                        .header("Authorization", "Bearer " + user.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(goalBody))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/goals")
+                        .header("Authorization", "Bearer " + user.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(goalBody))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("You already set your goal today"));
+    }
+
     private UserContext registerAndLogin() throws Exception {
         String email = "goal-" + UUID.randomUUID() + "@example.com";
         String password = "Passw0rd!";

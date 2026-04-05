@@ -5,6 +5,7 @@ import com.fitness.fitnessaicoach.domain.User;
 import com.fitness.fitnessaicoach.domain.UserGoalType;
 import com.fitness.fitnessaicoach.dto.GoalRequest;
 import com.fitness.fitnessaicoach.dto.GoalResponse;
+import com.fitness.fitnessaicoach.exception.GoalAlreadyExistsException;
 import com.fitness.fitnessaicoach.exception.GoalNotFoundException;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
 import com.fitness.fitnessaicoach.repository.GoalRepository;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +33,8 @@ public class GoalService {
     public GoalResponse createGoal(String email, GoalRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        ensureGoalNotAlreadyCreatedToday(user.getId());
 
         Goal goal = Goal.builder()
                 .goalType(request.getGoalType())
@@ -80,6 +85,16 @@ public class GoalService {
                 .targetCalories(goal.getTargetCalories())
                 .userId(goal.getUser() != null ? goal.getUser().getId() : null)
                 .build();
+    }
+
+    private void ensureGoalNotAlreadyCreatedToday(UUID userId) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime startOfNextDay = today.plusDays(1).atStartOfDay();
+
+        if (goalRepository.existsByUserIdAndCreatedAtBetween(userId, startOfDay, startOfNextDay)) {
+            throw new GoalAlreadyExistsException("You already set your goal today");
+        }
     }
 
     private double calculateTargetCalories(User user, UserGoalType goalType) {

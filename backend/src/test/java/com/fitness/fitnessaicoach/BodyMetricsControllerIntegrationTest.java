@@ -125,7 +125,7 @@ public class BodyMetricsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(bodyMetricsBody))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Body metrics for this date already exist."));
+                .andExpect(jsonPath("$.message").value("You already recorded your weight today"));
     }
 
     private UserContext registerAndLogin(String prefix) throws Exception {
