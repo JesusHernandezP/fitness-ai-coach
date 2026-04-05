@@ -10,5 +10,7 @@ data class UserResponseDto(
     val age: Int? = null,
     val heightCm: Double? = null,
     val weightKg: Double? = null,
+    val sex: String? = null,
+    val activityLevel: String? = null,
     val createdAt: String
 )

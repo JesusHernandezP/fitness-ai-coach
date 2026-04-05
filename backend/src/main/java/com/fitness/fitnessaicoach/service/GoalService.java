@@ -1,8 +1,10 @@
 package com.fitness.fitnessaicoach.service;
 
+import com.fitness.fitnessaicoach.domain.ActivityLevel;
 import com.fitness.fitnessaicoach.domain.Goal;
 import com.fitness.fitnessaicoach.domain.User;
 import com.fitness.fitnessaicoach.domain.UserGoalType;
+import com.fitness.fitnessaicoach.domain.UserSex;
 import com.fitness.fitnessaicoach.dto.GoalRequest;
 import com.fitness.fitnessaicoach.dto.GoalResponse;
 import com.fitness.fitnessaicoach.exception.GoalAlreadyExistsException;
@@ -24,9 +26,6 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class GoalService {
 
-    private static final double MODERATE_ACTIVITY_MULTIPLIER = 1.55;
-    private static final double DEFAULT_SEX_ADJUSTMENT = 5.0;
-
     private final GoalRepository goalRepository;
     private final UserRepository userRepository;
 
@@ -35,11 +34,15 @@ public class GoalService {
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         ensureGoalNotAlreadyCreatedToday(user.getId());
+        MacroTargets macroTargets = calculateMacroTargets(user, request.getGoalType());
 
         Goal goal = Goal.builder()
                 .goalType(request.getGoalType())
                 .targetWeight(request.getTargetWeight())
-                .targetCalories(calculateTargetCalories(user, request.getGoalType()))
+                .targetCalories(macroTargets.targetCalories())
+                .targetProtein(macroTargets.targetProtein())
+                .targetCarbs(macroTargets.targetCarbs())
+                .targetFat(macroTargets.targetFat())
                 .user(user)
                 .build();
 
@@ -83,6 +86,9 @@ public class GoalService {
                 .goalType(goal.getGoalType())
                 .targetWeight(goal.getTargetWeight())
                 .targetCalories(goal.getTargetCalories())
+                .targetProtein(goal.getTargetProtein())
+                .targetCarbs(goal.getTargetCarbs())
+                .targetFat(goal.getTargetFat())
                 .userId(goal.getUser() != null ? goal.getUser().getId() : null)
                 .build();
     }
@@ -97,14 +103,17 @@ public class GoalService {
         }
     }
 
-    private double calculateTargetCalories(User user, UserGoalType goalType) {
+    private MacroTargets calculateMacroTargets(User user, UserGoalType goalType) {
         validateUserForTargetCalories(user);
 
+        UserSex sex = user.getSex() != null ? user.getSex() : UserSex.MALE;
+        ActivityLevel activityLevel = user.getActivityLevel() != null ? user.getActivityLevel() : ActivityLevel.MODERATE;
+        double sexAdjustment = sex == UserSex.MALE ? 5.0 : -161.0;
         double bmr = (10 * user.getWeightKg())
                 + (6.25 * user.getHeightCm())
                 - (5 * user.getAge())
-                + DEFAULT_SEX_ADJUSTMENT;
-        double maintenanceCalories = bmr * MODERATE_ACTIVITY_MULTIPLIER;
+                + sexAdjustment;
+        double maintenanceCalories = bmr * resolveActivityMultiplier(activityLevel);
 
         double adjustedCalories = switch (goalType) {
             case LOSE_WEIGHT -> maintenanceCalories - 300;
@@ -112,14 +121,51 @@ public class GoalService {
             case MAINTAIN -> maintenanceCalories;
         };
 
-        return BigDecimal.valueOf(adjustedCalories)
-                .setScale(2, RoundingMode.HALF_UP)
-                .doubleValue();
+        double proteinMultiplier = switch (goalType) {
+            case LOSE_WEIGHT -> 2.0;
+            case BUILD_MUSCLE -> 2.2;
+            case MAINTAIN -> 1.6;
+        };
+        double targetProtein = roundToScale(user.getWeightKg() * proteinMultiplier);
+        double targetFat = roundToScale(user.getWeightKg() * 0.8);
+        double carbCalories = adjustedCalories - ((targetProtein * 4) + (targetFat * 9));
+        double targetCarbs = roundToScale(Math.max(0.0, carbCalories / 4.0));
+
+        return new MacroTargets(
+                roundToScale(adjustedCalories),
+                targetProtein,
+                targetCarbs,
+                targetFat
+        );
     }
 
     private void validateUserForTargetCalories(User user) {
         if (user.getWeightKg() == null || user.getHeightCm() == null || user.getAge() == null) {
             throw new IllegalStateException("User profile is missing weight, height, or age required to calculate target calories.");
         }
+    }
+
+    private double resolveActivityMultiplier(ActivityLevel activityLevel) {
+        return switch (activityLevel) {
+            case SEDENTARY -> 1.2;
+            case LIGHT -> 1.375;
+            case MODERATE -> 1.55;
+            case ACTIVE -> 1.725;
+            case VERY_ACTIVE -> 1.9;
+        };
+    }
+
+    private double roundToScale(double value) {
+        return BigDecimal.valueOf(value)
+                .setScale(2, RoundingMode.HALF_UP)
+                .doubleValue();
+    }
+
+    private record MacroTargets(
+            double targetCalories,
+            double targetProtein,
+            double targetCarbs,
+            double targetFat
+    ) {
     }
 }

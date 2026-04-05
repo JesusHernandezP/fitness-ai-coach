@@ -1,5 +1,7 @@
 package com.fitness.fitnessaicoach.dto;
 
+import com.fitness.fitnessaicoach.domain.ActivityLevel;
+import com.fitness.fitnessaicoach.domain.UserSex;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -30,4 +32,8 @@ public class UserRequest {
 
     @Positive(message = "El peso debe ser positivo.")
     private Double weightKg;
+
+    private UserSex sex;
+
+    private ActivityLevel activityLevel;
 }

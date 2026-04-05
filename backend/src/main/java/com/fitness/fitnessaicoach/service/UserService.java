@@ -1,6 +1,8 @@
 package com.fitness.fitnessaicoach.service;
 
+import com.fitness.fitnessaicoach.domain.ActivityLevel;
 import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.domain.UserSex;
 import com.fitness.fitnessaicoach.dto.UserRequest;
 import com.fitness.fitnessaicoach.dto.UserResponse;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
@@ -35,6 +37,8 @@ public class UserService {
                 .age(request.getAge())
                 .heightCm(request.getHeightCm())
                 .weightKg(request.getWeightKg())
+                .sex(request.getSex() != null ? request.getSex() : UserSex.MALE)
+                .activityLevel(request.getActivityLevel() != null ? request.getActivityLevel() : ActivityLevel.MODERATE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -67,6 +71,8 @@ public class UserService {
                 .age(user.getAge())
                 .heightCm(user.getHeightCm())
                 .weightKg(user.getWeightKg())
+                .sex(user.getSex())
+                .activityLevel(user.getActivityLevel())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

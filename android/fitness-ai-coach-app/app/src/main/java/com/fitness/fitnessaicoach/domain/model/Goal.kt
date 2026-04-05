@@ -11,5 +11,8 @@ data class Goal(
     val userId: String? = null,
     val goalType: GoalType,
     val targetWeight: Double? = null,
-    val targetCalories: Double
+    val targetCalories: Double,
+    val targetProtein: Double? = null,
+    val targetCarbs: Double? = null,
+    val targetFat: Double? = null
 )

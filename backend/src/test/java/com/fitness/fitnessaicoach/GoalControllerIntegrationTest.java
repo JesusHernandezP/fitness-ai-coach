@@ -66,6 +66,9 @@ public class GoalControllerIntegrationTest {
                 .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"))
                 .andExpect(jsonPath("$.targetWeight").value(75.0))
                 .andExpect(jsonPath("$.targetCalories").value(2451.25))
+                .andExpect(jsonPath("$.targetProtein").value(160.0))
+                .andExpect(jsonPath("$.targetFat").value(64.0))
+                .andExpect(jsonPath("$.targetCarbs").value(308.81))
                 .andExpect(jsonPath("$.userId").value(user.userId()))
                 .andReturn()
                 .getResponse()
@@ -106,7 +109,10 @@ public class GoalControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.goalType").value("MAINTAIN"))
                 .andExpect(jsonPath("$.targetWeight").isEmpty())
-                .andExpect(jsonPath("$.targetCalories").value(2751.25));
+                .andExpect(jsonPath("$.targetCalories").value(2751.25))
+                .andExpect(jsonPath("$.targetProtein").value(128.0))
+                .andExpect(jsonPath("$.targetFat").value(64.0))
+                .andExpect(jsonPath("$.targetCarbs").value(415.81));
     }
 
     @Test

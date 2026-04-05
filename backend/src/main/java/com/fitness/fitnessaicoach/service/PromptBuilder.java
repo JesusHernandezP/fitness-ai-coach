@@ -9,6 +9,9 @@ public class PromptBuilder {
     public String buildPrompt(AIAnalysisResponse analysis) {
         String goalType = analysis.getGoalType() != null ? analysis.getGoalType().name() : "UNKNOWN";
         String targetCalories = analysis.getTargetCalories() != null ? String.valueOf(analysis.getTargetCalories()) : "unknown";
+        String targetProtein = analysis.getTargetProtein() != null ? String.valueOf(analysis.getTargetProtein()) : "unknown";
+        String targetCarbs = analysis.getTargetCarbs() != null ? String.valueOf(analysis.getTargetCarbs()) : "unknown";
+        String targetFat = analysis.getTargetFat() != null ? String.valueOf(analysis.getTargetFat()) : "unknown";
         String caloriesConsumed = analysis.getTotalCaloriesConsumed() != null ? analysis.getTotalCaloriesConsumed().toPlainString() : "0";
         String caloriesBurned = analysis.getTotalCaloriesBurned() != null ? analysis.getTotalCaloriesBurned().toPlainString() : "0";
         String calorieBalance = analysis.getCalorieBalance() != null ? analysis.getCalorieBalance().toPlainString() : "0";
@@ -32,6 +35,9 @@ public class PromptBuilder {
                 Structured input:
                 - goalType: %s
                 - targetCalories: %s
+                - targetProtein: %s
+                - targetCarbs: %s
+                - targetFat: %s
                 - caloriesConsumed: %s
                 - caloriesBurned: %s
                 - calorieBalance: %s
@@ -69,6 +75,9 @@ public class PromptBuilder {
                 """.formatted(
                 goalType,
                 targetCalories,
+                targetProtein,
+                targetCarbs,
+                targetFat,
                 caloriesConsumed,
                 caloriesBurned,
                 calorieBalance,

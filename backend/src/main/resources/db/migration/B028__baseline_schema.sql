@@ -1,14 +1,18 @@
 CREATE TABLE users (
     id UUID NOT NULL,
     age INTEGER,
+    activity_level VARCHAR(255),
     created_at TIMESTAMP(6) WITHOUT TIME ZONE,
     email VARCHAR(255) NOT NULL,
     height_cm DOUBLE PRECISION,
     name VARCHAR(255),
     password_hash VARCHAR(255),
+    sex VARCHAR(255),
     weight_kg DOUBLE PRECISION,
     CONSTRAINT users_pkey PRIMARY KEY (id),
-    CONSTRAINT uk6dotkott2kjsp8vw4d0m25fb7 UNIQUE (email)
+    CONSTRAINT uk6dotkott2kjsp8vw4d0m25fb7 UNIQUE (email),
+    CONSTRAINT users_activity_level_check CHECK (activity_level IN ('SEDENTARY', 'LIGHT', 'MODERATE', 'ACTIVE', 'VERY_ACTIVE')),
+    CONSTRAINT users_sex_check CHECK (sex IN ('MALE', 'FEMALE'))
 );
 
 CREATE TABLE exercises (
@@ -46,7 +50,10 @@ CREATE TABLE goals (
     id UUID NOT NULL,
     goal_type VARCHAR(255) NOT NULL,
     target_calories DOUBLE PRECISION NOT NULL,
-    target_weight DOUBLE PRECISION NOT NULL,
+    target_carbs DOUBLE PRECISION,
+    target_fat DOUBLE PRECISION,
+    target_protein DOUBLE PRECISION,
+    target_weight DOUBLE PRECISION,
     user_id UUID NOT NULL,
     created_at TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT goals_pkey PRIMARY KEY (id),

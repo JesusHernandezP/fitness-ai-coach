@@ -10,7 +10,10 @@ fun GoalsResponseDto.toDomain(): Goal = Goal(
     userId = userId,
     goalType = GoalType.valueOf(goalType),
     targetWeight = targetWeight,
-    targetCalories = targetCalories
+    targetCalories = targetCalories,
+    targetProtein = targetProtein,
+    targetCarbs = targetCarbs,
+    targetFat = targetFat
 )
 
 fun Goal.toRequestDto(): GoalsRequestDto = GoalsRequestDto(

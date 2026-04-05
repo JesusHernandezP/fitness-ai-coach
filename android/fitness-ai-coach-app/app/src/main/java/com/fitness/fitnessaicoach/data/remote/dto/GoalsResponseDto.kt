@@ -8,5 +8,8 @@ data class GoalsResponseDto(
     val goalType: String,
     val targetWeight: Double? = null,
     val targetCalories: Double,
+    val targetProtein: Double? = null,
+    val targetCarbs: Double? = null,
+    val targetFat: Double? = null,
     val userId: String? = null
 )
