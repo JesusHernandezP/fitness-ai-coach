@@ -5,8 +5,17 @@ import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
 import com.fitness.fitnessaicoach.domain.ChatMessage;
 import com.fitness.fitnessaicoach.domain.ChatRole;
 import com.fitness.fitnessaicoach.domain.ChatSession;
+import com.fitness.fitnessaicoach.domain.DailyLog;
+import com.fitness.fitnessaicoach.domain.Meal;
+import com.fitness.fitnessaicoach.domain.MealItem;
+import com.fitness.fitnessaicoach.domain.WorkoutSession;
+import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.ChatMessageRepository;
 import com.fitness.fitnessaicoach.repository.ChatSessionRepository;
+import com.fitness.fitnessaicoach.repository.DailyLogRepository;
+import com.fitness.fitnessaicoach.repository.MealItemRepository;
+import com.fitness.fitnessaicoach.repository.MealRepository;
+import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -51,6 +60,21 @@ class AIChatIntegrationTest {
     @Autowired
     private ChatMessageRepository chatMessageRepository;
 
+    @Autowired
+    private DailyLogRepository dailyLogRepository;
+
+    @Autowired
+    private MealRepository mealRepository;
+
+    @Autowired
+    private MealItemRepository mealItemRepository;
+
+    @Autowired
+    private WorkoutSessionRepository workoutSessionRepository;
+
+    @Autowired
+    private BodyMetricsRepository bodyMetricsRepository;
+
     @MockBean
     private AITextGenerationClient aiTextGenerationClient;
 
@@ -66,6 +90,7 @@ class AIChatIntegrationTest {
     void aiChatShouldStoreConversationAndReuseSession() throws Exception {
         when(aiTextGenerationClient.generateText(anyString()))
                 .thenReturn("You are close to your calorie target. Add a short walk and keep dinner lighter.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
 
         UserContext user = registerAndLogin("ai-chat");
         createGoal(user.token(), 75);
@@ -96,6 +121,7 @@ class AIChatIntegrationTest {
     void aiChatShouldKeepOnlyLastTwentyStoredMessagesPerSession() throws Exception {
         when(aiTextGenerationClient.generateText(anyString()))
                 .thenReturn("Keep your calories steady and hit your step target tomorrow.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
 
         UserContext user = registerAndLogin("trim-chat");
         createDailyLog(user.token(), user.userId());
@@ -117,6 +143,47 @@ class AIChatIntegrationTest {
         assertThat(messages.get(messages.size() - 1).getRole()).isEqualTo(ChatRole.AI);
     }
 
+    @Test
+    void aiChatShouldLogFoodWorkoutStepsWeightAndAnswerProgressQuestion() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("You are in a calorie deficit today. Keep protein high and stay near your step target.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("log-chat");
+        createGoal(user.token(), 75);
+        createFood(user.token(), "eggs", 78.0);
+        createFood(user.token(), "toast", 90.0);
+
+        sendMessageExpectingReply(user.token(), "2 eggs and toast", "Logged 2 food item(s) for snack. Quantity total: 3.");
+        sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Logged workout \"Pull\" with 4x8.");
+        sendMessageExpectingReply(user.token(), "9000 steps today", "Logged 9000 steps for today.");
+        sendMessageExpectingReply(user.token(), "weight 78.5 kg", "Logged your weight at 78.5 kg for today.");
+        sendMessageExpectingReply(user.token(), "am I in deficit?", "You are in a calorie deficit today. Keep protein high and stay near your step target.");
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
+                .orElseThrow();
+        assertThat(dailyLog.getSteps()).isEqualTo(9000);
+        assertThat(dailyLog.getCaloriesConsumed()).isGreaterThan(0.0);
+        assertThat(dailyLog.getCaloriesBurned()).isGreaterThan(0.0);
+
+        List<Meal> meals = mealRepository.findByDailyLogId(dailyLog.getId());
+        assertThat(meals).hasSize(1);
+
+        List<MealItem> mealItems = mealItemRepository.findAllByDailyLogId(dailyLog.getId());
+        assertThat(mealItems).hasSize(2);
+        assertThat(mealItems).extracting(item -> item.getFood().getName().toLowerCase()).contains("eggs", "toast");
+
+        List<WorkoutSession> workouts = workoutSessionRepository.findByDailyLogId(dailyLog.getId());
+        assertThat(workouts).hasSize(1);
+        assertThat(workouts.get(0).getSets()).isEqualTo(4);
+        assertThat(workouts.get(0).getReps()).isEqualTo(8);
+
+        assertThat(bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(UUID.fromString(user.userId())))
+                .get()
+                .extracting(metric -> metric.getWeight())
+                .isEqualTo(78.5);
+    }
+
     private void sendMessage(String token, String message) throws Exception {
         String body = """
                 {
@@ -130,6 +197,21 @@ class AIChatIntegrationTest {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reply").isString());
+    }
+
+    private void sendMessageExpectingReply(String token, String message, String expectedReply) throws Exception {
+        String body = """
+                {
+                  "message": "%s"
+                }
+                """.formatted(message);
+
+        mockMvc.perform(post("/api/ai-chat/message")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply").value(expectedReply));
     }
 
     private void createGoal(String token, double targetWeight) throws Exception {
@@ -174,6 +256,24 @@ class AIChatIntegrationTest {
                 """.formatted(userId);
 
         mockMvc.perform(post("/api/daily-logs")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
+    private void createFood(String token, String name, double calories) throws Exception {
+        String body = """
+                {
+                  "name": "%s",
+                  "calories": %s,
+                  "protein": 6.0,
+                  "carbs": 12.0,
+                  "fat": 4.0
+                }
+                """.formatted(name, calories);
+
+        mockMvc.perform(post("/api/foods")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))

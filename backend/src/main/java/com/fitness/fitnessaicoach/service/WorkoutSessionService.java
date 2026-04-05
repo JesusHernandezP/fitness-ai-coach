@@ -13,8 +13,10 @@ import com.fitness.fitnessaicoach.repository.ExerciseRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -25,6 +27,7 @@ public class WorkoutSessionService {
     private final DailyLogRepository dailyLogRepository;
     private final ExerciseRepository exerciseRepository;
 
+    @Transactional
     public WorkoutSessionResponse createWorkoutSession(WorkoutSessionRequest request) {
         DailyLog dailyLog = dailyLogRepository.findById(request.getDailyLogId())
                 .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
@@ -42,6 +45,7 @@ public class WorkoutSessionService {
                 .build();
 
         WorkoutSession saved = workoutSessionRepository.save(workoutSession);
+        syncDailyLogCaloriesBurned(dailyLog.getId());
 
         return toResponse(saved);
     }
@@ -60,11 +64,14 @@ public class WorkoutSessionService {
         return toResponse(workoutSession);
     }
 
+    @Transactional
     public void deleteWorkoutSession(UUID id) {
         WorkoutSession workoutSession = workoutSessionRepository.findById(id)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException("Workout session not found."));
 
+        UUID dailyLogId = workoutSession.getDailyLog().getId();
         workoutSessionRepository.delete(workoutSession);
+        syncDailyLogCaloriesBurned(dailyLogId);
     }
 
     private WorkoutSessionResponse toResponse(WorkoutSession workoutSession) {
@@ -77,5 +84,15 @@ public class WorkoutSessionService {
                 .duration(workoutSession.getDuration())
                 .caloriesBurned(workoutSession.getCaloriesBurned())
                 .build();
+    }
+
+    private void syncDailyLogCaloriesBurned(UUID dailyLogId) {
+        dailyLogRepository.findById(dailyLogId).ifPresent(dailyLog -> {
+            dailyLog.setCaloriesBurned(Objects.requireNonNullElse(
+                    workoutSessionRepository.sumCaloriesBurnedByDailyLogId(dailyLogId),
+                    0.0
+            ));
+            dailyLogRepository.save(dailyLog);
+        });
     }
 }

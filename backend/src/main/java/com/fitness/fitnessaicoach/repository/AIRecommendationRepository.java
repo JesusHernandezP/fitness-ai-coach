@@ -14,6 +14,8 @@ public interface AIRecommendationRepository extends JpaRepository<AIRecommendati
 
     Optional<AIRecommendation> findFirstByDailyLogIdOrderByCreatedAtDescIdDesc(UUID dailyLogId);
 
+    void deleteByDailyLogId(UUID dailyLogId);
+
     @Query("""
             select aiRecommendation
             from AIRecommendation aiRecommendation, DailyLog dailyLog
