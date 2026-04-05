@@ -16,9 +16,5 @@ public class BodyMetricsResponse {
 
     private Double weight;
 
-    private Double bodyFat;
-
-    private Double muscleMass;
-
     private LocalDate date;
 }

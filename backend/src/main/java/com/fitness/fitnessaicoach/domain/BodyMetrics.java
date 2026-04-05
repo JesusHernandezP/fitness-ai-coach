@@ -36,10 +36,6 @@ public class BodyMetrics {
     @Column(nullable = false)
     private Double weight;
 
-    private Double bodyFat;
-
-    private Double muscleMass;
-
     @Column(nullable = false)
     private LocalDate date;
 }

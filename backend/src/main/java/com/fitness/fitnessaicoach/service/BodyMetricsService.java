@@ -33,8 +33,6 @@ public class BodyMetricsService {
         BodyMetrics bodyMetrics = BodyMetrics.builder()
                 .user(user)
                 .weight(request.getWeight())
-                .bodyFat(request.getBodyFat())
-                .muscleMass(request.getMuscleMass())
                 .date(request.getDate())
                 .build();
 
@@ -78,8 +76,6 @@ public class BodyMetricsService {
                 .id(bodyMetrics.getId())
                 .userId(bodyMetrics.getUser() != null ? bodyMetrics.getUser().getId() : null)
                 .weight(bodyMetrics.getWeight())
-                .bodyFat(bodyMetrics.getBodyFat())
-                .muscleMass(bodyMetrics.getMuscleMass())
                 .date(bodyMetrics.getDate())
                 .build();
     }

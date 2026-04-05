@@ -1,7 +1,7 @@
 package com.fitness.fitnessaicoach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fitness.fitnessaicoach.ai.provider.groq.GroqClient;
+import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
 import com.fitness.fitnessaicoach.domain.AIRecommendation;
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
 import com.fitness.fitnessaicoach.repository.AIRecommendationRepository;
@@ -49,7 +49,7 @@ class AICoachingIntegrationTest {
     private AIAnalysisService aiAnalysisService;
 
     @MockBean
-    private GroqClient groqClient;
+    private AITextGenerationClient aiTextGenerationClient;
 
     @Test
     void swaggerSpecShouldExposeAICoachingEndpoint() throws Exception {
@@ -78,7 +78,8 @@ class AICoachingIntegrationTest {
                 .build();
 
         when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
-        when(groqClient.getCoachingResponse(anyString())).thenReturn("Great job, keep hydration steady.");
+        when(aiTextGenerationClient.generateText(anyString())).thenReturn("Great job, keep hydration steady.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("llama-test");
 
         mockMvc.perform(get("/api/ai-coach/daily-log/" + dailyLogId)
                         .header("Authorization", "Bearer " + token)

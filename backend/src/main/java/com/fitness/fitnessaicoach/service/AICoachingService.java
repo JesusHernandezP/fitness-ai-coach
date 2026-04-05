@@ -2,8 +2,7 @@ package com.fitness.fitnessaicoach.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fitness.fitnessaicoach.ai.provider.groq.GroqClient;
-import com.fitness.fitnessaicoach.config.GroqConfig;
+import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
 import com.fitness.fitnessaicoach.domain.AIRecommendation;
 import com.fitness.fitnessaicoach.dto.ai.AICoachingResponse;
 import com.fitness.fitnessaicoach.dto.ai.AICoachingAdviceResponse;
@@ -23,10 +22,9 @@ public class AICoachingService {
 
     private final AIAnalysisService aiAnalysisService;
     private final PromptBuilder promptBuilder;
-    private final GroqClient groqClient;
+    private final AITextGenerationClient aiTextGenerationClient;
     private final AIRecommendationRepository aiRecommendationRepository;
     private final ObjectMapper objectMapper;
-    private final GroqConfig groqConfig;
 
     @Transactional
     public AICoachingResponse getCoaching(UUID dailyLogId) {
@@ -49,7 +47,7 @@ public class AICoachingService {
         String advice;
 
         try {
-            advice = groqClient.getCoachingResponse(prompt);
+            advice = aiTextGenerationClient.generateText(prompt);
         } catch (Exception e) {
             log.error("AI error", e);
             advice = fallbackAdvice();
@@ -69,7 +67,7 @@ public class AICoachingService {
                 .dailyLogId(dailyLogId)
                 .analysisSnapshot(analysisSnapshot)
                 .advice(advice)
-                .model(groqConfig.getModel())
+                .model(aiTextGenerationClient.getModelName())
                 .build();
 
         aiRecommendationRepository.save(recommendation);

@@ -1,10 +1,12 @@
 package com.fitness.fitnessaicoach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -14,6 +16,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,6 +39,9 @@ public class MealItemControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private AITextGenerationClient aiTextGenerationClient;
+
     @Test
     void swaggerSpecShouldExposeMealItemEndpoints() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
@@ -48,6 +54,7 @@ public class MealItemControllerIntegrationTest {
 
     @Test
     void mealItemCrudEndpointsShouldWorkWithValidToken() throws Exception {
+        when(aiTextGenerationClient.getModelName()).thenReturn("llama-test");
         UserContext user = registerAndLogin();
         String token = user.token();
         UUID dailyLogId = createDailyLog(token, user.userId());
@@ -87,6 +94,57 @@ public class MealItemControllerIntegrationTest {
         mockMvc.perform(delete("/api/meal-items/" + mealItemId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void mealItemCreationShouldEstimateUnknownFoodAndUpdateDailyLogCalories() throws Exception {
+        when(aiTextGenerationClient.generateText(org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn("""
+                        {"name":"Greek Yogurt","calories":95.0,"protein":10.0,"carbs":4.0,"fat":5.0}
+                        """);
+        when(aiTextGenerationClient.getModelName()).thenReturn("llama-test");
+
+        UserContext user = registerAndLogin();
+        String token = user.token();
+        UUID dailyLogId = createDailyLog(token, user.userId());
+        UUID mealId = createMeal(token, dailyLogId);
+
+        String mealItemBody = """
+                {
+                  "mealId": "%s",
+                  "foodName": "Greek Yogurt",
+                  "quantity": 2
+                }
+                """.formatted(mealId);
+
+        MvcResult createMealItemResult = mockMvc.perform(post("/api/meal-items")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mealItemBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.mealId").value(mealId.toString()))
+                .andExpect(jsonPath("$.foodId").isNotEmpty())
+                .andExpect(jsonPath("$.quantity").value(2.0))
+                .andExpect(jsonPath("$.calculatedCalories").value(190.0))
+                .andReturn();
+
+        mockMvc.perform(get("/api/daily-logs/" + dailyLogId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.caloriesConsumed").value(190.0));
+
+        String mealItemId = objectMapper.readTree(createMealItemResult.getResponse().getContentAsString())
+                .get("id")
+                .asText();
+
+        mockMvc.perform(delete("/api/meal-items/" + mealItemId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/daily-logs/" + dailyLogId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.caloriesConsumed").value(0.0));
     }
 
     private UUID createDailyLog(String token, String userId) throws Exception {

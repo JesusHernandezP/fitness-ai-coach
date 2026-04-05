@@ -54,8 +54,6 @@ public class BodyMetricsControllerIntegrationTest {
         String bodyMetricsBody = """
                 {
                   "weight": 82.5,
-                  "bodyFat": 18.2,
-                  "muscleMass": 38.5,
                   "date": "2026-04-15"
                 }
                 """;
@@ -66,8 +64,6 @@ public class BodyMetricsControllerIntegrationTest {
                         .content(bodyMetricsBody))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.weight").value(82.5))
-                .andExpect(jsonPath("$.bodyFat").value(18.2))
-                .andExpect(jsonPath("$.muscleMass").value(38.5))
                 .andExpect(jsonPath("$.date").value("2026-04-15"))
                 .andExpect(jsonPath("$.userId").value(user.userId()))
                 .andReturn()
@@ -114,8 +110,6 @@ public class BodyMetricsControllerIntegrationTest {
         String bodyMetricsBody = """
                 {
                   "weight": 82.5,
-                  "bodyFat": 18.2,
-                  "muscleMass": 38.5,
                   "date": "2026-04-15"
                 }
                 """;

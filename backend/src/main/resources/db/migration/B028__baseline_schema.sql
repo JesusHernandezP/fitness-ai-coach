@@ -56,9 +56,7 @@ CREATE TABLE goals (
 
 CREATE TABLE body_metrics (
     id UUID NOT NULL,
-    body_fat DOUBLE PRECISION,
     date DATE NOT NULL,
-    muscle_mass DOUBLE PRECISION,
     weight DOUBLE PRECISION NOT NULL,
     user_id UUID NOT NULL,
     CONSTRAINT body_metrics_pkey PRIMARY KEY (id),

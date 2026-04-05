@@ -15,8 +15,4 @@ public class GoalRequest {
 
     @Positive(message = "Target weight must be greater than 0.")
     private Double targetWeight;
-
-    @NotNull
-    @Positive(message = "Target calories must be greater than 0.")
-    private Double targetCalories;
 }

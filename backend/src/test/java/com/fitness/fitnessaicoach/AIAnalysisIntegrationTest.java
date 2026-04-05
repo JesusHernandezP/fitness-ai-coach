@@ -60,8 +60,8 @@ public class AIAnalysisIntegrationTest {
         createWorkoutSession(token, dailyLogId, exerciseId, 180.0);
 
         createGoal(token, user.userId());
-        createBodyMetric(token, user.userId(), 81.5, 20.2, 36.4, "2026-04-14");
-        createBodyMetric(token, user.userId(), 80.7, 19.8, 36.9, "2026-04-15");
+        createBodyMetric(token, user.userId(), 81.5, "2026-04-14");
+        createBodyMetric(token, user.userId(), 80.7, "2026-04-15");
 
         mockMvc.perform(get("/api/ai-analysis/daily-log/" + dailyLogId)
                         .header("Authorization", "Bearer " + token))
@@ -77,10 +77,8 @@ public class AIAnalysisIntegrationTest {
                 .andExpect(jsonPath("$.calorieBalance").value(240.0))
                 .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"))
                 .andExpect(jsonPath("$.targetWeight").value(75.0))
-                .andExpect(jsonPath("$.targetCalories").value(2100.0))
+                .andExpect(jsonPath("$.targetCalories").value(2466.75))
                 .andExpect(jsonPath("$.latestWeight").value(80.7))
-                .andExpect(jsonPath("$.latestBodyFat").value(19.8))
-                .andExpect(jsonPath("$.latestMuscleMass").value(36.9))
                 .andExpect(jsonPath("$.meals.length()").value(2))
                 .andExpect(jsonPath("$.meals[0].mealType").value("BREAKFAST"))
                 .andExpect(jsonPath("$.meals[0].totalItems").value(1))
@@ -114,8 +112,6 @@ public class AIAnalysisIntegrationTest {
                 .andExpect(jsonPath("$.targetWeight").value(nullValue()))
                 .andExpect(jsonPath("$.targetCalories").value(nullValue()))
                 .andExpect(jsonPath("$.latestWeight").value(nullValue()))
-                .andExpect(jsonPath("$.latestBodyFat").value(nullValue()))
-                .andExpect(jsonPath("$.latestMuscleMass").value(nullValue()))
                 .andExpect(jsonPath("$.meals.length()").value(0))
                 .andExpect(jsonPath("$.workouts.length()").value(0));
     }
@@ -260,8 +256,7 @@ public class AIAnalysisIntegrationTest {
                 {
                   "userId": "%s",
                   "goalType": "LOSE_WEIGHT",
-                  "targetWeight": 75,
-                  "targetCalories": 2100
+                  "targetWeight": 75
                 }
                 """.formatted(userId);
 
@@ -273,16 +268,14 @@ public class AIAnalysisIntegrationTest {
                 .andReturn();
     }
 
-    private void createBodyMetric(String token, String userId, Double weight, Double bodyFat, Double muscleMass, String date) throws Exception {
+    private void createBodyMetric(String token, String userId, Double weight, String date) throws Exception {
         String bodyMetricBody = """
                 {
                   "userId": "%s",
                   "weight": %s,
-                  "bodyFat": %s,
-                  "muscleMass": %s,
                   "date": "%s"
                 }
-                """.formatted(userId, String.valueOf(weight), String.valueOf(bodyFat), String.valueOf(muscleMass), date);
+                """.formatted(userId, String.valueOf(weight), date);
 
         mockMvc.perform(post("/api/body-metrics")
                         .header("Authorization", "Bearer " + token)

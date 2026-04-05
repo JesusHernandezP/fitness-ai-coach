@@ -54,8 +54,7 @@ public class GoalControllerIntegrationTest {
         String goalBody = """
                 {
                   "goalType": "LOSE_WEIGHT",
-                  "targetWeight": 75,
-                  "targetCalories": 2000
+                  "targetWeight": 75
                 }
                 """;
 
@@ -66,7 +65,7 @@ public class GoalControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"))
                 .andExpect(jsonPath("$.targetWeight").value(75.0))
-                .andExpect(jsonPath("$.targetCalories").value(2000))
+                .andExpect(jsonPath("$.targetCalories").value(2451.25))
                 .andExpect(jsonPath("$.userId").value(user.userId()))
                 .andReturn()
                 .getResponse()
@@ -96,8 +95,7 @@ public class GoalControllerIntegrationTest {
 
         String goalBody = """
                 {
-                  "goalType": "MAINTAIN",
-                  "targetCalories": 2200
+                  "goalType": "MAINTAIN"
                 }
                 """;
 
@@ -108,7 +106,7 @@ public class GoalControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.goalType").value("MAINTAIN"))
                 .andExpect(jsonPath("$.targetWeight").isEmpty())
-                .andExpect(jsonPath("$.targetCalories").value(2200));
+                .andExpect(jsonPath("$.targetCalories").value(2751.25));
     }
 
     private UserContext registerAndLogin() throws Exception {

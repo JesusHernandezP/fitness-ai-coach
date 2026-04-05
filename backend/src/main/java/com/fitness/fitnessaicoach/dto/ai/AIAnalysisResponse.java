@@ -41,10 +41,6 @@ public class AIAnalysisResponse {
 
     private Double latestWeight;
 
-    private Double latestBodyFat;
-
-    private Double latestMuscleMass;
-
     private List<AIMealSummaryResponse> meals;
 
     private List<AIWorkoutSummaryResponse> workouts;

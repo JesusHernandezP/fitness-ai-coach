@@ -55,4 +55,23 @@ public class BodyMetricsMigrationValidationTest {
         assertTrue(migrationResource.exists());
         assertTrue(migrationResource.contentLength() > 0);
     }
+
+    @Test
+    void bodyMetricsTableShouldOnlyStoreWeightHistoryColumns() {
+        Integer bodyFatColumns = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = 'BODY_METRICS'
+                  AND COLUMN_NAME = 'BODY_FAT'
+                """, Integer.class);
+        Integer muscleMassColumns = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_NAME = 'BODY_METRICS'
+                  AND COLUMN_NAME = 'MUSCLE_MASS'
+                """, Integer.class);
+
+        assertEquals(0, bodyFatColumns);
+        assertEquals(0, muscleMassColumns);
+    }
 }
