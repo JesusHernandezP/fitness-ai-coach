@@ -21,10 +21,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -72,6 +74,7 @@ class AICoachingServiceTest {
                 .build();
 
         String builtPrompt = "prompt-text";
+        when(aiRecommendationRepository.findFirstByDailyLogIdOrderByCreatedAtDescIdDesc(dailyLogId)).thenReturn(Optional.empty());
         when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
         when(promptBuilder.buildPrompt(analysis)).thenReturn(builtPrompt);
         when(groqClient.getCoachingResponse("prompt-text")).thenReturn("Advice from Groq");
@@ -86,7 +89,7 @@ class AICoachingServiceTest {
         verify(aiRecommendationRepository).save(any(AIRecommendation.class));
 
         assertThat(idCaptor.getValue()).isEqualTo(dailyLogId);
-        assertThat(response.getAnalysis().getDailyLogId()).isEqualTo(dailyLogId);
+        assertThat(response.getAnalysis()).contains(dailyLogId.toString());
         assertThat(response.getAdvice()).isEqualTo("Advice from Groq");
     }
 
@@ -100,6 +103,7 @@ class AICoachingServiceTest {
                 .build();
 
         String builtPrompt = "prompt-text";
+        when(aiRecommendationRepository.findFirstByDailyLogIdOrderByCreatedAtDescIdDesc(dailyLogId)).thenReturn(Optional.empty());
         when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
         when(promptBuilder.buildPrompt(analysis)).thenReturn(builtPrompt);
         when(groqClient.getCoachingResponse("prompt-text")).thenThrow(new IllegalStateException("groq timeout"));
@@ -110,5 +114,28 @@ class AICoachingServiceTest {
         assertThat(response.getAdvice())
                 .isEqualTo("AI coaching is temporarily unavailable. Please review your daily log summary and try again later.");
         verify(aiRecommendationRepository).save(any(AIRecommendation.class));
+    }
+
+    @Test
+    void getCoachingReturnsStoredRecommendationWhenAvailable() {
+        UUID dailyLogId = UUID.randomUUID();
+        AIRecommendation storedRecommendation = AIRecommendation.builder()
+                .dailyLogId(dailyLogId)
+                .analysisSnapshot("{\"dailyLogId\":\"%s\"}".formatted(dailyLogId))
+                .advice("Stored advice")
+                .model("llama-test")
+                .build();
+
+        when(aiRecommendationRepository.findFirstByDailyLogIdOrderByCreatedAtDescIdDesc(dailyLogId))
+                .thenReturn(Optional.of(storedRecommendation));
+
+        AICoachingResponse response = aiCoachingService.getCoaching(dailyLogId);
+
+        assertThat(response.getAnalysis()).isEqualTo(storedRecommendation.getAnalysisSnapshot());
+        assertThat(response.getAdvice()).isEqualTo("Stored advice");
+        verify(aiAnalysisService, never()).getDailyLogAiAnalysis(any());
+        verify(promptBuilder, never()).buildPrompt(any());
+        verify(groqClient, never()).getCoachingResponse(any());
+        verify(aiRecommendationRepository, never()).save(any());
     }
 }

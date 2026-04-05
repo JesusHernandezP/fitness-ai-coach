@@ -2,22 +2,22 @@ package com.fitness.fitnessaicoach.dto.ai;
 
 public class AICoachingResponse {
 
-    private AIAnalysisResponse analysis;
+    private String analysis;
     private String advice;
 
     public AICoachingResponse() {
     }
 
-    public AICoachingResponse(AIAnalysisResponse analysis, String advice) {
+    public AICoachingResponse(String analysis, String advice) {
         this.analysis = analysis;
         this.advice = advice;
     }
 
-    public AIAnalysisResponse getAnalysis() {
+    public String getAnalysis() {
         return analysis;
     }
 
-    public void setAnalysis(AIAnalysisResponse analysis) {
+    public void setAnalysis(String analysis) {
         this.analysis = analysis;
     }
 

@@ -84,8 +84,8 @@ class AICoachingIntegrationTest {
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.analysis.dailyLogId").value(dailyLogId.toString()))
-                .andExpect(jsonPath("$.analysis.totalCaloriesConsumed").value(1500.0))
+                .andExpect(jsonPath("$.analysis").isString())
+                .andExpect(jsonPath("$.analysis").value(org.hamcrest.Matchers.containsString(dailyLogId.toString())))
                 .andExpect(jsonPath("$.advice").value("Great job, keep hydration steady."));
 
         List<AIRecommendation> savedRecommendations = aiRecommendationRepository.findByDailyLogId(dailyLogId);
@@ -93,6 +93,29 @@ class AICoachingIntegrationTest {
         assertThat(savedRecommendations.get(0).getAdvice()).isEqualTo("Great job, keep hydration steady.");
         assertThat(savedRecommendations.get(0).getAnalysisSnapshot()).contains(dailyLogId.toString());
         assertThat(savedRecommendations.get(0).getModel()).isNotBlank();
+    }
+
+    @Test
+    void aiCoachingShouldReturnStoredRecommendationWhenAvailable() throws Exception {
+        String token = registerAndLogin().token();
+        UUID dailyLogId = UUID.randomUUID();
+
+        aiRecommendationRepository.save(AIRecommendation.builder()
+                .dailyLogId(dailyLogId)
+                .analysisSnapshot("{\"dailyLogId\":\"%s\",\"summary\":\"stored\"}".formatted(dailyLogId))
+                .advice("Stored coaching advice")
+                .model("llama-test")
+                .build());
+
+        mockMvc.perform(get("/api/ai-coach/daily-log/" + dailyLogId)
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.analysis").value("{\"dailyLogId\":\"%s\",\"summary\":\"stored\"}".formatted(dailyLogId)))
+                .andExpect(jsonPath("$.advice").value("Stored coaching advice"));
+
+        List<AIRecommendation> savedRecommendations = aiRecommendationRepository.findByDailyLogId(dailyLogId);
+        assertThat(savedRecommendations).hasSize(1);
     }
 
     private UserContext registerAndLogin() throws Exception {
