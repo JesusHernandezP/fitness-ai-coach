@@ -139,6 +139,27 @@ fun BodyMetricsScreen(
             )
         }
 
+        item {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Weight progress",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Current weight: ${uiState.currentWeight?.toString() ?: "-"}"
+                )
+                Text(
+                    text = "Previous weight: ${uiState.previousWeight?.toString() ?: "-"}"
+                )
+                Text(
+                    text = "Difference: ${uiState.weightDifference?.toString() ?: "-"}"
+                )
+            }
+        }
+
         if (uiState.bodyMetrics.isEmpty() && !uiState.isLoading) {
             item {
                 Text(

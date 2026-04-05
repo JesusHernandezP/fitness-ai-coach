@@ -23,7 +23,10 @@ data class BodyMetricsUiState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null,
-    val bodyMetrics: List<BodyMetrics> = emptyList()
+    val bodyMetrics: List<BodyMetrics> = emptyList(),
+    val currentWeight: Double? = null,
+    val previousWeight: Double? = null,
+    val weightDifference: Double? = null
 )
 
 @HiltViewModel
@@ -57,10 +60,17 @@ class BodyMetricsViewModel @Inject constructor(
             when (val result = getBodyMetricsUseCase()) {
                 AppResult.Loading -> Unit
                 is AppResult.Success -> {
+                    val sortedMetrics = result.data.sortedByDescending { it.date }
+                    val latestMetric = sortedMetrics.getOrNull(0)
+                    val previousMetric = sortedMetrics.getOrNull(1)
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            bodyMetrics = result.data,
+                            bodyMetrics = sortedMetrics,
+                            currentWeight = latestMetric?.weight,
+                            previousWeight = previousMetric?.weight,
+                            weightDifference = latestMetric?.weight?.minus(previousMetric?.weight ?: 0.0)
+                                ?.takeIf { previousMetric != null },
                             errorMessage = null
                         )
                     }

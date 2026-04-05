@@ -35,7 +35,15 @@ class BodyMetricsViewModelTest {
 
     @Test
     fun `loads body metrics history on init`() = runTest {
-        val expectedMetrics = listOf(
+        val backendMetrics = listOf(
+            BodyMetrics(
+                id = "metric-2",
+                userId = "user-1",
+                weight = 81.0,
+                bodyFat = 18.8,
+                muscleMass = 38.0,
+                date = "2026-04-14"
+            ),
             BodyMetrics(
                 id = "metric-1",
                 userId = "user-1",
@@ -45,6 +53,7 @@ class BodyMetricsViewModelTest {
                 date = "2026-04-15"
             )
         )
+        val expectedMetrics = backendMetrics.sortedByDescending { it.date }
         val repository = FakeBodyMetricsRepository(
             getResult = AppResult.Success(expectedMetrics),
             createResult = AppResult.Success(expectedMetrics.first())
@@ -58,7 +67,39 @@ class BodyMetricsViewModelTest {
         advanceUntilIdle()
 
         assertEquals(expectedMetrics, viewModel.uiState.value.bodyMetrics)
+        assertEquals(82.5, viewModel.uiState.value.currentWeight)
+        assertEquals(81.0, viewModel.uiState.value.previousWeight)
+        assertEquals(1.5, viewModel.uiState.value.weightDifference)
         assertTrue(viewModel.uiState.value.errorMessage == null)
+    }
+
+    @Test
+    fun `keeps previous weight empty when only one body metric exists`() = runTest {
+        val bodyMetrics = listOf(
+            BodyMetrics(
+                id = "metric-1",
+                userId = "user-1",
+                weight = 82.5,
+                bodyFat = 18.2,
+                muscleMass = 38.5,
+                date = "2026-04-15"
+            )
+        )
+        val repository = FakeBodyMetricsRepository(
+            getResult = AppResult.Success(bodyMetrics),
+            createResult = AppResult.Success(bodyMetrics.first())
+        )
+
+        val viewModel = BodyMetricsViewModel(
+            createBodyMetricsUseCase = CreateBodyMetricsUseCase(repository),
+            getBodyMetricsUseCase = GetBodyMetricsUseCase(repository)
+        )
+
+        advanceUntilIdle()
+
+        assertEquals(82.5, viewModel.uiState.value.currentWeight)
+        assertEquals(null, viewModel.uiState.value.previousWeight)
+        assertEquals(null, viewModel.uiState.value.weightDifference)
     }
 
     private class FakeBodyMetricsRepository(
