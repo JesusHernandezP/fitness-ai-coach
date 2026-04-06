@@ -1,5 +1,7 @@
 package com.fitness.fitnessaicoach.controller;
 
+import com.fitness.fitnessaicoach.dto.MetabolicProfileResponse;
+import com.fitness.fitnessaicoach.service.MetabolicProfileService;
 import com.fitness.fitnessaicoach.dto.UserProfileUpdateRequest;
 import com.fitness.fitnessaicoach.dto.UserRequest;
 import com.fitness.fitnessaicoach.dto.UserResponse;
@@ -29,6 +31,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final MetabolicProfileService metabolicProfileService;
 
     @PostMapping
     @Operation(summary = "Register a new user", security = {})
@@ -37,11 +40,19 @@ public class UserController {
         return ResponseEntity.ok(created);
     }
 
-    @GetMapping("/{id:[0-9a-fA-F\\-]{36}}")
+    @GetMapping("/{id}")
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
-        UserResponse user = userService.getById(id);
+    public ResponseEntity<?> getUserById(
+            @PathVariable String id,
+            @AuthenticationPrincipal String email
+    ) {
+        if ("profile".equals(id)) {
+            MetabolicProfileResponse profile = metabolicProfileService.getProfile(email);
+            return ResponseEntity.ok(profile);
+        }
+
+        UserResponse user = userService.getById(UUID.fromString(id));
         return ResponseEntity.ok(user);
     }
 
@@ -52,15 +63,28 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PutMapping("/{id:[0-9a-fA-F\\-]{36}}")
+    @PutMapping("/{id}")
     @Operation(summary = "Update current user metabolic profile")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<UserResponse> updateUserProfile(
-            @PathVariable UUID id,
+    public ResponseEntity<?> updateUserProfile(
+            @PathVariable String id,
             @Valid @RequestBody UserProfileUpdateRequest request,
             @AuthenticationPrincipal String email
     ) {
-        UserResponse updated = userService.updateProfile(id, email, request);
+        if ("profile".equals(id)) {
+            MetabolicProfileResponse profile = metabolicProfileService.updateProfile(
+                    email,
+                    com.fitness.fitnessaicoach.dto.MetabolicProfileRequest.builder()
+                            .age(request.getAge())
+                            .heightCm(request.getHeightCm())
+                            .sex(request.getSex())
+                            .activityLevel(request.getActivityLevel())
+                            .build()
+            );
+            return ResponseEntity.ok(profile);
+        }
+
+        UserResponse updated = userService.updateProfile(UUID.fromString(id), email, request);
         return ResponseEntity.ok(updated);
     }
 }
