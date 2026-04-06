@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.di
 
 import com.fitness.fitnessaicoach.BuildConfig
 import com.fitness.fitnessaicoach.data.remote.api.ApiClient
+import com.fitness.fitnessaicoach.data.remote.api.AIChatApiService
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
 import com.fitness.fitnessaicoach.data.remote.api.AuthTokenInterceptor
 import com.fitness.fitnessaicoach.data.remote.api.BodyMetricsApi
@@ -90,4 +91,8 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideCoachApi(retrofit: Retrofit): CoachApi = retrofit.create(CoachApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideAIChatApiService(retrofit: Retrofit): AIChatApiService = retrofit.create(AIChatApiService::class.java)
 }

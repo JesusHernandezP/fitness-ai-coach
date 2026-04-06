@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fitness.fitnessaicoach.presentation.auth.LoginScreen
 import com.fitness.fitnessaicoach.presentation.bodymetrics.BodyMetricsScreen
+import com.fitness.fitnessaicoach.presentation.chat.AIChatScreen
 import com.fitness.fitnessaicoach.presentation.coach.CoachScreen
 import com.fitness.fitnessaicoach.presentation.dailylog.DailyLogScreen
 import com.fitness.fitnessaicoach.presentation.goals.GoalsScreen
@@ -43,6 +44,9 @@ fun AppNavigation() {
                 },
                 onOpenGoals = {
                     navController.navigate(AppDestination.Goals.route)
+                },
+                onOpenAIChat = {
+                    navController.navigate(AppDestination.AIChat.route)
                 }
             )
         }
@@ -66,6 +70,9 @@ fun AppNavigation() {
         }
         composable(AppDestination.Coach.route) {
             CoachScreen()
+        }
+        composable(AppDestination.AIChat.route) {
+            AIChatScreen()
         }
     }
 }

@@ -5,8 +5,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.fitness.fitnessaicoach.core.constants.NetworkConstants
+import com.fitness.fitnessaicoach.data.chat.AIChatRepository
+import com.fitness.fitnessaicoach.data.chat.AIChatRepositoryImpl
 import com.fitness.fitnessaicoach.data.local.datastore.DataStoreTokenStorage
 import com.fitness.fitnessaicoach.data.local.datastore.TokenStorage
+import com.fitness.fitnessaicoach.data.remote.api.AIChatApiService
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
 import com.fitness.fitnessaicoach.data.remote.api.BodyMetricsApi
 import com.fitness.fitnessaicoach.data.remote.api.CoachApi
@@ -117,6 +120,16 @@ object RepositoryModule {
     ): AICoachRepository {
         return AICoachRepositoryImpl(
             coachApi = coachApi
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAIChatRepository(
+        aiChatApiService: AIChatApiService
+    ): AIChatRepository {
+        return AIChatRepositoryImpl(
+            aiChatApiService = aiChatApiService
         )
     }
 }

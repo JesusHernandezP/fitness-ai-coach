@@ -34,6 +34,7 @@ fun HomeScreen(
     onOpenProfile: () -> Unit,
     onOpenBodyMetrics: () -> Unit,
     onOpenGoals: () -> Unit,
+    onOpenAIChat: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val dailyLogState by viewModel.dailyLogState.collectAsStateWithLifecycle()
@@ -76,6 +77,15 @@ fun HomeScreen(
                     .heightIn(min = 48.dp)
             ) {
                 Text("Goals")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = onOpenAIChat,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+            ) {
+                Text("Chat with AI Coach")
             }
             Spacer(modifier = Modifier.height(16.dp))
 
