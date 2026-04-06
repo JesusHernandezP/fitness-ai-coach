@@ -1,10 +1,6 @@
 package com.fitness.fitnessaicoach.service;
 
-import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
 import com.fitness.fitnessaicoach.domain.BodyMetrics;
-import com.fitness.fitnessaicoach.domain.ChatMessage;
-import com.fitness.fitnessaicoach.domain.ChatRole;
-import com.fitness.fitnessaicoach.domain.ChatSession;
 import com.fitness.fitnessaicoach.domain.DailyLog;
 import com.fitness.fitnessaicoach.domain.Exercise;
 import com.fitness.fitnessaicoach.domain.Goal;
@@ -16,51 +12,41 @@ import com.fitness.fitnessaicoach.dto.ExerciseRequest;
 import com.fitness.fitnessaicoach.dto.MealItemRequest;
 import com.fitness.fitnessaicoach.dto.MealRequest;
 import com.fitness.fitnessaicoach.dto.WorkoutSessionRequest;
-import com.fitness.fitnessaicoach.dto.ai.AIChatMessageResponse;
 import com.fitness.fitnessaicoach.dto.ai.AICoachingResponse;
-import com.fitness.fitnessaicoach.exception.UserNotFoundException;
-import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.AIRecommendationRepository;
-import com.fitness.fitnessaicoach.repository.ChatMessageRepository;
-import com.fitness.fitnessaicoach.repository.ChatSessionRepository;
+import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
 import com.fitness.fitnessaicoach.repository.ExerciseRepository;
 import com.fitness.fitnessaicoach.repository.GoalRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
 @RequiredArgsConstructor
-public class ChatService {
+public class AIIntentService {
 
-    private static final int MAX_STORED_MESSAGES = 20;
     private static final Pattern STEPS_PATTERN = Pattern.compile("(\\d{3,6})\\s*steps?");
     private static final Pattern WEIGHT_PATTERN = Pattern.compile("(?:weight\\s*)?(\\d{2,3}(?:[.,]\\d{1,2})?)\\s*kg");
     private static final Pattern SETS_REPS_PATTERN = Pattern.compile("(\\d{1,2})\\s*x\\s*(\\d{1,3})");
     private static final Pattern EXERCISE_COUNT_PATTERN = Pattern.compile("(\\d{1,2})\\s+exercises?");
     private static final Pattern FOOD_ITEM_SPLIT_PATTERN = Pattern.compile("\\s*(?:,| and )\\s*");
+    private static final Pattern FOOD_ENTRY_PATTERN = Pattern.compile("^(\\d+(?:[.,]\\d+)?)\\s+(.+)$");
 
-    private final ChatSessionRepository chatSessionRepository;
-    private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
     private final DailyLogRepository dailyLogRepository;
     private final BodyMetricsRepository bodyMetricsRepository;
     private final AIRecommendationRepository aiRecommendationRepository;
     private final ExerciseRepository exerciseRepository;
-    private final AITextGenerationClient aiTextGenerationClient;
     private final DailyLogService dailyLogService;
     private final MealService mealService;
     private final MealItemService mealItemService;
@@ -69,73 +55,53 @@ public class ChatService {
     private final ExerciseService exerciseService;
     private final AICoachingService aiCoachingService;
 
-    @Transactional
-    public AIChatMessageResponse sendMessage(String email, String messageContent) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found."));
-
-        ChatSession session = getOrCreateActiveSession(user);
-        saveMessage(session, ChatRole.USER, messageContent);
-
-        String reply = processMessage(user, session, messageContent).trim();
-
-        saveMessage(session, ChatRole.AI, reply);
-        session.setLastActivityAt(LocalDateTime.now());
-        chatSessionRepository.save(session);
-        trimStoredMessages(session.getId());
-
-        return new AIChatMessageResponse(reply);
-    }
-
-    private String processMessage(User user, ChatSession session, String messageContent) {
+    public Optional<String> handleIntent(User user, String messageContent) {
         String normalized = normalize(messageContent);
 
         if (isProgressQuestion(normalized)) {
-            return generateCoachingReply(user);
+            return Optional.of(generateCoachingReply(user));
         }
 
         ParsedSteps parsedSteps = parseSteps(normalized);
         if (parsedSteps != null) {
-            return logSteps(user, parsedSteps.steps());
+            return Optional.of(logSteps(user, parsedSteps.steps()));
         }
 
         ParsedWeight parsedWeight = parseWeight(normalized);
         if (parsedWeight != null) {
-            return logWeight(user, parsedWeight.weightKg());
+            return Optional.of(logWeight(user, parsedWeight.weightKg()));
         }
 
         ParsedWorkout parsedWorkout = parseWorkout(normalized);
         if (parsedWorkout != null) {
-            return logWorkout(user, parsedWorkout);
+            return Optional.of(logWorkout(user, parsedWorkout));
         }
 
         ParsedFood parsedFood = parseFood(normalized);
         if (parsedFood != null) {
-            return logFood(user, parsedFood);
+            return Optional.of(logFood(user, parsedFood));
         }
 
-        String prompt = buildPrompt(user.getId(), session, messageContent);
-        return aiTextGenerationClient.generateText(prompt).trim();
+        return Optional.empty();
     }
 
-    private ChatSession getOrCreateActiveSession(User user) {
-        return chatSessionRepository.findTopByUserIdOrderByLastActivityAtDescIdDesc(user.getId())
-                .map(existing -> {
-                    existing.setLastActivityAt(LocalDateTime.now());
-                    return chatSessionRepository.save(existing);
-                })
-                .orElseGet(() -> chatSessionRepository.save(ChatSession.builder()
-                        .user(user)
-                        .lastActivityAt(LocalDateTime.now())
-                        .build()));
-    }
+    public AIChatPromptContext buildPromptContext(UUID userId) {
+        Goal latestGoal = goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(userId).orElse(null);
+        DailyLog latestDailyLog = dailyLogRepository.findTopByUserIdOrderByLogDateDescIdDesc(userId).orElse(null);
+        BodyMetrics latestBodyMetrics = bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(userId).orElse(null);
 
-    private void saveMessage(ChatSession session, ChatRole role, String content) {
-        chatMessageRepository.save(ChatMessage.builder()
-                .session(session)
-                .role(role)
-                .content(content)
-                .build());
+        return new AIChatPromptContext(
+                latestGoal != null && latestGoal.getGoalType() != null ? latestGoal.getGoalType().name() : "UNKNOWN",
+                latestGoal != null && latestGoal.getTargetCalories() != null ? latestGoal.getTargetCalories() : "unknown",
+                latestGoal != null && latestGoal.getTargetProtein() != null ? latestGoal.getTargetProtein() : "unknown",
+                latestGoal != null && latestGoal.getTargetCarbs() != null ? latestGoal.getTargetCarbs() : "unknown",
+                latestGoal != null && latestGoal.getTargetFat() != null ? latestGoal.getTargetFat() : "unknown",
+                latestDailyLog != null && latestDailyLog.getCaloriesConsumed() != null ? latestDailyLog.getCaloriesConsumed() : 0.0,
+                latestDailyLog != null && latestDailyLog.getCaloriesBurned() != null ? latestDailyLog.getCaloriesBurned() : 0.0,
+                calculateBalance(latestDailyLog),
+                latestDailyLog != null && latestDailyLog.getSteps() != null ? latestDailyLog.getSteps() : 0,
+                latestBodyMetrics != null && latestBodyMetrics.getWeight() != null ? latestBodyMetrics.getWeight() : "unknown"
+        );
     }
 
     private String generateCoachingReply(User user) {
@@ -217,7 +183,8 @@ public class ChatService {
         }
 
         invalidateCoaching(todayLog.getId());
-        return "Logged " + parsedFood.items().size() + " food item(s) for " + parsedFood.mealType().name().toLowerCase(Locale.ROOT)
+        return "Logged " + parsedFood.items().size() + " food item(s) for "
+                + parsedFood.mealType().name().toLowerCase(Locale.ROOT)
                 + ". Quantity total: " + trimNumber(totalQuantity) + ".";
     }
 
@@ -287,12 +254,16 @@ public class ChatService {
     }
 
     private ParsedFood parseFood(String normalized) {
+        if (normalized.isBlank()) {
+            return null;
+        }
         if (normalized.contains("?") || normalized.startsWith("am i") || normalized.contains("deficit")) {
             return null;
         }
         if (normalized.contains("steps") || normalized.contains("workout") || normalized.contains("kg") || normalized.startsWith("weight")) {
             return null;
         }
+
         boolean looksLikeFoodLog = normalized.contains(" and ")
                 || normalized.contains(",")
                 || normalized.contains("breakfast")
@@ -304,12 +275,7 @@ public class ChatService {
             return null;
         }
 
-        String[] parts = FOOD_ITEM_SPLIT_PATTERN.split(normalized);
-        if (parts.length == 0) {
-            return null;
-        }
-
-        List<FoodEntry> items = java.util.Arrays.stream(parts)
+        List<FoodEntry> items = java.util.Arrays.stream(FOOD_ITEM_SPLIT_PATTERN.split(normalized))
                 .map(String::trim)
                 .filter(part -> !part.isBlank())
                 .map(this::parseFoodEntry)
@@ -323,7 +289,7 @@ public class ChatService {
     }
 
     private FoodEntry parseFoodEntry(String value) {
-        Matcher matcher = Pattern.compile("^(\\d+(?:[.,]\\d+)?)\\s+(.+)$").matcher(value);
+        Matcher matcher = FOOD_ENTRY_PATTERN.matcher(value);
         if (matcher.find()) {
             return new FoodEntry(normalizeFoodName(matcher.group(2)), Double.parseDouble(matcher.group(1).replace(',', '.')));
         }
@@ -357,57 +323,6 @@ public class ChatService {
                 || normalized.contains("calorie balance");
     }
 
-    private String buildPrompt(UUID userId, ChatSession session, String latestUserMessage) {
-        Goal latestGoal = goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(userId).orElse(null);
-        DailyLog latestDailyLog = dailyLogRepository.findTopByUserIdOrderByLogDateDescIdDesc(userId).orElse(null);
-        BodyMetrics latestBodyMetrics = bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(userId).orElse(null);
-
-        List<ChatMessage> recentMessages = chatMessageRepository.findTop20BySessionIdOrderByCreatedAtDescIdDesc(session.getId());
-        Collections.reverse(recentMessages);
-
-        return """
-                You are a continuous AI fitness coach in an ongoing conversation.
-
-                Current user context:
-                - goalType: %s
-                - targetCalories: %s
-                - targetProtein: %s
-                - targetCarbs: %s
-                - targetFat: %s
-                - caloriesConsumed: %s
-                - caloriesBurned: %s
-                - calorieBalance: %s
-                - steps: %s
-                - latestWeight: %s
-
-                Conversation rules:
-                - Be supportive, clear, and actionable.
-                - Keep replies short: at most 4 sentences.
-                - Avoid repetition.
-                - Use the recent conversation and the latest fitness context.
-                - If data is missing, say so briefly and still help.
-
-                Recent conversation:
-                %s
-
-                Latest user message:
-                %s
-                """.formatted(
-                latestGoal != null && latestGoal.getGoalType() != null ? latestGoal.getGoalType().name() : "UNKNOWN",
-                latestGoal != null && latestGoal.getTargetCalories() != null ? latestGoal.getTargetCalories() : "unknown",
-                latestGoal != null && latestGoal.getTargetProtein() != null ? latestGoal.getTargetProtein() : "unknown",
-                latestGoal != null && latestGoal.getTargetCarbs() != null ? latestGoal.getTargetCarbs() : "unknown",
-                latestGoal != null && latestGoal.getTargetFat() != null ? latestGoal.getTargetFat() : "unknown",
-                latestDailyLog != null && latestDailyLog.getCaloriesConsumed() != null ? latestDailyLog.getCaloriesConsumed() : 0.0,
-                latestDailyLog != null && latestDailyLog.getCaloriesBurned() != null ? latestDailyLog.getCaloriesBurned() : 0.0,
-                calculateBalance(latestDailyLog),
-                latestDailyLog != null && latestDailyLog.getSteps() != null ? latestDailyLog.getSteps() : 0,
-                latestBodyMetrics != null && latestBodyMetrics.getWeight() != null ? latestBodyMetrics.getWeight() : "unknown",
-                formatConversation(recentMessages),
-                latestUserMessage
-        );
-    }
-
     private double calculateBalance(DailyLog latestDailyLog) {
         if (latestDailyLog == null) {
             return 0.0;
@@ -416,28 +331,6 @@ public class ChatService {
         double consumed = latestDailyLog.getCaloriesConsumed() != null ? latestDailyLog.getCaloriesConsumed() : 0.0;
         double burned = latestDailyLog.getCaloriesBurned() != null ? latestDailyLog.getCaloriesBurned() : 0.0;
         return consumed - burned;
-    }
-
-    private String formatConversation(List<ChatMessage> recentMessages) {
-        if (recentMessages.isEmpty()) {
-            return "No previous messages.";
-        }
-
-        return recentMessages.stream()
-                .sorted(Comparator.comparing(ChatMessage::getCreatedAt).thenComparing(ChatMessage::getId))
-                .map(message -> message.getRole().name() + ": " + message.getContent())
-                .reduce((left, right) -> left + System.lineSeparator() + right)
-                .orElse("No previous messages.");
-    }
-
-    private void trimStoredMessages(UUID sessionId) {
-        List<ChatMessage> allMessages = chatMessageRepository.findBySessionIdOrderByCreatedAtAscIdAsc(sessionId);
-        int messagesToDelete = allMessages.size() - MAX_STORED_MESSAGES;
-        if (messagesToDelete <= 0) {
-            return;
-        }
-
-        chatMessageRepository.deleteAll(allMessages.subList(0, messagesToDelete));
     }
 
     private void invalidateCoaching(UUID dailyLogId) {
@@ -475,6 +368,20 @@ public class ChatService {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);
+    }
+
+    public record AIChatPromptContext(
+            String goalType,
+            Object targetCalories,
+            Object targetProtein,
+            Object targetCarbs,
+            Object targetFat,
+            double caloriesConsumed,
+            double caloriesBurned,
+            double calorieBalance,
+            int steps,
+            Object latestWeight
+    ) {
     }
 
     private record ParsedSteps(int steps) {

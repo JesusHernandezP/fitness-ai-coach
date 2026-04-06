@@ -2,7 +2,7 @@ package com.fitness.fitnessaicoach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
-import com.fitness.fitnessaicoach.domain.ChatMessage;
+import com.fitness.fitnessaicoach.domain.AIChatMessage;
 import com.fitness.fitnessaicoach.domain.ChatRole;
 import com.fitness.fitnessaicoach.domain.ChatSession;
 import com.fitness.fitnessaicoach.domain.DailyLog;
@@ -10,7 +10,7 @@ import com.fitness.fitnessaicoach.domain.Meal;
 import com.fitness.fitnessaicoach.domain.MealItem;
 import com.fitness.fitnessaicoach.domain.WorkoutSession;
 import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
-import com.fitness.fitnessaicoach.repository.ChatMessageRepository;
+import com.fitness.fitnessaicoach.repository.AIChatMessageRepository;
 import com.fitness.fitnessaicoach.repository.ChatSessionRepository;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
 import com.fitness.fitnessaicoach.repository.MealItemRepository;
@@ -58,7 +58,7 @@ class AIChatIntegrationTest {
     private ChatSessionRepository chatSessionRepository;
 
     @Autowired
-    private ChatMessageRepository chatMessageRepository;
+    private AIChatMessageRepository aiChatMessageRepository;
 
     @Autowired
     private DailyLogRepository dailyLogRepository;
@@ -106,7 +106,7 @@ class AIChatIntegrationTest {
         assertThat(sessions).hasSize(1);
 
         ChatSession session = sessions.get(0);
-        List<ChatMessage> messages = chatMessageRepository.findBySessionIdOrderByCreatedAtAscIdAsc(session.getId());
+        List<AIChatMessage> messages = aiChatMessageRepository.findBySessionIdOrderByCreatedAtAscIdAsc(session.getId());
 
         assertThat(messages).hasSize(4);
         assertThat(messages.get(0).getRole()).isEqualTo(ChatRole.USER);
@@ -134,7 +134,7 @@ class AIChatIntegrationTest {
                 .filter(candidate -> candidate.getUser() != null && user.userId().equals(candidate.getUser().getId().toString()))
                 .findFirst()
                 .orElseThrow();
-        List<ChatMessage> messages = chatMessageRepository.findBySessionIdOrderByCreatedAtAscIdAsc(session.getId());
+        List<AIChatMessage> messages = aiChatMessageRepository.findBySessionIdOrderByCreatedAtAscIdAsc(session.getId());
 
         assertThat(messages).hasSize(20);
         assertThat(messages.get(0).getContent()).isEqualTo("Message 2");
