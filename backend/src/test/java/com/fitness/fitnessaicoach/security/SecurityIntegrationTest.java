@@ -2,6 +2,8 @@ package com.fitness.fitnessaicoach.security;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,6 +30,9 @@ class SecurityIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void getUsersWithoutTokenShouldReturn401() throws Exception {
@@ -90,6 +95,44 @@ class SecurityIntegrationTest {
         mockMvc.perform(get("/api/users")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void chatHistoryWithoutTokenShouldReturn401() throws Exception {
+        mockMvc.perform(get("/api/ai-chat/history"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void weeklySummaryWithoutTokenShouldReturn401() throws Exception {
+        mockMvc.perform(get("/api/ai-coach/weekly-summary"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void registeredPasswordShouldBeStoredEncrypted() throws Exception {
+        String email = "security-password-" + UUID.randomUUID() + "@example.com";
+        String rawPassword = "Passw0rd!";
+
+        String registerBody = """
+                {
+                  "name": "Password Test",
+                  "email": "%s",
+                  "password": "%s",
+                  "age": 25,
+                  "heightCm": 175.0,
+                  "weightKg": 70.0
+                }
+                """.formatted(email, rawPassword);
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerBody))
+                .andExpect(status().isOk());
+
+        User savedUser = userRepository.findByEmail(email).orElseThrow();
+        org.assertj.core.api.Assertions.assertThat(savedUser.getPassword()).isNotEqualTo(rawPassword);
+        org.assertj.core.api.Assertions.assertThat(savedUser.getPassword()).startsWith("$2");
     }
 
     private String registerAndLogin() throws Exception {

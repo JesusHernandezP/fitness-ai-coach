@@ -6,6 +6,7 @@ import com.fitness.fitnessaicoach.dto.ai.AIWorkoutSummaryResponse;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -138,6 +139,46 @@ public class PromptBuilder {
         );
     }
 
+    public String buildWeeklySummaryPrompt(WeeklySummaryPromptContext context) {
+        return """
+                You are an AI fitness coach generating a weekly progress summary for a dashboard.
+                Respond with strict JSON only using this exact shape:
+                {"summary":"...","recommendation":"..."}
+
+                Use only the data provided below. Do not invent values.
+                Write both fields as short plain text sentences.
+                The summary should describe trend and adherence.
+                The recommendation should suggest one or two next steps.
+
+                Weekly context:
+                Week start: %s
+                Week end: %s
+                Days logged: %s
+                Average calories consumed: %s
+                Average calories burned: %s
+                Average steps: %s
+                Total workouts: %s
+                Goal type: %s
+                Latest weight: %s
+                Starting weight: %s
+                Ending weight: %s
+                Weight trend: %s
+                """.formatted(
+                context.weekStart(),
+                context.weekEnd(),
+                context.daysLogged(),
+                context.averageCaloriesConsumed(),
+                context.averageCaloriesBurned(),
+                context.averageSteps(),
+                context.totalWorkouts(),
+                context.goalType(),
+                context.latestWeight(),
+                context.startingWeight(),
+                context.endingWeight(),
+                context.weightTrend()
+        );
+    }
+
     public record ChatPromptContext(
             String goalType,
             Object targetCalories,
@@ -149,6 +190,22 @@ public class PromptBuilder {
             double calorieBalance,
             int steps,
             Object latestWeight
+    ) {
+    }
+
+    public record WeeklySummaryPromptContext(
+            LocalDate weekStart,
+            LocalDate weekEnd,
+            int daysLogged,
+            String averageCaloriesConsumed,
+            String averageCaloriesBurned,
+            int averageSteps,
+            int totalWorkouts,
+            String goalType,
+            String latestWeight,
+            String startingWeight,
+            String endingWeight,
+            String weightTrend
     ) {
     }
 

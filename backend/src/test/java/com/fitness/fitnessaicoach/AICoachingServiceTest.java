@@ -8,6 +8,11 @@ import com.fitness.fitnessaicoach.dto.ai.AIMealSummaryResponse;
 import com.fitness.fitnessaicoach.dto.ai.AIWorkoutSummaryResponse;
 import com.fitness.fitnessaicoach.dto.ai.AICoachingResponse;
 import com.fitness.fitnessaicoach.repository.AIRecommendationRepository;
+import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
+import com.fitness.fitnessaicoach.repository.DailyLogRepository;
+import com.fitness.fitnessaicoach.repository.GoalRepository;
+import com.fitness.fitnessaicoach.repository.UserRepository;
+import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import com.fitness.fitnessaicoach.service.AICoachingService;
 import com.fitness.fitnessaicoach.service.AIAnalysisService;
 import com.fitness.fitnessaicoach.service.PromptBuilder;
@@ -44,6 +49,21 @@ class AICoachingServiceTest {
     @Mock
     private AIRecommendationRepository aiRecommendationRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private DailyLogRepository dailyLogRepository;
+
+    @Mock
+    private BodyMetricsRepository bodyMetricsRepository;
+
+    @Mock
+    private GoalRepository goalRepository;
+
+    @Mock
+    private WorkoutSessionRepository workoutSessionRepository;
+
     private AICoachingService aiCoachingService;
 
     @BeforeEach
@@ -53,7 +73,12 @@ class AICoachingServiceTest {
                 promptBuilder,
                 aiTextGenerationClient,
                 aiRecommendationRepository,
-                new ObjectMapper()
+                new ObjectMapper(),
+                userRepository,
+                dailyLogRepository,
+                bodyMetricsRepository,
+                goalRepository,
+                workoutSessionRepository
         );
     }
 

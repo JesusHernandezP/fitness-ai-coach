@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
 import com.fitness.fitnessaicoach.domain.AIRecommendation;
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
+import com.fitness.fitnessaicoach.dto.ai.AIWeeklySummaryResponse;
 import com.fitness.fitnessaicoach.repository.AIRecommendationRepository;
 import com.fitness.fitnessaicoach.service.AIAnalysisService;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,7 +57,8 @@ class AICoachingIntegrationTest {
     void swaggerSpecShouldExposeAICoachingEndpoint() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$['paths']['/api/ai-coach/daily-log/{dailyLogId}']['get']").exists());
+                .andExpect(jsonPath("$['paths']['/api/ai-coach/daily-log/{dailyLogId}']['get']").exists())
+                .andExpect(jsonPath("$['paths']['/api/ai-coach/weekly-summary']['get']").exists());
     }
 
     @Test
@@ -119,6 +122,64 @@ class AICoachingIntegrationTest {
         assertThat(savedRecommendations).hasSize(1);
     }
 
+    @Test
+    void weeklySummaryShouldReturnSummaryAndRecommendationForAuthenticatedUser() throws Exception {
+        UserContext user = registerAndLogin();
+        createDailyLog(user.token(), user.userId(), LocalDate.parse("2026-04-10"), 1900.0, 2200.0, 8500);
+        createDailyLog(user.token(), user.userId(), LocalDate.parse("2026-04-12"), 1800.0, 2100.0, 9000);
+        createBodyMetric(user.token(), 82.5, "2026-04-10");
+        createBodyMetric(user.token(), 81.8, "2026-04-12");
+
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("{\"summary\":\"You maintained a calorie deficit and trained consistently.\",\"recommendation\":\"Continue the current approach and keep steps above 8k.\"}");
+
+        MvcResult result = mockMvc.perform(get("/api/ai-coach/weekly-summary")
+                        .header("Authorization", "Bearer " + user.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.weekStart").value("2026-04-06"))
+                .andExpect(jsonPath("$.weekEnd").value("2026-04-12"))
+                .andExpect(jsonPath("$.summary").isString())
+                .andExpect(jsonPath("$.recommendation").isString())
+                .andReturn();
+
+        AIWeeklySummaryResponse response = objectMapper.readValue(result.getResponse().getContentAsString(), AIWeeklySummaryResponse.class);
+        assertThat(response.getSummary()).contains("calorie deficit");
+        assertThat(response.getRecommendation()).contains("8k");
+    }
+
+    private void createDailyLog(String token, String userId, LocalDate date, double caloriesConsumed, double caloriesBurned, int steps) throws Exception {
+        String body = """
+                {
+                  "logDate": "%s",
+                  "steps": %s,
+                  "caloriesConsumed": %s,
+                  "caloriesBurned": %s,
+                  "userId": "%s"
+                }
+                """.formatted(date, steps, caloriesConsumed, caloriesBurned, userId);
+
+        mockMvc.perform(post("/api/daily-logs")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
+    private void createBodyMetric(String token, double weight, String date) throws Exception {
+        String body = """
+                {
+                  "weight": %s,
+                  "date": "%s"
+                }
+                """.formatted(weight, date);
+
+        mockMvc.perform(post("/api/body-metrics")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
     private UserContext registerAndLogin() throws Exception {
         String email = "ai-coach-" + UUID.randomUUID() + "@example.com";
         String password = "Passw0rd!";
@@ -134,10 +195,15 @@ class AICoachingIntegrationTest {
                 }
                 """.formatted(email, password);
 
-        mockMvc.perform(post("/api/users")
+        MvcResult registerResult = mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("id")
+                .asText();
 
         String loginBody = """
                 {
@@ -158,9 +224,9 @@ class AICoachingIntegrationTest {
                 .asText();
         assertNotNull(token);
 
-        return new UserContext(token);
+        return new UserContext(token, userId);
     }
 
-    private record UserContext(String token) {
+    private record UserContext(String token, String userId) {
     }
 }
