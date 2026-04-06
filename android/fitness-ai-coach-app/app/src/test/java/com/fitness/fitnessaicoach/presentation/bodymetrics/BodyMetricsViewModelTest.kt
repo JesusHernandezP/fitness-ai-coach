@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.presentation.bodymetrics
 
 import com.fitness.fitnessaicoach.core.result.AppResult
 import com.fitness.fitnessaicoach.domain.model.BodyMetrics
+import com.fitness.fitnessaicoach.domain.model.WeightProgressPoint
 import com.fitness.fitnessaicoach.domain.repository.BodyMetricsRepository
 import com.fitness.fitnessaicoach.domain.usecase.CreateBodyMetricsUseCase
 import com.fitness.fitnessaicoach.domain.usecase.GetBodyMetricsUseCase
@@ -103,5 +104,9 @@ class BodyMetricsViewModelTest {
         override suspend fun createBodyMetrics(bodyMetrics: BodyMetrics): AppResult<BodyMetrics> = createResult
 
         override suspend fun getBodyMetrics(): AppResult<List<BodyMetrics>> = getResult
+
+        override suspend fun getWeightProgress(): AppResult<List<WeightProgressPoint>> {
+            error("Not used in this test")
+        }
     }
 }

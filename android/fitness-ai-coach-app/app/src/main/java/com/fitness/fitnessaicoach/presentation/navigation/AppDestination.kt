@@ -5,6 +5,7 @@ sealed class AppDestination(val route: String) {
     data object Home : AppDestination("home")
     data object Profile : AppDestination("profile")
     data object BodyMetrics : AppDestination("bodyMetrics")
+    data object WeightProgress : AppDestination("weightProgress")
     data object Goals : AppDestination("goals")
     data object DailyLog : AppDestination("dailyLog")
     data object Meal : AppDestination("meal")

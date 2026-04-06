@@ -1,5 +1,6 @@
 package com.fitness.fitnessaicoach.data.remote.api
 
+import com.fitness.fitnessaicoach.data.remote.dto.BodyMetricsProgressDto
 import com.fitness.fitnessaicoach.data.remote.dto.BodyMetricsRequestDto
 import com.fitness.fitnessaicoach.data.remote.dto.BodyMetricsResponseDto
 import retrofit2.http.Body
@@ -12,4 +13,7 @@ interface BodyMetricsApi {
 
     @GET("body-metrics")
     suspend fun getBodyMetrics(): List<BodyMetricsResponseDto>
+
+    @GET("body-metrics/progress")
+    suspend fun getWeightProgress(): List<BodyMetricsProgressDto>
 }

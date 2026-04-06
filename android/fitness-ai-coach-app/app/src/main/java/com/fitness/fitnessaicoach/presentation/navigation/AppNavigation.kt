@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fitness.fitnessaicoach.presentation.auth.LoginScreen
 import com.fitness.fitnessaicoach.presentation.bodymetrics.BodyMetricsScreen
+import com.fitness.fitnessaicoach.presentation.bodymetrics.WeightProgressScreen
 import com.fitness.fitnessaicoach.presentation.coach.CoachScreen
 import com.fitness.fitnessaicoach.presentation.dailylog.DailyLogScreen
 import com.fitness.fitnessaicoach.presentation.goals.GoalsScreen
@@ -50,7 +51,14 @@ fun AppNavigation() {
             MetabolicProfileScreen()
         }
         composable(AppDestination.BodyMetrics.route) {
-            BodyMetricsScreen()
+            BodyMetricsScreen(
+                onOpenWeightProgress = {
+                    navController.navigate(AppDestination.WeightProgress.route)
+                }
+            )
+        }
+        composable(AppDestination.WeightProgress.route) {
+            WeightProgressScreen()
         }
         composable(AppDestination.Goals.route) {
             GoalsScreen()
