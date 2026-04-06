@@ -37,7 +37,7 @@ public class UserController {
         return ResponseEntity.ok(created);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:[0-9a-fA-F\\-]{36}}")
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
@@ -52,7 +52,7 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{id:[0-9a-fA-F\\-]{36}}")
     @Operation(summary = "Update current user metabolic profile")
     @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserResponse> updateUserProfile(
