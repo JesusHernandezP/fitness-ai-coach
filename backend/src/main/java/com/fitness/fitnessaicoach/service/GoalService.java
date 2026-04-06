@@ -11,6 +11,7 @@ import com.fitness.fitnessaicoach.exception.GoalAlreadyExistsException;
 import com.fitness.fitnessaicoach.exception.GoalNotFoundException;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
 import com.fitness.fitnessaicoach.repository.GoalRepository;
+import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class GoalService {
 
     private final GoalRepository goalRepository;
     private final UserRepository userRepository;
+    private final BodyMetricsRepository bodyMetricsRepository;
 
     public GoalResponse createGoal(String email, GoalRequest request) {
         User user = userRepository.findByEmail(email)
@@ -104,12 +106,13 @@ public class GoalService {
     }
 
     private MacroTargets calculateMacroTargets(User user, UserGoalType goalType) {
-        validateUserForTargetCalories(user);
+        double currentWeight = resolveCurrentWeight(user);
+        validateUserForTargetCalories(user, currentWeight);
 
         UserSex sex = user.getSex() != null ? user.getSex() : UserSex.MALE;
         ActivityLevel activityLevel = user.getActivityLevel() != null ? user.getActivityLevel() : ActivityLevel.MODERATE;
         double sexAdjustment = sex == UserSex.MALE ? 5.0 : -161.0;
-        double bmr = (10 * user.getWeightKg())
+        double bmr = (10 * currentWeight)
                 + (6.25 * user.getHeightCm())
                 - (5 * user.getAge())
                 + sexAdjustment;
@@ -126,8 +129,8 @@ public class GoalService {
             case BUILD_MUSCLE -> 2.2;
             case MAINTAIN -> 1.6;
         };
-        double targetProtein = roundToScale(user.getWeightKg() * proteinMultiplier);
-        double targetFat = roundToScale(user.getWeightKg() * 0.8);
+        double targetProtein = roundToScale(currentWeight * proteinMultiplier);
+        double targetFat = roundToScale(currentWeight * 0.8);
         double carbCalories = adjustedCalories - ((targetProtein * 4) + (targetFat * 9));
         double targetCarbs = roundToScale(Math.max(0.0, carbCalories / 4.0));
 
@@ -139,10 +142,24 @@ public class GoalService {
         );
     }
 
-    private void validateUserForTargetCalories(User user) {
-        if (user.getWeightKg() == null || user.getHeightCm() == null || user.getAge() == null) {
+    private void validateUserForTargetCalories(User user, double currentWeight) {
+        if (currentWeight <= 0.0 || user.getHeightCm() == null || user.getAge() == null) {
             throw new IllegalStateException("User profile is missing weight, height, or age required to calculate target calories.");
         }
+    }
+
+    private double resolveCurrentWeight(User user) {
+        if (user.getWeightKg() != null && user.getWeightKg() > 0.0) {
+            return user.getWeightKg();
+        }
+
+        return bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(user.getId())
+                .map(metric -> {
+                    user.setWeightKg(metric.getWeight());
+                    userRepository.save(user);
+                    return metric.getWeight();
+                })
+                .orElse(0.0);
     }
 
     private double resolveActivityMultiplier(ActivityLevel activityLevel) {

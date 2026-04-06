@@ -80,7 +80,6 @@ class GoalsViewModel @Inject constructor(
         val currentState = _uiState.value
         val goalType = currentState.goalType
         val targetWeight = currentState.targetWeight.takeIf { it.isNotBlank() }?.toDoubleOrNull()
-        val targetCalories = currentState.targetCalories.toDoubleOrNull()
 
         if (goalType == null) {
             _uiState.update { it.copy(errorMessage = "Goal type is required.") }
@@ -90,17 +89,13 @@ class GoalsViewModel @Inject constructor(
             _uiState.update { it.copy(errorMessage = "Target weight must be positive.") }
             return
         }
-        if (targetCalories == null || targetCalories <= 0.0) {
-            _uiState.update { it.copy(errorMessage = "Target calories must be positive.") }
-            return
-        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
             val goal = Goal(
                 goalType = goalType,
                 targetWeight = targetWeight,
-                targetCalories = targetCalories
+                targetCalories = null
             )
 
             when (val result = createGoalUseCase(goal)) {

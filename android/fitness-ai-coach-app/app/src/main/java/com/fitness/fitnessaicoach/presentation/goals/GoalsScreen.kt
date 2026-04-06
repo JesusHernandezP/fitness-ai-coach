@@ -53,7 +53,7 @@ fun GoalsScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Set your current fitness objective and calorie target.",
+                    text = "Set your current fitness objective. Target calories are calculated automatically from your profile and latest weight.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -109,10 +109,10 @@ fun GoalsScreen(
         item {
             OutlinedTextField(
                 value = uiState.targetCalories,
-                onValueChange = viewModel::onTargetCaloriesChanged,
-                label = { Text("Target calories") },
+                onValueChange = { },
+                label = { Text("Target calories (calculated automatically)") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                enabled = false,
                 singleLine = true
             )
         }

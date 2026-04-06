@@ -38,6 +38,8 @@ public class BodyMetricsService {
                 .build();
 
         BodyMetrics saved = bodyMetricsRepository.save(bodyMetrics);
+        user.setWeightKg(request.getWeight());
+        userRepository.save(user);
 
         return toResponse(saved);
     }

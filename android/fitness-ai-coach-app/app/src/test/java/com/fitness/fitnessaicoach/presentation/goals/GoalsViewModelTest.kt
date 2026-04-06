@@ -61,6 +61,35 @@ class GoalsViewModelTest {
         assertNull(viewModel.uiState.value.errorMessage)
     }
 
+    @Test
+    fun `save goal does not require target calories input`() = runTest {
+        val createdGoal = Goal(
+            id = "goal-2",
+            userId = "user-1",
+            goalType = GoalType.BUILD_MUSCLE,
+            targetWeight = 84.0,
+            targetCalories = 2800.0
+        )
+        val repository = FakeGoalsRepository(
+            getResult = AppResult.Success(listOf(createdGoal)),
+            createResult = AppResult.Success(createdGoal)
+        )
+
+        val viewModel = GoalsViewModel(
+            createGoalUseCase = CreateGoalUseCase(repository),
+            getGoalsUseCase = GetGoalsUseCase(repository)
+        )
+
+        advanceUntilIdle()
+        viewModel.onGoalTypeChanged(GoalType.BUILD_MUSCLE)
+        viewModel.onTargetWeightChanged("84")
+        viewModel.saveGoal()
+        advanceUntilIdle()
+
+        assertEquals("Goal saved.", viewModel.uiState.value.successMessage)
+        assertNull(viewModel.uiState.value.errorMessage)
+    }
+
     private class FakeGoalsRepository(
         private val getResult: AppResult<List<Goal>>,
         private val createResult: AppResult<Goal>

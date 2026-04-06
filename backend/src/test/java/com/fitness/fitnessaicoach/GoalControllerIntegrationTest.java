@@ -140,6 +140,72 @@ public class GoalControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("You already set your goal today"));
     }
 
+    @Test
+    void shouldCalculateGoalUsingLatestBodyMetricsWhenUserWeightIsMissing() throws Exception {
+        String email = "goal-bodymetrics-" + UUID.randomUUID() + "@example.com";
+        String password = "Passw0rd!";
+
+        String registerBody = """
+                {
+                  "name": "Goal BodyMetrics User",
+                  "email": "%s",
+                  "password": "%s",
+                  "age": 35,
+                  "heightCm": 185.0
+                }
+                """.formatted(email, password);
+
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerBody))
+                .andExpect(status().isOk());
+
+        String loginBody = """
+                {
+                  "email": "%s",
+                  "password": "%s"
+                }
+                """.formatted(email, password);
+
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString()).get("token").asText();
+
+        String bodyMetricsBody = """
+                {
+                  "weight": 82.0,
+                  "date": "2026-04-06"
+                }
+                """;
+
+        mockMvc.perform(post("/api/body-metrics")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyMetricsBody))
+                .andExpect(status().isCreated());
+
+        String goalBody = """
+                {
+                  "goalType": "BUILD_MUSCLE",
+                  "targetWeight": 84
+                }
+                """;
+
+        mockMvc.perform(post("/api/goals")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(goalBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.targetCalories").isNumber())
+                .andExpect(jsonPath("$.targetProtein").isNumber())
+                .andExpect(jsonPath("$.targetCarbs").isNumber())
+                .andExpect(jsonPath("$.targetFat").isNumber());
+    }
+
     private UserContext registerAndLogin() throws Exception {
         String email = "goal-" + UUID.randomUUID() + "@example.com";
         String password = "Passw0rd!";

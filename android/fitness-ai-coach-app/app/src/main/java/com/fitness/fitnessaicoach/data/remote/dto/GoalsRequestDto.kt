@@ -5,6 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GoalsRequestDto(
     val goalType: String,
-    val targetWeight: Double? = null,
-    val targetCalories: Double
+    val targetWeight: Double? = null
 )
