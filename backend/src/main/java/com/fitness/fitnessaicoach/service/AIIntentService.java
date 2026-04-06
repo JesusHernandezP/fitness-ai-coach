@@ -85,12 +85,12 @@ public class AIIntentService {
         return Optional.empty();
     }
 
-    public AIChatPromptContext buildPromptContext(UUID userId) {
+    public PromptBuilder.ChatPromptContext buildPromptContext(UUID userId) {
         Goal latestGoal = goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(userId).orElse(null);
         DailyLog latestDailyLog = dailyLogRepository.findTopByUserIdOrderByLogDateDescIdDesc(userId).orElse(null);
         BodyMetrics latestBodyMetrics = bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(userId).orElse(null);
 
-        return new AIChatPromptContext(
+        return new PromptBuilder.ChatPromptContext(
                 latestGoal != null && latestGoal.getGoalType() != null ? latestGoal.getGoalType().name() : "UNKNOWN",
                 latestGoal != null && latestGoal.getTargetCalories() != null ? latestGoal.getTargetCalories() : "unknown",
                 latestGoal != null && latestGoal.getTargetProtein() != null ? latestGoal.getTargetProtein() : "unknown",
@@ -368,20 +368,6 @@ public class AIIntentService {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);
-    }
-
-    public record AIChatPromptContext(
-            String goalType,
-            Object targetCalories,
-            Object targetProtein,
-            Object targetCarbs,
-            Object targetFat,
-            double caloriesConsumed,
-            double caloriesBurned,
-            double calorieBalance,
-            int steps,
-            Object latestWeight
-    ) {
     }
 
     private record ParsedSteps(int steps) {

@@ -93,4 +93,62 @@ public class PromptBuilder {
                 analysis
         );
     }
+
+    public String buildChatPrompt(ChatPromptContext context, String conversationHistory, String latestUserMessage) {
+        return """
+                You are a continuous AI fitness coach in an ongoing conversation.
+
+                Current user context:
+                - goalType: %s
+                - targetCalories: %s
+                - targetProtein: %s
+                - targetCarbs: %s
+                - targetFat: %s
+                - caloriesConsumed: %s
+                - caloriesBurned: %s
+                - calorieBalance: %s
+                - steps: %s
+                - latestWeight: %s
+
+                Conversation rules:
+                - Be supportive, clear, and actionable.
+                - Keep replies short: at most 4 sentences.
+                - Avoid repetition.
+                - Use the recent conversation and the latest fitness context.
+                - If data is missing, say so briefly and still help.
+
+                Recent conversation:
+                %s
+
+                Latest user message:
+                %s
+                """.formatted(
+                context.goalType(),
+                context.targetCalories(),
+                context.targetProtein(),
+                context.targetCarbs(),
+                context.targetFat(),
+                context.caloriesConsumed(),
+                context.caloriesBurned(),
+                context.calorieBalance(),
+                context.steps(),
+                context.latestWeight(),
+                conversationHistory,
+                latestUserMessage
+        );
+    }
+
+    public record ChatPromptContext(
+            String goalType,
+            Object targetCalories,
+            Object targetProtein,
+            Object targetCarbs,
+            Object targetFat,
+            double caloriesConsumed,
+            double caloriesBurned,
+            double calorieBalance,
+            int steps,
+            Object latestWeight
+    ) {
+    }
 }

@@ -11,4 +11,6 @@ public interface AIChatMessageRepository extends JpaRepository<AIChatMessage, UU
     List<AIChatMessage> findTop20BySessionIdOrderByCreatedAtDescIdDesc(UUID sessionId);
 
     List<AIChatMessage> findBySessionIdOrderByCreatedAtAscIdAsc(UUID sessionId);
+
+    List<AIChatMessage> findTop20BySessionUserIdOrderByCreatedAtDescIdDesc(UUID userId);
 }

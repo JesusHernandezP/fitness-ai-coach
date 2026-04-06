@@ -17,6 +17,7 @@ import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.MealRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,6 +33,9 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -141,6 +145,39 @@ class AIChatIntegrationTest {
         assertThat(messages.get(1).getContent()).isEqualTo("Keep your calories steady and hit your step target tomorrow.");
         assertThat(messages.get(messages.size() - 2).getContent()).isEqualTo("Message 11");
         assertThat(messages.get(messages.size() - 1).getRole()).isEqualTo(ChatRole.AI);
+    }
+
+    @Test
+    void aiChatShouldBuildChronologicalTrimmedPromptContextFromRecentUserHistory() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Context-aware reply.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("history-chat");
+        createDailyLog(user.token(), user.userId());
+
+        for (int index = 1; index <= 11; index++) {
+            sendMessage(user.token(), "Message " + index);
+        }
+
+        reset(aiTextGenerationClient);
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Context-aware reply.");
+
+        sendMessage(user.token(), "Message 12");
+
+        ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
+        verify(aiTextGenerationClient, atLeastOnce()).generateText(promptCaptor.capture());
+
+        String prompt = promptCaptor.getValue();
+        assertThat(prompt).contains("USER: Message 3");
+        assertThat(prompt).contains("AI: Context-aware reply.");
+        assertThat(prompt).contains("USER: Message 11");
+        assertThat(prompt).contains("Latest user message:");
+        assertThat(prompt).contains("Message 12");
+        assertThat(prompt).doesNotContain("USER: Message 1\r\n");
+        assertThat(prompt).doesNotContain("USER: Message 12");
+        assertThat(prompt.indexOf("USER: Message 3")).isLessThan(prompt.indexOf("USER: Message 11"));
     }
 
     @Test

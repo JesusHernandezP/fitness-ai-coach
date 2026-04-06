@@ -31,6 +31,7 @@ public class AIChatService {
     private final UserRepository userRepository;
     private final AIIntentService aiIntentService;
     private final AITextGenerationClient aiTextGenerationClient;
+    private final PromptBuilder promptBuilder;
 
     @Transactional
     public AIChatMessageResponse sendMessage(String email, String messageContent) {
@@ -41,7 +42,7 @@ public class AIChatService {
         saveMessage(session, ChatRole.USER, messageContent);
 
         String reply = aiIntentService.handleIntent(user, messageContent)
-                .orElseGet(() -> aiTextGenerationClient.generateText(buildPrompt(user.getId(), session, messageContent)).trim());
+                .orElseGet(() -> aiTextGenerationClient.generateText(buildPrompt(user.getId(), messageContent)).trim());
 
         saveMessage(session, ChatRole.AI, reply);
         session.setLastActivityAt(LocalDateTime.now());
@@ -71,52 +72,11 @@ public class AIChatService {
                 .build());
     }
 
-    private String buildPrompt(UUID userId, ChatSession session, String latestUserMessage) {
-        AIIntentService.AIChatPromptContext context = aiIntentService.buildPromptContext(userId);
-        List<AIChatMessage> recentMessages = aiChatMessageRepository.findTop20BySessionIdOrderByCreatedAtDescIdDesc(session.getId());
+    private String buildPrompt(UUID userId, String latestUserMessage) {
+        PromptBuilder.ChatPromptContext context = aiIntentService.buildPromptContext(userId);
+        List<AIChatMessage> recentMessages = aiChatMessageRepository.findTop20BySessionUserIdOrderByCreatedAtDescIdDesc(userId);
         Collections.reverse(recentMessages);
-
-        return """
-                You are a continuous AI fitness coach in an ongoing conversation.
-
-                Current user context:
-                - goalType: %s
-                - targetCalories: %s
-                - targetProtein: %s
-                - targetCarbs: %s
-                - targetFat: %s
-                - caloriesConsumed: %s
-                - caloriesBurned: %s
-                - calorieBalance: %s
-                - steps: %s
-                - latestWeight: %s
-
-                Conversation rules:
-                - Be supportive, clear, and actionable.
-                - Keep replies short: at most 4 sentences.
-                - Avoid repetition.
-                - Use the recent conversation and the latest fitness context.
-                - If data is missing, say so briefly and still help.
-
-                Recent conversation:
-                %s
-
-                Latest user message:
-                %s
-                """.formatted(
-                context.goalType(),
-                context.targetCalories(),
-                context.targetProtein(),
-                context.targetCarbs(),
-                context.targetFat(),
-                context.caloriesConsumed(),
-                context.caloriesBurned(),
-                context.calorieBalance(),
-                context.steps(),
-                context.latestWeight(),
-                formatConversation(recentMessages),
-                latestUserMessage
-        );
+        return promptBuilder.buildChatPrompt(context, formatConversation(excludeLatestUserTurn(recentMessages, latestUserMessage)), latestUserMessage);
     }
 
     private String formatConversation(List<AIChatMessage> recentMessages) {
@@ -139,5 +99,18 @@ public class AIChatService {
         }
 
         aiChatMessageRepository.deleteAll(allMessages.subList(0, messagesToDelete));
+    }
+
+    private List<AIChatMessage> excludeLatestUserTurn(List<AIChatMessage> recentMessages, String latestUserMessage) {
+        if (recentMessages.isEmpty()) {
+            return recentMessages;
+        }
+
+        AIChatMessage lastMessage = recentMessages.get(recentMessages.size() - 1);
+        if (lastMessage.getRole() == ChatRole.USER && latestUserMessage.equals(lastMessage.getContent())) {
+            return recentMessages.subList(0, recentMessages.size() - 1);
+        }
+
+        return recentMessages;
     }
 }
