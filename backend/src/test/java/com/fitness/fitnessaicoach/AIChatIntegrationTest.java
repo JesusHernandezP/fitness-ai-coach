@@ -8,11 +8,13 @@ import com.fitness.fitnessaicoach.domain.ChatSession;
 import com.fitness.fitnessaicoach.domain.DailyLog;
 import com.fitness.fitnessaicoach.domain.Meal;
 import com.fitness.fitnessaicoach.domain.MealItem;
+import com.fitness.fitnessaicoach.domain.UserGoalType;
 import com.fitness.fitnessaicoach.domain.WorkoutSession;
 import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.AIChatMessageRepository;
 import com.fitness.fitnessaicoach.repository.ChatSessionRepository;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
+import com.fitness.fitnessaicoach.repository.GoalRepository;
 import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.MealRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
@@ -78,6 +80,9 @@ class AIChatIntegrationTest {
 
     @Autowired
     private BodyMetricsRepository bodyMetricsRepository;
+
+    @Autowired
+    private GoalRepository goalRepository;
 
     @MockBean
     private AITextGenerationClient aiTextGenerationClient;
@@ -219,6 +224,49 @@ class AIChatIntegrationTest {
                 .get()
                 .extracting(metric -> metric.getWeight())
                 .isEqualTo(78.5);
+    }
+
+    @Test
+    void aiChatShouldRecognizeExpandedIntentPhrases() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Fallback reply.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("expanded-chat");
+        createFood(user.token(), "eggs", 78.0);
+        createFood(user.token(), "rice", 130.0);
+
+        sendMessageExpectingReply(user.token(), "I ate 3 eggs and rice", "Logged 2 food item(s) for snack. Quantity total: 4.");
+        sendMessageExpectingReply(user.token(), "today I walked 8000 steps", "Logged 8000 steps for today.");
+        sendMessageExpectingReply(user.token(), "did push workout 4 exercises 4x8", "Logged workout \"Push\" with 4x8.");
+        sendMessageExpectingReply(user.token(), "burned 500 calories", "Logged 500 calories burned for today.");
+        sendMessageExpectingReply(user.token(), "my weight is 82kg", "Logged your weight at 82.0 kg for today.");
+        sendMessageExpectingReply(user.token(), "I want to gain muscle", "Set your goal to build muscle.");
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
+                .orElseThrow();
+        assertThat(dailyLog.getSteps()).isEqualTo(8000);
+        assertThat(dailyLog.getCaloriesBurned()).isEqualTo(500.0);
+
+        List<MealItem> mealItems = mealItemRepository.findAllByDailyLogId(dailyLog.getId());
+        assertThat(mealItems).hasSize(2);
+        assertThat(mealItems).extracting(item -> item.getQuantity()).containsExactlyInAnyOrder(3.0, 1.0);
+        assertThat(mealItems).extracting(item -> item.getFood().getName().toLowerCase()).contains("eggs", "rice");
+
+        List<WorkoutSession> workouts = workoutSessionRepository.findByDailyLogId(dailyLog.getId());
+        assertThat(workouts).hasSize(1);
+        assertThat(workouts.get(0).getExercise().getName()).isEqualTo("Push");
+        assertThat(workouts.get(0).getCaloriesBurned()).isGreaterThan(0.0);
+
+        assertThat(bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(UUID.fromString(user.userId())))
+                .get()
+                .extracting(metric -> metric.getWeight())
+                .isEqualTo(82.0);
+
+        assertThat(goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(UUID.fromString(user.userId())))
+                .get()
+                .extracting(goal -> goal.getGoalType())
+                .isEqualTo(UserGoalType.BUILD_MUSCLE);
     }
 
     private void sendMessage(String token, String message) throws Exception {
