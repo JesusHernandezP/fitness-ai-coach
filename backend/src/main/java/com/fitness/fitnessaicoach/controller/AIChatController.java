@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.controller;
 
 import com.fitness.fitnessaicoach.dto.ai.AIChatMessageRequest;
+import com.fitness.fitnessaicoach.dto.ai.AIChatMessageDto;
 import com.fitness.fitnessaicoach.dto.ai.AIChatMessageResponse;
 import com.fitness.fitnessaicoach.service.AIChatService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,10 +11,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/ai-chat")
@@ -23,6 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AIChatController {
 
     private final AIChatService aiChatService;
+
+    @GetMapping("/history")
+    @Operation(summary = "Get stored coaching chat history")
+    public ResponseEntity<List<AIChatMessageDto>> getHistory(Authentication authentication) {
+        return ResponseEntity.ok(aiChatService.getChatHistory(authentication.getName()));
+    }
 
     @PostMapping("/message")
     @Operation(summary = "Send a coaching chat message")

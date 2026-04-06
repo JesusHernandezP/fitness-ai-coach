@@ -91,8 +91,37 @@ class AIChatIntegrationTest {
     void swaggerSpecShouldExposeAiChatEndpoint() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$['paths']['/api/ai-chat/history']").exists())
+                .andExpect(jsonPath("$['paths']['/api/ai-chat/history']['get']").exists())
                 .andExpect(jsonPath("$['paths']['/api/ai-chat/message']").exists())
                 .andExpect(jsonPath("$['paths']['/api/ai-chat/message']['post']").exists());
+    }
+
+    @Test
+    void aiChatHistoryShouldReturnChronologicalMessagesForAuthenticatedUser() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Assistant reply.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("history-endpoint");
+        createGoal(user.token(), 75);
+        createBodyMetric(user.token(), 79.4);
+        createDailyLog(user.token(), user.userId());
+
+        sendMessage(user.token(), "How did I do today?");
+        sendMessage(user.token(), "What should I do tomorrow?");
+
+        mockMvc.perform(get("/api/ai-chat/history")
+                        .header("Authorization", "Bearer " + user.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].role").value("USER"))
+                .andExpect(jsonPath("$[0].message").value("How did I do today?"))
+                .andExpect(jsonPath("$[1].role").value("ASSISTANT"))
+                .andExpect(jsonPath("$[1].message").value("Assistant reply."))
+                .andExpect(jsonPath("$[2].role").value("USER"))
+                .andExpect(jsonPath("$[2].message").value("What should I do tomorrow?"))
+                .andExpect(jsonPath("$[3].role").value("ASSISTANT"))
+                .andExpect(jsonPath("$[3].createdAt").isNotEmpty());
     }
 
     @Test
