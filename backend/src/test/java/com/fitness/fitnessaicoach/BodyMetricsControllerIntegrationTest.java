@@ -42,6 +42,8 @@ public class BodyMetricsControllerIntegrationTest {
                 .andExpect(jsonPath("$['paths']['/api/body-metrics']").exists())
                 .andExpect(jsonPath("$['paths']['/api/body-metrics']['post']").exists())
                 .andExpect(jsonPath("$['paths']['/api/body-metrics']['get']").exists())
+                .andExpect(jsonPath("$['paths']['/api/body-metrics/progress']").exists())
+                .andExpect(jsonPath("$['paths']['/api/body-metrics/progress']['get']").exists())
                 .andExpect(jsonPath("$['paths']['/api/body-metrics/{id}']['get']").exists())
                 .andExpect(jsonPath("$['paths']['/api/body-metrics/{id}']['delete']").exists());
     }
@@ -126,6 +128,41 @@ public class BodyMetricsControllerIntegrationTest {
                         .content(bodyMetricsBody))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("You already recorded your weight today"));
+    }
+
+    @Test
+    void weightProgressEndpointShouldReturnOrderedResults() throws Exception {
+        UserContext user = registerAndLogin("progress");
+
+        createBodyMetrics(user.token(), 82.5, "2026-04-05");
+        createBodyMetrics(user.token(), 83.1, "2026-04-01");
+        createBodyMetrics(user.token(), 81.8, "2026-04-10");
+
+        mockMvc.perform(get("/api/body-metrics/progress")
+                        .header("Authorization", "Bearer " + user.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].date").value("2026-04-01"))
+                .andExpect(jsonPath("$[0].weight").value(83.1))
+                .andExpect(jsonPath("$[1].date").value("2026-04-05"))
+                .andExpect(jsonPath("$[1].weight").value(82.5))
+                .andExpect(jsonPath("$[2].date").value("2026-04-10"))
+                .andExpect(jsonPath("$[2].weight").value(81.8));
+    }
+
+    private void createBodyMetrics(String token, double weight, String date) throws Exception {
+        String bodyMetricsBody = """
+                {
+                  "weight": %s,
+                  "date": "%s"
+                }
+                """.formatted(weight, date);
+
+        mockMvc.perform(post("/api/body-metrics")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(bodyMetricsBody))
+                .andExpect(status().isCreated());
     }
 
     private UserContext registerAndLogin(String prefix) throws Exception {

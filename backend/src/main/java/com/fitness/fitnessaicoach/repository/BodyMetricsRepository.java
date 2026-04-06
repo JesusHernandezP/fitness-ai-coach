@@ -14,6 +14,8 @@ public interface BodyMetricsRepository extends JpaRepository<BodyMetrics, UUID> 
 
     List<BodyMetrics> findAllByUserIdOrderByDateDescIdDesc(UUID userId);
 
+    List<BodyMetrics> findByUserIdOrderByDateAsc(UUID userId);
+
     Optional<BodyMetrics> findByIdAndUserId(UUID id, UUID userId);
 
     boolean existsByUserIdAndDate(UUID userId, LocalDate date);
