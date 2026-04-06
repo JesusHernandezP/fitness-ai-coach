@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.dto;
 
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
+import com.fitness.fitnessaicoach.domain.UserGoalType;
 import com.fitness.fitnessaicoach.domain.UserSex;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,4 +23,9 @@ public class MetabolicProfileResponse {
     private Double heightCm;
     private UserSex sex;
     private ActivityLevel activityLevel;
+    private UserGoalType goalType;
+    private Double targetCalories;
+    private Double targetProtein;
+    private Double targetCarbs;
+    private Double targetFat;
 }

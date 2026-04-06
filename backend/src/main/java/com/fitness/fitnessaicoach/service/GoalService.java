@@ -82,6 +82,34 @@ public class GoalService {
         goalRepository.delete(goal);
     }
 
+    public Goal upsertGoalFromProfile(User user, UserGoalType goalType) {
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime startOfNextDay = today.plusDays(1).atStartOfDay();
+        MacroTargets macroTargets = calculateMacroTargets(user, goalType);
+
+        Goal goal = goalRepository.findTopByUserIdAndCreatedAtBetweenOrderByCreatedAtDescIdDesc(
+                        user.getId(),
+                        startOfDay,
+                        startOfNextDay
+                )
+                .orElseGet(Goal::new);
+
+        goal.setGoalType(goalType);
+        goal.setTargetWeight(user.getWeightKg());
+        goal.setTargetCalories(macroTargets.targetCalories());
+        goal.setTargetProtein(macroTargets.targetProtein());
+        goal.setTargetCarbs(macroTargets.targetCarbs());
+        goal.setTargetFat(macroTargets.targetFat());
+        goal.setUser(user);
+
+        return goalRepository.save(goal);
+    }
+
+    public Goal getLatestGoalForUser(UUID userId) {
+        return goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(userId).orElse(null);
+    }
+
     private GoalResponse toResponse(Goal goal) {
         return GoalResponse.builder()
                 .id(goal.getId())

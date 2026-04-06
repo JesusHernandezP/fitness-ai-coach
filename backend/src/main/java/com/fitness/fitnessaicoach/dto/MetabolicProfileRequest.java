@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.dto;
 
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
+import com.fitness.fitnessaicoach.domain.UserGoalType;
 import com.fitness.fitnessaicoach.domain.UserSex;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -30,4 +31,6 @@ public class MetabolicProfileRequest {
 
     @NotNull(message = "Activity level is required.")
     private ActivityLevel activityLevel;
+
+    private UserGoalType goalType;
 }

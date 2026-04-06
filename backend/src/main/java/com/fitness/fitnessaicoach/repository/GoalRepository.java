@@ -16,5 +16,11 @@ public interface GoalRepository extends JpaRepository<Goal, UUID> {
 
     Optional<Goal> findTopByUserIdOrderByCreatedAtDescIdDesc(UUID userId);
 
+    Optional<Goal> findTopByUserIdAndCreatedAtBetweenOrderByCreatedAtDescIdDesc(
+            UUID userId,
+            LocalDateTime start,
+            LocalDateTime end
+    );
+
     boolean existsByUserIdAndCreatedAtBetween(UUID userId, LocalDateTime start, LocalDateTime end);
 }
