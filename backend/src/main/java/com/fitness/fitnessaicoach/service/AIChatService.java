@@ -33,9 +33,11 @@ public class AIChatService {
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         aiChatHistoryService.saveUserMessage(user.getId(), messageContent);
-
-        String reply = aiIntentService.handleIntent(user, messageContent)
-                .orElseGet(() -> aiTextGenerationClient.generateText(buildPrompt(user.getId(), messageContent)).trim());
+        String structuredAction = aiIntentService.handleIntent(user, messageContent).orElse(null);
+        String reply = aiTextGenerationClient.generateText(buildPrompt(user.getId(), messageContent, structuredAction)).trim();
+        if (reply.isBlank() && structuredAction != null) {
+            reply = structuredAction;
+        }
 
         aiChatHistoryService.saveAssistantMessage(user.getId(), reply);
 
@@ -49,11 +51,16 @@ public class AIChatService {
         return aiChatHistoryService.getChatHistory(user.getId());
     }
 
-    private String buildPrompt(UUID userId, String latestUserMessage) {
+    private String buildPrompt(UUID userId, String latestUserMessage, String structuredAction) {
         PromptBuilder.ChatPromptContext context = aiIntentService.buildPromptContext(userId);
         List<AIChatMessage> recentMessages = aiChatHistoryService.getRecentMessages(userId, 20);
         Collections.reverse(recentMessages);
-        return promptBuilder.buildChatPrompt(context, formatConversation(excludeLatestUserTurn(recentMessages, latestUserMessage)), latestUserMessage);
+        return promptBuilder.buildChatPrompt(
+                context,
+                formatConversation(excludeLatestUserTurn(recentMessages, latestUserMessage)),
+                latestUserMessage,
+                structuredAction
+        );
     }
 
     private String formatConversation(List<AIChatMessage> recentMessages) {

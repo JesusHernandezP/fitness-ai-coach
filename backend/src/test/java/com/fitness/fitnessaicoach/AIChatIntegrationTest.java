@@ -217,7 +217,7 @@ class AIChatIntegrationTest {
     @Test
     void aiChatShouldLogFoodWorkoutStepsWeightAndAnswerProgressQuestion() throws Exception {
         when(aiTextGenerationClient.generateText(anyString()))
-                .thenReturn("You are in a calorie deficit today. Keep protein high and stay near your step target.");
+                .thenReturn("Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
         when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
 
         UserContext user = registerAndLogin("log-chat");
@@ -225,11 +225,11 @@ class AIChatIntegrationTest {
         createFood(user.token(), "eggs", 78.0);
         createFood(user.token(), "toast", 90.0);
 
-        sendMessageExpectingReply(user.token(), "2 eggs and toast", "Logged 2 food item(s) for snack. Quantity total: 3.");
-        sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Logged 4 workout exercise(s) for \"Pull\" with 4x8.");
-        sendMessageExpectingReply(user.token(), "9000 steps today", "Logged 9000 steps for today.");
-        sendMessageExpectingReply(user.token(), "weight 78.5 kg", "Logged your weight at 78.5 kg for today.");
-        sendMessageExpectingReply(user.token(), "am I in deficit?", "You are in a calorie deficit today. Keep protein high and stay near your step target.");
+        sendMessageExpectingReply(user.token(), "2 eggs and toast", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
+        sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
+        sendMessageExpectingReply(user.token(), "9000 steps today", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
+        sendMessageExpectingReply(user.token(), "weight 78.5 kg", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
+        sendMessageExpectingReply(user.token(), "am I in deficit?", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
 
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
@@ -262,19 +262,19 @@ class AIChatIntegrationTest {
     @Test
     void aiChatShouldRecognizeExpandedIntentPhrases() throws Exception {
         when(aiTextGenerationClient.generateText(anyString()))
-                .thenReturn("Fallback reply.");
+                .thenReturn("That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
         when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
 
         UserContext user = registerAndLogin("expanded-chat");
         createFood(user.token(), "eggs", 78.0);
         createFood(user.token(), "rice", 130.0);
 
-        sendMessageExpectingReply(user.token(), "I ate 3 eggs and rice", "Logged 2 food item(s) for snack. Quantity total: 4.");
-        sendMessageExpectingReply(user.token(), "today I walked 8000 steps", "Logged 8000 steps for today.");
-        sendMessageExpectingReply(user.token(), "did push workout 4 exercises 4x8", "Logged 4 workout exercise(s) for \"Push\" with 4x8.");
-        sendMessageExpectingReply(user.token(), "burned 500 calories", "Logged 500 calories burned for today.");
-        sendMessageExpectingReply(user.token(), "my weight is 82kg", "Logged your weight at 82.0 kg for today.");
-        sendMessageExpectingReply(user.token(), "I want to gain muscle", "Set your goal to build muscle.");
+        sendMessageExpectingReply(user.token(), "I ate 3 eggs and rice", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
+        sendMessageExpectingReply(user.token(), "today I walked 8000 steps", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
+        sendMessageExpectingReply(user.token(), "did push workout 4 exercises 4x8", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
+        sendMessageExpectingReply(user.token(), "burned 500 calories", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
+        sendMessageExpectingReply(user.token(), "my weight is 82kg", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
+        sendMessageExpectingReply(user.token(), "I want to gain muscle", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
 
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
@@ -306,15 +306,15 @@ class AIChatIntegrationTest {
     @Test
     void aiChatShouldCreateMultipleWorkoutSessionsForExerciseCountPhrases() throws Exception {
         when(aiTextGenerationClient.generateText(anyString()))
-                .thenReturn("Fallback reply.");
+                .thenReturn("Nice session. Make sure you recover well and get enough protein today.");
         when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
 
         UserContext user = registerAndLogin("workout-chat");
 
-        sendMessageExpectingReply(user.token(), "pull day 4 exercises 4x8", "Logged 4 workout exercise(s) for \"Pull\" with 4x8.");
-        sendMessageExpectingReply(user.token(), "3x10 bench press", "Logged workout \"Bench Press\" with 3x10.");
-        sendMessageExpectingReply(user.token(), "did cardio 30 minutes", "Logged workout \"Cardio\" with 3x10.");
-        sendMessageExpectingReply(user.token(), "ran 20 minutes", "Logged workout \"Running\" with 3x10.");
+        sendMessageExpectingReply(user.token(), "pull day 4 exercises 4x8", "Nice session. Make sure you recover well and get enough protein today.");
+        sendMessageExpectingReply(user.token(), "3x10 bench press", "Nice session. Make sure you recover well and get enough protein today.");
+        sendMessageExpectingReply(user.token(), "did cardio 30 minutes", "Nice session. Make sure you recover well and get enough protein today.");
+        sendMessageExpectingReply(user.token(), "ran 20 minutes", "Nice session. Make sure you recover well and get enough protein today.");
 
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
@@ -340,7 +340,7 @@ class AIChatIntegrationTest {
     @Test
     void aiChatShouldExtractMealQuantitiesFromConversationalPhrases() throws Exception {
         when(aiTextGenerationClient.generateText(anyString()))
-                .thenReturn("Fallback reply.");
+                .thenReturn("Good meal choice. Keep building meals around protein and quality carbs to support your goal.");
         when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
 
         UserContext user = registerAndLogin("meal-quantity-chat");
@@ -348,8 +348,8 @@ class AIChatIntegrationTest {
         createFood(user.token(), "rice", 130.0);
         createFood(user.token(), "bread", 265.0);
 
-        sendMessageExpectingReply(user.token(), "2 eggs and 150g rice", "Logged 2 food item(s) for snack. Quantity total: 152.");
-        sendMessageExpectingReply(user.token(), "2 slices bread", "Logged 1 food item(s) for snack. Quantity total: 2.");
+        sendMessageExpectingReply(user.token(), "2 eggs and 150g rice", "Good meal choice. Keep building meals around protein and quality carbs to support your goal.");
+        sendMessageExpectingReply(user.token(), "2 slices bread", "Good meal choice. Keep building meals around protein and quality carbs to support your goal.");
 
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
