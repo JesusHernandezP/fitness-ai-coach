@@ -108,6 +108,24 @@ class PromptBuilderTest {
                         145.0,
                         82.0
                 ),
+                new PromptBuilder.NutritionContext(
+                        "BUILD_MUSCLE",
+                        82.0,
+                        "MODERATE",
+                        2800.0,
+                        170.0,
+                        320.0,
+                        80.0,
+                        460.0,
+                        63.0,
+                        28.0,
+                        6.0,
+                        2340.0,
+                        107.0,
+                        292.0,
+                        74.0,
+                        true
+                ),
                 "USER: I ate chicken and rice\nAI: Good protein choice.",
                 "How can I improve dinner?",
                 "The user's meal was already recorded successfully."
@@ -121,6 +139,12 @@ class PromptBuilderTest {
         assertThat(prompt).contains("target calories 2900.0");
         assertThat(prompt).contains("protein consumed 145.0");
         assertThat(prompt).contains("The user's meal was already recorded successfully.");
+        assertThat(prompt).contains("NUTRITION CONTEXT");
+        assertThat(prompt).contains("USER PROFILE");
+        assertThat(prompt).contains("goal: BUILD_MUSCLE");
+        assertThat(prompt).contains("target calories: 2800 kcal");
+        assertThat(prompt).contains("consumed protein today: 63 g");
+        assertThat(prompt).contains("remaining carbs: 292 g");
         assertThat(prompt).contains("Recent conversation:");
         assertThat(prompt).contains("Latest user message:");
         assertThat(prompt).contains("How can I improve dinner?");

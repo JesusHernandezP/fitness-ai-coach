@@ -24,6 +24,7 @@ public class AIChatService {
     private final UserRepository userRepository;
     private final AIChatHistoryService aiChatHistoryService;
     private final AIIntentService aiIntentService;
+    private final NutritionContextBuilder nutritionContextBuilder;
     private final AITextGenerationClient aiTextGenerationClient;
     private final PromptBuilder promptBuilder;
 
@@ -53,10 +54,12 @@ public class AIChatService {
 
     private String buildPrompt(UUID userId, String latestUserMessage, String structuredAction) {
         PromptBuilder.ChatPromptContext context = aiIntentService.buildPromptContext(userId);
+        PromptBuilder.NutritionContext nutritionContext = nutritionContextBuilder.build(userId);
         List<AIChatMessage> recentMessages = aiChatHistoryService.getRecentMessages(userId, 20);
         Collections.reverse(recentMessages);
         return promptBuilder.buildChatPrompt(
                 context,
+                nutritionContext,
                 formatConversation(excludeLatestUserTurn(recentMessages, latestUserMessage)),
                 latestUserMessage,
                 structuredAction

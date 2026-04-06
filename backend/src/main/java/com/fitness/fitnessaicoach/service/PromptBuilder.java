@@ -97,6 +97,7 @@ public class PromptBuilder {
 
     public String buildChatPrompt(
             ChatPromptContext context,
+            NutritionContext nutritionContext,
             String conversationHistory,
             String latestUserMessage,
             String structuredAction
@@ -134,6 +135,15 @@ public class PromptBuilder {
                 If the latest message was understood as a fitness action and recorded, use that naturally in your answer:
                 %s
 
+                When nutritional context is provided, use the numbers to guide your recommendations.
+                Do not repeat the numbers mechanically.
+                Explain the meaning of the numbers in natural language.
+                Focus on helping the user stay aligned with their goal.
+                Provide practical suggestions for next meals or actions.
+
+                NUTRITION CONTEXT
+                %s
+
                 Response rules:
                 - Sound natural, useful, and human.
                 - Keep replies concise but valuable, usually 2 to 4 short paragraphs or sentences.
@@ -165,8 +175,55 @@ public class PromptBuilder {
                 context.proteinConsumed(),
                 context.latestWeight(),
                 structuredAction != null ? structuredAction : "No specific fitness action was detected.",
+                formatNutritionContext(nutritionContext),
                 conversationHistory,
                 latestUserMessage
+        );
+    }
+
+    private String formatNutritionContext(NutritionContext context) {
+        if (context == null || !context.available()) {
+            return "No nutrition context available.";
+        }
+
+        return """
+                USER PROFILE
+                goal: %s
+                weight: %s kg
+                activity level: %s
+
+                DAILY TARGET
+                target calories: %s kcal
+                target protein: %s g
+                target carbs: %s g
+                target fat: %s g
+
+                TODAY PROGRESS
+                consumed calories today: %s kcal
+                consumed protein today: %s g
+                consumed carbs today: %s g
+                consumed fat today: %s g
+
+                remaining calories: %s kcal
+                remaining protein: %s g
+                remaining carbs: %s g
+                remaining fat: %s g
+                """.formatted(
+                context.goal(),
+                context.weight(),
+                context.activityLevel(),
+                formatDecimal(context.targetCalories()),
+                formatDecimal(context.targetProtein()),
+                formatDecimal(context.targetCarbs()),
+                formatDecimal(context.targetFat()),
+                formatDecimal(context.consumedCalories()),
+                formatDecimal(context.consumedProtein()),
+                formatDecimal(context.consumedCarbs()),
+                formatDecimal(context.consumedFat()),
+                formatDecimal(context.remainingCalories()),
+                formatDecimal(context.remainingProtein()),
+                formatDecimal(context.remainingCarbs()),
+                formatDecimal(context.remainingFat())
         );
     }
 
@@ -230,6 +287,26 @@ public class PromptBuilder {
     ) {
     }
 
+    public record NutritionContext(
+            String goal,
+            Object weight,
+            String activityLevel,
+            double targetCalories,
+            double targetProtein,
+            double targetCarbs,
+            double targetFat,
+            double consumedCalories,
+            double consumedProtein,
+            double consumedCarbs,
+            double consumedFat,
+            double remainingCalories,
+            double remainingProtein,
+            double remainingCarbs,
+            double remainingFat,
+            boolean available
+    ) {
+    }
+
     public record WeeklySummaryPromptContext(
             LocalDate weekStart,
             LocalDate weekEnd,
@@ -276,6 +353,10 @@ public class PromptBuilder {
 
     private String formatNullableNumber(Number value) {
         return value != null ? String.valueOf(value) : "unknown";
+    }
+
+    private String formatDecimal(double value) {
+        return BigDecimal.valueOf(value).stripTrailingZeros().toPlainString();
     }
 
     private String valueOrUnknown(Object value) {
