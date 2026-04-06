@@ -1,0 +1,28 @@
+:host {
+  display: block;
+}
+
+.weight-progress-chart {
+  min-height: 260px;
+}
+
+.weight-progress-chart__canvas-wrapper {
+  position: relative;
+  min-height: 260px;
+}
+
+.weight-progress-chart__state {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  color: #49645d;
+  border: 1px dashed #c9dbd4;
+  border-radius: 16px;
+  background: #f8fbfa;
+  text-align: center;
+  padding: 24px;
+}
+
+.weight-progress-chart__state--error {
+  color: #a33d3d;
+}
