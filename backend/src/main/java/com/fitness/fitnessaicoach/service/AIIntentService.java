@@ -46,6 +46,9 @@ public class AIIntentService {
     private static final Pattern DURATION_PATTERN = Pattern.compile("(\\d{1,3})\\s*(?:minutes?|mins?)");
     private static final Pattern FOOD_ITEM_SPLIT_PATTERN = Pattern.compile("\\s*(?:,| and )\\s*");
     private static final Pattern FOOD_ENTRY_PATTERN = Pattern.compile("^(\\d+(?:[.,]\\d+)?)\\s+(.+)$");
+    private static final Pattern FOOD_GRAMS_PATTERN = Pattern.compile("^(\\d+(?:[.,]\\d+)?)\\s*(?:g|gr|grams?)\\s+(.+)$");
+    private static final Pattern FOOD_PORTION_PATTERN = Pattern.compile("^(small|medium|large)\\s+(?:(?:portion|plate|bowl|serving)\\s+)?(.+)$");
+    private static final Pattern SIMPLE_FOOD_PHRASE_PATTERN = Pattern.compile("^[a-z]+(?:\\s+(?:with\\s+)?[a-z]+){0,2}$");
     private static final Pattern GOAL_LOSE_FAT_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:lose\\s+(?:fat|weight)|cut)\\b");
     private static final Pattern GOAL_GAIN_MUSCLE_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:gain\\s+muscle|bulk|build\\s+muscle)\\b");
     private static final Pattern GOAL_MAINTAIN_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:maintain|stay\\s+the\\s+same)\\b");
@@ -346,7 +349,17 @@ public class AIIntentService {
                 || normalized.contains("lunch")
                 || normalized.contains("dinner")
                 || normalized.contains("snack")
-                || Character.isDigit(normalized.charAt(0));
+                || normalized.contains("i ate")
+                || normalized.contains("i had")
+                || normalized.contains("ate ")
+                || normalized.contains("had ")
+                || normalized.contains("drank ")
+                || normalized.contains("drink ")
+                || Character.isDigit(normalized.charAt(0))
+                || normalized.startsWith("small ")
+                || normalized.startsWith("medium ")
+                || normalized.startsWith("large ")
+                || isSimpleFoodPhrase(normalized);
         if (!looksLikeFoodLog) {
             return null;
         }
@@ -367,9 +380,28 @@ public class AIIntentService {
     }
 
     private FoodEntry parseFoodEntry(String value) {
+        Matcher gramsMatcher = FOOD_GRAMS_PATTERN.matcher(value);
+        if (gramsMatcher.find()) {
+            return new FoodEntry(
+                    normalizeFoodName(gramsMatcher.group(2)),
+                    Double.parseDouble(gramsMatcher.group(1).replace(',', '.'))
+            );
+        }
+
+        Matcher portionMatcher = FOOD_PORTION_PATTERN.matcher(value);
+        if (portionMatcher.find()) {
+            return new FoodEntry(
+                    normalizeFoodName(portionMatcher.group(2)),
+                    resolvePortionQuantity(portionMatcher.group(1))
+            );
+        }
+
         Matcher matcher = FOOD_ENTRY_PATTERN.matcher(value);
         if (matcher.find()) {
-            return new FoodEntry(normalizeFoodName(matcher.group(2)), Double.parseDouble(matcher.group(1).replace(',', '.')));
+            return new FoodEntry(
+                    normalizeFoodName(matcher.group(2)),
+                    Double.parseDouble(matcher.group(1).replace(',', '.'))
+            );
         }
         return new FoodEntry(normalizeFoodName(value), 1.0);
     }
@@ -389,12 +421,36 @@ public class AIIntentService {
 
     private String normalizeFoodName(String value) {
         return value.replaceAll("\\b(today|for breakfast|for lunch|for dinner|snack|i ate|ate|had|for|my meal was)\\b", "")
+                .replaceAll("^(?:slices?|pieces?|plates?|bowls?|portions?|servings?)\\s+", "")
+                .replaceAll("\\b(?:g|gr|grams?)\\b", "")
                 .replaceAll("\\s+", " ")
                 .trim();
     }
 
     private String stripFoodPrefix(String value) {
-        return value.replaceFirst("^(?:i\\s+ate|i\\s+had|ate|had|my\\s+meal\\s+was)\\s+", "");
+        return value.replaceFirst("^(?:i\\s+ate|i\\s+had|i\\s+drank|ate|had|drank|my\\s+meal\\s+was)\\s+", "");
+    }
+
+    private boolean isSimpleFoodPhrase(String normalized) {
+        if (!SIMPLE_FOOD_PHRASE_PATTERN.matcher(normalized).matches()) {
+            return false;
+        }
+
+        return !normalized.equals("hi")
+                && !normalized.equals("hello")
+                && !normalized.equals("thanks")
+                && !normalized.equals("thank you")
+                && !normalized.equals("okay")
+                && !normalized.equals("ok");
+    }
+
+    private double resolvePortionQuantity(String portionSize) {
+        return switch (portionSize) {
+            case "small" -> 1.0;
+            case "medium" -> 2.0;
+            case "large" -> 3.0;
+            default -> 1.0;
+        };
     }
 
     private ParsedGoal parseGoal(String normalized) {

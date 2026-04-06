@@ -308,6 +308,36 @@ class AIChatIntegrationTest {
                 .satisfies(workout -> assertThat(workout.getDuration()).isEqualTo(20));
     }
 
+    @Test
+    void aiChatShouldExtractMealQuantitiesFromConversationalPhrases() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Fallback reply.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("meal-quantity-chat");
+        createFood(user.token(), "eggs", 78.0);
+        createFood(user.token(), "rice", 130.0);
+        createFood(user.token(), "bread", 265.0);
+
+        sendMessageExpectingReply(user.token(), "2 eggs and 150g rice", "Logged 2 food item(s) for snack. Quantity total: 152.");
+        sendMessageExpectingReply(user.token(), "2 slices bread", "Logged 1 food item(s) for snack. Quantity total: 2.");
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
+                .orElseThrow();
+
+        List<MealItem> mealItems = mealItemRepository.findAllByDailyLogId(dailyLog.getId());
+        assertThat(mealItems).hasSize(3);
+        assertThat(mealItems).filteredOn(item -> "eggs".equalsIgnoreCase(item.getFood().getName()))
+                .singleElement()
+                .satisfies(item -> assertThat(item.getQuantity()).isEqualTo(2.0));
+        assertThat(mealItems).filteredOn(item -> "rice".equalsIgnoreCase(item.getFood().getName()))
+                .singleElement()
+                .satisfies(item -> assertThat(item.getQuantity()).isEqualTo(150.0));
+        assertThat(mealItems).filteredOn(item -> "bread".equalsIgnoreCase(item.getFood().getName()))
+                .singleElement()
+                .satisfies(item -> assertThat(item.getQuantity()).isEqualTo(2.0));
+    }
+
     private void sendMessage(String token, String message) throws Exception {
         String body = """
                 {
