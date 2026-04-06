@@ -8,11 +8,13 @@ import com.fitness.fitnessaicoach.domain.ChatSession;
 import com.fitness.fitnessaicoach.domain.DailyLog;
 import com.fitness.fitnessaicoach.domain.Meal;
 import com.fitness.fitnessaicoach.domain.MealItem;
+import com.fitness.fitnessaicoach.domain.UserGoalType;
 import com.fitness.fitnessaicoach.domain.WorkoutSession;
 import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.AIChatMessageRepository;
 import com.fitness.fitnessaicoach.repository.ChatSessionRepository;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
+import com.fitness.fitnessaicoach.repository.GoalRepository;
 import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.MealRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
@@ -78,6 +80,9 @@ class AIChatIntegrationTest {
 
     @Autowired
     private BodyMetricsRepository bodyMetricsRepository;
+
+    @Autowired
+    private GoalRepository goalRepository;
 
     @MockBean
     private AITextGenerationClient aiTextGenerationClient;
@@ -192,7 +197,7 @@ class AIChatIntegrationTest {
         createFood(user.token(), "toast", 90.0);
 
         sendMessageExpectingReply(user.token(), "2 eggs and toast", "Logged 2 food item(s) for snack. Quantity total: 3.");
-        sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Logged workout \"Pull\" with 4x8.");
+        sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Logged 4 workout exercise(s) for \"Pull\" with 4x8.");
         sendMessageExpectingReply(user.token(), "9000 steps today", "Logged 9000 steps for today.");
         sendMessageExpectingReply(user.token(), "weight 78.5 kg", "Logged your weight at 78.5 kg for today.");
         sendMessageExpectingReply(user.token(), "am I in deficit?", "You are in a calorie deficit today. Keep protein high and stay near your step target.");
@@ -211,14 +216,126 @@ class AIChatIntegrationTest {
         assertThat(mealItems).extracting(item -> item.getFood().getName().toLowerCase()).contains("eggs", "toast");
 
         List<WorkoutSession> workouts = workoutSessionRepository.findByDailyLogId(dailyLog.getId());
-        assertThat(workouts).hasSize(1);
-        assertThat(workouts.get(0).getSets()).isEqualTo(4);
-        assertThat(workouts.get(0).getReps()).isEqualTo(8);
+        assertThat(workouts).hasSize(4);
+        assertThat(workouts).allSatisfy(workout -> {
+            assertThat(workout.getSets()).isEqualTo(4);
+            assertThat(workout.getReps()).isEqualTo(8);
+        });
+        assertThat(workouts).extracting(workout -> workout.getExercise().getName())
+                .contains("Pull Exercise 1", "Pull Exercise 2", "Pull Exercise 3", "Pull Exercise 4");
 
         assertThat(bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(UUID.fromString(user.userId())))
                 .get()
                 .extracting(metric -> metric.getWeight())
                 .isEqualTo(78.5);
+    }
+
+    @Test
+    void aiChatShouldRecognizeExpandedIntentPhrases() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Fallback reply.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("expanded-chat");
+        createFood(user.token(), "eggs", 78.0);
+        createFood(user.token(), "rice", 130.0);
+
+        sendMessageExpectingReply(user.token(), "I ate 3 eggs and rice", "Logged 2 food item(s) for snack. Quantity total: 4.");
+        sendMessageExpectingReply(user.token(), "today I walked 8000 steps", "Logged 8000 steps for today.");
+        sendMessageExpectingReply(user.token(), "did push workout 4 exercises 4x8", "Logged 4 workout exercise(s) for \"Push\" with 4x8.");
+        sendMessageExpectingReply(user.token(), "burned 500 calories", "Logged 500 calories burned for today.");
+        sendMessageExpectingReply(user.token(), "my weight is 82kg", "Logged your weight at 82.0 kg for today.");
+        sendMessageExpectingReply(user.token(), "I want to gain muscle", "Set your goal to build muscle.");
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
+                .orElseThrow();
+        assertThat(dailyLog.getSteps()).isEqualTo(8000);
+        assertThat(dailyLog.getCaloriesBurned()).isEqualTo(500.0);
+
+        List<MealItem> mealItems = mealItemRepository.findAllByDailyLogId(dailyLog.getId());
+        assertThat(mealItems).hasSize(2);
+        assertThat(mealItems).extracting(item -> item.getQuantity()).containsExactlyInAnyOrder(3.0, 1.0);
+        assertThat(mealItems).extracting(item -> item.getFood().getName().toLowerCase()).contains("eggs", "rice");
+
+        List<WorkoutSession> workouts = workoutSessionRepository.findByDailyLogId(dailyLog.getId());
+        assertThat(workouts).hasSize(4);
+        assertThat(workouts).extracting(workout -> workout.getExercise().getName())
+                .contains("Push Exercise 1", "Push Exercise 2", "Push Exercise 3", "Push Exercise 4");
+        assertThat(workouts).allSatisfy(workout -> assertThat(workout.getCaloriesBurned()).isGreaterThan(0.0));
+
+        assertThat(bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(UUID.fromString(user.userId())))
+                .get()
+                .extracting(metric -> metric.getWeight())
+                .isEqualTo(82.0);
+
+        assertThat(goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(UUID.fromString(user.userId())))
+                .get()
+                .extracting(goal -> goal.getGoalType())
+                .isEqualTo(UserGoalType.BUILD_MUSCLE);
+    }
+
+    @Test
+    void aiChatShouldCreateMultipleWorkoutSessionsForExerciseCountPhrases() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Fallback reply.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("workout-chat");
+
+        sendMessageExpectingReply(user.token(), "pull day 4 exercises 4x8", "Logged 4 workout exercise(s) for \"Pull\" with 4x8.");
+        sendMessageExpectingReply(user.token(), "3x10 bench press", "Logged workout \"Bench Press\" with 3x10.");
+        sendMessageExpectingReply(user.token(), "did cardio 30 minutes", "Logged workout \"Cardio\" with 3x10.");
+        sendMessageExpectingReply(user.token(), "ran 20 minutes", "Logged workout \"Running\" with 3x10.");
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
+                .orElseThrow();
+
+        List<WorkoutSession> workouts = workoutSessionRepository.findByDailyLogId(dailyLog.getId());
+        assertThat(workouts).hasSize(7);
+        assertThat(workouts).filteredOn(workout -> workout.getExercise().getName().startsWith("Pull Exercise"))
+                .hasSize(4);
+        assertThat(workouts).filteredOn(workout -> "Bench Press".equals(workout.getExercise().getName()))
+                .singleElement()
+                .satisfies(workout -> {
+                    assertThat(workout.getSets()).isEqualTo(3);
+                    assertThat(workout.getReps()).isEqualTo(10);
+                });
+        assertThat(workouts).filteredOn(workout -> "Cardio".equals(workout.getExercise().getName()))
+                .singleElement()
+                .satisfies(workout -> assertThat(workout.getDuration()).isEqualTo(30));
+        assertThat(workouts).filteredOn(workout -> "Running".equals(workout.getExercise().getName()))
+                .singleElement()
+                .satisfies(workout -> assertThat(workout.getDuration()).isEqualTo(20));
+    }
+
+    @Test
+    void aiChatShouldExtractMealQuantitiesFromConversationalPhrases() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Fallback reply.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("meal-quantity-chat");
+        createFood(user.token(), "eggs", 78.0);
+        createFood(user.token(), "rice", 130.0);
+        createFood(user.token(), "bread", 265.0);
+
+        sendMessageExpectingReply(user.token(), "2 eggs and 150g rice", "Logged 2 food item(s) for snack. Quantity total: 152.");
+        sendMessageExpectingReply(user.token(), "2 slices bread", "Logged 1 food item(s) for snack. Quantity total: 2.");
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
+                .orElseThrow();
+
+        List<MealItem> mealItems = mealItemRepository.findAllByDailyLogId(dailyLog.getId());
+        assertThat(mealItems).hasSize(3);
+        assertThat(mealItems).filteredOn(item -> "eggs".equalsIgnoreCase(item.getFood().getName()))
+                .singleElement()
+                .satisfies(item -> assertThat(item.getQuantity()).isEqualTo(2.0));
+        assertThat(mealItems).filteredOn(item -> "rice".equalsIgnoreCase(item.getFood().getName()))
+                .singleElement()
+                .satisfies(item -> assertThat(item.getQuantity()).isEqualTo(150.0));
+        assertThat(mealItems).filteredOn(item -> "bread".equalsIgnoreCase(item.getFood().getName()))
+                .singleElement()
+                .satisfies(item -> assertThat(item.getQuantity()).isEqualTo(2.0));
     }
 
     private void sendMessage(String token, String message) throws Exception {

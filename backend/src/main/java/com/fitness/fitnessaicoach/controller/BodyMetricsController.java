@@ -1,5 +1,6 @@
 package com.fitness.fitnessaicoach.controller;
 
+import com.fitness.fitnessaicoach.dto.BodyMetricsProgressResponse;
 import com.fitness.fitnessaicoach.dto.BodyMetricsRequest;
 import com.fitness.fitnessaicoach.dto.BodyMetricsResponse;
 import com.fitness.fitnessaicoach.service.BodyMetricsService;
@@ -39,6 +40,12 @@ public class BodyMetricsController {
     @Operation(summary = "Get all body metrics")
     public List<BodyMetricsResponse> getAllBodyMetrics(Authentication authentication) {
         return bodyMetricsService.getAllBodyMetrics(authentication.getName());
+    }
+
+    @GetMapping("/progress")
+    @Operation(summary = "Get body weight progress history")
+    public List<BodyMetricsProgressResponse> getWeightProgress(Authentication authentication) {
+        return bodyMetricsService.getWeightProgress(authentication.getName());
     }
 
     @GetMapping("/{id}")

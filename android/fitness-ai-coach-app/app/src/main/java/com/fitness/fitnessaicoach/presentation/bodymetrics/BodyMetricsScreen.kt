@@ -27,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun BodyMetricsScreen(
+    onOpenWeightProgress: () -> Unit = {},
     viewModel: BodyMetricsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -49,6 +50,17 @@ fun BodyMetricsScreen(
                     text = "Track your weight history.",
                     style = MaterialTheme.typography.bodyMedium
                 )
+            }
+        }
+
+        item {
+            Button(
+                onClick = onOpenWeightProgress,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 48.dp)
+            ) {
+                Text("View progress chart")
             }
         }
 

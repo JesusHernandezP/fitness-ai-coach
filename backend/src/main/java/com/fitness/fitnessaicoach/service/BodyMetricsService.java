@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.domain.BodyMetrics;
 import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.dto.BodyMetricsProgressResponse;
 import com.fitness.fitnessaicoach.dto.BodyMetricsRequest;
 import com.fitness.fitnessaicoach.dto.BodyMetricsResponse;
 import com.fitness.fitnessaicoach.exception.BodyMetricsAlreadyExistsException;
@@ -61,6 +62,16 @@ public class BodyMetricsService {
         return toResponse(bodyMetrics);
     }
 
+    public List<BodyMetricsProgressResponse> getWeightProgress(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        return bodyMetricsRepository.findByUserIdOrderByDateAsc(user.getId())
+                .stream()
+                .map(this::toProgressResponse)
+                .toList();
+    }
+
     public void deleteBodyMetrics(String email, UUID id) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
@@ -77,6 +88,13 @@ public class BodyMetricsService {
                 .userId(bodyMetrics.getUser() != null ? bodyMetrics.getUser().getId() : null)
                 .weight(bodyMetrics.getWeight())
                 .date(bodyMetrics.getDate())
+                .build();
+    }
+
+    private BodyMetricsProgressResponse toProgressResponse(BodyMetrics bodyMetrics) {
+        return BodyMetricsProgressResponse.builder()
+                .date(bodyMetrics.getDate())
+                .weight(bodyMetrics.getWeight())
                 .build();
     }
 }

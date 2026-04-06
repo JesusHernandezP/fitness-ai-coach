@@ -6,6 +6,7 @@ import com.fitness.fitnessaicoach.data.remote.api.BodyMetricsApi
 import com.fitness.fitnessaicoach.data.remote.mapper.toDomain
 import com.fitness.fitnessaicoach.data.remote.mapper.toRequestDto
 import com.fitness.fitnessaicoach.domain.model.BodyMetrics
+import com.fitness.fitnessaicoach.domain.model.WeightProgressPoint
 import com.fitness.fitnessaicoach.domain.repository.BodyMetricsRepository
 import javax.inject.Inject
 
@@ -24,6 +25,14 @@ class BodyMetricsRepositoryImpl @Inject constructor(
     override suspend fun getBodyMetrics(): AppResult<List<BodyMetrics>> {
         return try {
             AppResult.Success(bodyMetricsApi.getBodyMetrics().map { it.toDomain() })
+        } catch (throwable: Throwable) {
+            AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
+        }
+    }
+
+    override suspend fun getWeightProgress(): AppResult<List<WeightProgressPoint>> {
+        return try {
+            AppResult.Success(bodyMetricsApi.getWeightProgress().map { it.toDomain() })
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }

@@ -1,96 +1,96 @@
 package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
+import com.fitness.fitnessaicoach.dto.ai.AIMealSummaryResponse;
+import com.fitness.fitnessaicoach.dto.ai.AIWorkoutSummaryResponse;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Component
 public class PromptBuilder {
 
     public String buildPrompt(AIAnalysisResponse analysis) {
         String goalType = analysis.getGoalType() != null ? analysis.getGoalType().name() : "UNKNOWN";
-        String targetCalories = analysis.getTargetCalories() != null ? String.valueOf(analysis.getTargetCalories()) : "unknown";
-        String targetProtein = analysis.getTargetProtein() != null ? String.valueOf(analysis.getTargetProtein()) : "unknown";
-        String targetCarbs = analysis.getTargetCarbs() != null ? String.valueOf(analysis.getTargetCarbs()) : "unknown";
-        String targetFat = analysis.getTargetFat() != null ? String.valueOf(analysis.getTargetFat()) : "unknown";
-        String caloriesConsumed = analysis.getTotalCaloriesConsumed() != null ? analysis.getTotalCaloriesConsumed().toPlainString() : "0";
-        String caloriesBurned = analysis.getTotalCaloriesBurned() != null ? analysis.getTotalCaloriesBurned().toPlainString() : "0";
-        String calorieBalance = analysis.getCalorieBalance() != null ? analysis.getCalorieBalance().toPlainString() : "0";
+        String targetCalories = formatNullableNumber(analysis.getTargetCalories());
+        String targetProtein = formatNullableNumber(analysis.getTargetProtein());
+        String targetCarbs = formatNullableNumber(analysis.getTargetCarbs());
+        String targetFat = formatNullableNumber(analysis.getTargetFat());
+        String caloriesConsumed = formatBigDecimal(analysis.getTotalCaloriesConsumed());
+        String caloriesBurned = formatBigDecimal(analysis.getTotalCaloriesBurned());
+        String calorieBalance = formatBigDecimal(analysis.getCalorieBalance());
         String steps = analysis.getTotalSteps() != null ? String.valueOf(analysis.getTotalSteps()) : "0";
-        String latestWeight = analysis.getLatestWeight() != null ? String.valueOf(analysis.getLatestWeight()) : "unknown";
+        String latestWeight = formatNullableNumber(analysis.getLatestWeight());
+        String targetWeight = formatNullableNumber(analysis.getTargetWeight());
         String sex = analysis.getSex() != null ? analysis.getSex().name() : "unknown";
         String activityLevel = analysis.getActivityLevel() != null ? analysis.getActivityLevel().name() : "unknown";
-        String workoutsPerformed = analysis.getTotalWorkoutSessions() != null
-                ? String.valueOf(analysis.getTotalWorkoutSessions())
-                : "0";
+        String workoutCount = analysis.getTotalWorkoutSessions() != null ? String.valueOf(analysis.getTotalWorkoutSessions()) : "0";
+        String mealCount = analysis.getTotalMeals() != null ? String.valueOf(analysis.getTotalMeals()) : "0";
+        String mealSummary = formatMealSummary(analysis.getMeals());
+        String workoutSummary = formatWorkoutSummary(analysis.getWorkouts());
 
         return """
                 You are an AI fitness coach writing personalized daily coaching for a mobile app.
+                Generate the advice text only. Do not return JSON, markdown, headings, or bullet points.
+                Use only the structured data below. If a value is missing, say so briefly and do not invent details.
 
-                The backend already returns the final API shape as:
-                {
-                  "analysis": string,
-                  "advice": string
-                }
+                User daily summary:
+                Date: %s
+                Calories consumed: %s
+                Calories burned: %s
+                Calorie balance: %s
+                Steps: %s
+                Meals logged: %s
+                Workout sessions logged: %s
 
-                Your job is to generate the advice content only. Do not return JSON, markdown, bullets, or labels.
-
-                Structured input:
-                - goalType: %s
-                - targetCalories: %s
-                - targetProtein: %s
-                - targetCarbs: %s
-                - targetFat: %s
-                - caloriesConsumed: %s
-                - caloriesBurned: %s
-                - calorieBalance: %s
-                - steps: %s
-                - latestWeight: %s
-                - sex: %s
-                - activityLevel: %s
-                - workoutsPerformed: %s
-
-                Coaching priorities, in this order:
-                1. Adherence to the calorie target.
-                2. Activity level versus the 7000 steps baseline.
-                3. Consistency with the current goalType.
-                4. Weight trend direction using the latest available weight.
-
-                Goal-specific guidance:
-                - LOSE_WEIGHT: favor a sustainable calorie deficit, more walking when steps are low, and lower-calorie food choices.
-                - BUILD_MUSCLE: support adequate protein, resistance training, and a controlled calorie surplus.
-                - MAINTAIN: support stable intake, stable activity, and avoidance of large calorie swings.
-
-                Tone requirements:
-                - supportive
-                - clear
-                - actionable
-                - specific, not generic
-                - avoid repetition and vague motivational filler
-
-                Output requirements:
-                - Write 3 to 4 sentences maximum.
-                - First sentence should objectively explain the most important pattern in the data.
-                - Remaining sentence(s) should give concrete next actions for the next day.
-                - Mention calorie target adherence, steps, and goal alignment when relevant.
-                - If some data are missing, say so briefly and still give the best next action.
-
-                Full analysis object for reference:
+                Meals:
                 %s
+
+                Workout:
+                %s
+
+                Goal:
+                Goal type: %s
+                Target weight: %s
+                Target calories: %s
+                Target protein: %s
+                Target carbs: %s
+                Target fat: %s
+
+                Body metrics:
+                Weight: %s
+                Sex: %s
+                Activity level: %s
+
+                Advice requirements:
+                - Write 3 to 4 sentences maximum.
+                - First sentence must summarize the main fitness pattern from the daily log.
+                - Mention calorie balance, activity level, and goal alignment when relevant.
+                - Use the meal and workout summary to comment on nutrition quality or training consistency only when the data supports it.
+                - Give concrete next-step recommendations for the next day.
+                - Do not hallucinate food details, workout details, or targets that are not provided.
                 """.formatted(
-                goalType,
-                targetCalories,
-                targetProtein,
-                targetCarbs,
-                targetFat,
+                analysis.getDate() != null ? analysis.getDate() : "unknown",
                 caloriesConsumed,
                 caloriesBurned,
                 calorieBalance,
                 steps,
+                mealCount,
+                workoutCount,
+                mealSummary,
+                workoutSummary,
+                goalType,
+                targetWeight,
+                targetCalories,
+                targetProtein,
+                targetCarbs,
+                targetFat,
                 latestWeight,
                 sex,
-                activityLevel,
-                workoutsPerformed,
-                analysis
+                activityLevel
         );
     }
 
@@ -150,5 +150,52 @@ public class PromptBuilder {
             int steps,
             Object latestWeight
     ) {
+    }
+
+    private String formatMealSummary(List<AIMealSummaryResponse> meals) {
+        if (meals == null || meals.isEmpty()) {
+            return "- No meals logged";
+        }
+
+        return meals.stream()
+                .map(meal -> "- " + titleCase(meal.getMealType())
+                        + ": " + valueOrUnknown(meal.getTotalItems())
+                        + " item(s), " + formatBigDecimal(meal.getTotalCalories()) + " kcal")
+                .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    private String formatWorkoutSummary(List<AIWorkoutSummaryResponse> workouts) {
+        if (workouts == null || workouts.isEmpty()) {
+            return "- No workout sessions logged";
+        }
+
+        return workouts.stream()
+                .map(workout -> "- " + valueOrUnknown(workout.getExerciseName())
+                        + ", duration " + valueOrUnknown(workout.getDuration()) + " min"
+                        + ", calories " + formatBigDecimal(workout.getCaloriesBurned()) + " kcal")
+                .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    private String formatBigDecimal(BigDecimal value) {
+        return value != null ? value.stripTrailingZeros().toPlainString() : "0";
+    }
+
+    private String formatNullableNumber(Number value) {
+        return value != null ? String.valueOf(value) : "unknown";
+    }
+
+    private String valueOrUnknown(Object value) {
+        return value != null ? String.valueOf(value) : "unknown";
+    }
+
+    private String titleCase(String value) {
+        if (value == null || value.isBlank()) {
+            return "Unknown";
+        }
+
+        return java.util.Arrays.stream(value.toLowerCase(Locale.ROOT).split("_|\\s+"))
+                .filter(part -> !part.isBlank())
+                .map(part -> Character.toUpperCase(part.charAt(0)) + part.substring(1))
+                .collect(Collectors.joining(" "));
     }
 }
