@@ -206,7 +206,7 @@ fun AIChatScreen(
                 ) {
                     items(
                         items = uiState.messages,
-                        key = { message -> "${message.role}-${message.timestamp}-${message.content}" }
+                        key = { message -> message.id }
                     ) { message ->
                         ChatBubble(message = message)
                     }

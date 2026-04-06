@@ -1,5 +1,7 @@
 package com.fitness.fitnessaicoach.presentation.chat
 
+import java.util.UUID
+
 data class AIChatUiState(
     val messages: List<AIChatMessageItem> = emptyList(),
     val isLoading: Boolean = false,
@@ -7,6 +9,7 @@ data class AIChatUiState(
 )
 
 data class AIChatMessageItem(
+    val id: String = UUID.randomUUID().toString(),
     val role: AIChatRole,
     val content: String,
     val timestamp: Long? = System.currentTimeMillis()
