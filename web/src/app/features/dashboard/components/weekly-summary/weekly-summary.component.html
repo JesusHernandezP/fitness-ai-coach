@@ -1,0 +1,25 @@
+<div class="weekly-summary">
+  @if (isLoading) {
+    <div class="weekly-summary__state">Loading weekly AI summary...</div>
+  } @else if (errorMessage) {
+    <div class="weekly-summary__state weekly-summary__state--error">
+      {{ errorMessage }}
+    </div>
+  } @else if (!summaryData) {
+    <div class="weekly-summary__state">No weekly summary available yet.</div>
+  } @else {
+    @if (weekRangeLabel) {
+      <p class="weekly-summary__range">Week: {{ weekRangeLabel }}</p>
+    }
+
+    <div class="weekly-summary__section">
+      <h3>Summary</h3>
+      <p>{{ summaryData.summary }}</p>
+    </div>
+
+    <div class="weekly-summary__section">
+      <h3>Recommendation</h3>
+      <p>{{ summaryData.recommendation }}</p>
+    </div>
+  }
+</div>
