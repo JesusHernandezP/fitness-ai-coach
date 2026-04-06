@@ -8,5 +8,10 @@ data class UserProfileResponseDto(
     val age: Int? = null,
     val heightCm: Double? = null,
     val sex: String? = null,
-    val activityLevel: String? = null
+    val activityLevel: String? = null,
+    val goalType: String? = null,
+    val targetCalories: Double? = null,
+    val targetProtein: Double? = null,
+    val targetCarbs: Double? = null,
+    val targetFat: Double? = null
 )

@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.data.remote.mapper
 
 import com.fitness.fitnessaicoach.data.remote.dto.UserProfileResponseDto
 import com.fitness.fitnessaicoach.data.remote.dto.UserResponseDto
+import com.fitness.fitnessaicoach.domain.model.GoalType
 import com.fitness.fitnessaicoach.domain.model.User
 
 fun UserResponseDto.toDomain(): User = User(
@@ -13,6 +14,11 @@ fun UserResponseDto.toDomain(): User = User(
     weightKg = weightKg,
     sex = sex,
     activityLevel = activityLevel,
+    goalType = null,
+    targetCalories = null,
+    targetProtein = null,
+    targetCarbs = null,
+    targetFat = null,
     createdAt = createdAt
 )
 
@@ -25,5 +31,10 @@ fun UserProfileResponseDto.toDomain(): User = User(
     weightKg = null,
     sex = sex,
     activityLevel = activityLevel,
+    goalType = goalType?.let(GoalType::valueOf),
+    targetCalories = targetCalories,
+    targetProtein = targetProtein,
+    targetCarbs = targetCarbs,
+    targetFat = targetFat,
     createdAt = ""
 )

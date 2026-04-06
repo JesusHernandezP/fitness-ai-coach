@@ -27,7 +27,7 @@ fun AppNavigation() {
         composable(AppDestination.Login.route) {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(AppDestination.Home.route) {
+                    navController.navigate(AppDestination.AIChat.route) {
                         popUpTo(AppDestination.Login.route) {
                             inclusive = true
                         }
@@ -80,7 +80,11 @@ fun AppNavigation() {
             CoachScreen()
         }
         composable(AppDestination.AIChat.route) {
-            AIChatScreen()
+            AIChatScreen(
+                onOpenProfile = {
+                    navController.navigate(AppDestination.Profile.route)
+                }
+            )
         }
     }
 }

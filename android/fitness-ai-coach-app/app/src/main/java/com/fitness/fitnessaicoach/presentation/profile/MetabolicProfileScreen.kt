@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 private val sexOptions = listOf("MALE", "FEMALE")
 private val activityLevelOptions = listOf("SEDENTARY", "LIGHT", "MODERATE", "ACTIVE", "VERY_ACTIVE")
+private val goalTypeOptions = listOf("LOSE_WEIGHT", "BUILD_MUSCLE", "MAINTAIN")
 
 @Composable
 fun MetabolicProfileScreen(
@@ -39,6 +40,7 @@ fun MetabolicProfileScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var sexExpanded by remember { mutableStateOf(false) }
     var activityExpanded by remember { mutableStateOf(false) }
+    var goalExpanded by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier
@@ -115,6 +117,57 @@ fun MetabolicProfileScreen(
                             }
                         )
                     }
+                }
+            }
+        }
+
+        item {
+            Column {
+                OutlinedTextField(
+                    value = uiState.goalType,
+                    onValueChange = { },
+                    readOnly = true,
+                    label = { Text("Goal") },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = { goalExpanded = true },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 48.dp)
+                ) {
+                    Text("Select goal")
+                }
+                DropdownMenu(
+                    expanded = goalExpanded,
+                    onDismissRequest = { goalExpanded = false }
+                ) {
+                    goalTypeOptions.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                viewModel.onGoalTypeChanged(option)
+                                goalExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+
+        if (uiState.targetCalories != null) {
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Generated daily targets",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text("Calories: ${uiState.targetCalories}")
+                    Text("Protein: ${uiState.targetProtein ?: 0.0}")
+                    Text("Carbs: ${uiState.targetCarbs ?: 0.0}")
+                    Text("Fat: ${uiState.targetFat ?: 0.0}")
                 }
             }
         }

@@ -3,6 +3,7 @@ package com.fitness.fitnessaicoach.presentation.profile
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fitness.fitnessaicoach.core.result.AppResult
+import com.fitness.fitnessaicoach.domain.model.GoalType
 import com.fitness.fitnessaicoach.domain.model.User
 import com.fitness.fitnessaicoach.domain.usecase.GetCurrentUserUseCase
 import com.fitness.fitnessaicoach.domain.usecase.UpdateUserProfileUseCase
@@ -23,6 +24,11 @@ data class MetabolicProfileUiState(
     val heightCm: String = "",
     val sex: String = "",
     val activityLevel: String = "",
+    val goalType: String = "",
+    val targetCalories: Double? = null,
+    val targetProtein: Double? = null,
+    val targetCarbs: Double? = null,
+    val targetFat: Double? = null,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val successMessage: String? = null
@@ -72,6 +78,10 @@ class MetabolicProfileViewModel @Inject constructor(
         _uiState.update { it.copy(activityLevel = value, errorMessage = null, successMessage = null) }
     }
 
+    fun onGoalTypeChanged(value: String) {
+        _uiState.update { it.copy(goalType = value, errorMessage = null, successMessage = null) }
+    }
+
     fun saveUserProfile() {
         val currentState = _uiState.value
         val age = currentState.age.toIntOrNull()
@@ -93,6 +103,10 @@ class MetabolicProfileViewModel @Inject constructor(
             _uiState.update { it.copy(errorMessage = "Activity level is required.") }
             return
         }
+        if (currentState.goalType.isBlank()) {
+            _uiState.update { it.copy(errorMessage = "Goal is required.") }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
@@ -105,6 +119,11 @@ class MetabolicProfileViewModel @Inject constructor(
                 weightKg = currentState.weightKg,
                 sex = currentState.sex,
                 activityLevel = currentState.activityLevel,
+                goalType = GoalType.valueOf(currentState.goalType),
+                targetCalories = currentState.targetCalories,
+                targetProtein = currentState.targetProtein,
+                targetCarbs = currentState.targetCarbs,
+                targetFat = currentState.targetFat,
                 createdAt = ""
             )
 
@@ -133,6 +152,11 @@ class MetabolicProfileViewModel @Inject constructor(
                 heightCm = user.heightCm?.toString().orEmpty(),
                 sex = user.sex.orEmpty(),
                 activityLevel = user.activityLevel.orEmpty(),
+                goalType = user.goalType?.name.orEmpty(),
+                targetCalories = user.targetCalories,
+                targetProtein = user.targetProtein,
+                targetCarbs = user.targetCarbs,
+                targetFat = user.targetFat,
                 isLoading = false,
                 errorMessage = null,
                 successMessage = successMessage

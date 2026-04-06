@@ -24,6 +24,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun AIChatScreen(
+    onOpenProfile: () -> Unit,
     viewModel: AIChatViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -104,12 +106,24 @@ fun AIChatScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Text(
-                text = "Chat with AI Coach",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, top = 12.dp, end = 16.dp, bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Chat with AI Coach",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                TextButton(
+                    onClick = onOpenProfile,
+                ) {
+                    Text("Profile")
+                }
+            }
             HorizontalDivider()
 
             if (uiState.messages.isEmpty() && !uiState.isLoading) {

@@ -9,5 +9,10 @@ data class User(
     val weightKg: Double?,
     val sex: String? = null,
     val activityLevel: String? = null,
+    val goalType: GoalType? = null,
+    val targetCalories: Double? = null,
+    val targetProtein: Double? = null,
+    val targetCarbs: Double? = null,
+    val targetFat: Double? = null,
     val createdAt: String
 )

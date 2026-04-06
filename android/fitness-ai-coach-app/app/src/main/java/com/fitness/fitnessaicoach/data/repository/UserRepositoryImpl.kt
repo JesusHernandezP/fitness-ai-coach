@@ -28,7 +28,8 @@ class UserRepositoryImpl @Inject constructor(
                     age = user.age ?: throw IllegalArgumentException("Age is required."),
                     heightCm = user.heightCm ?: throw IllegalArgumentException("Height is required."),
                     sex = user.sex ?: throw IllegalArgumentException("Sex is required."),
-                    activityLevel = user.activityLevel ?: throw IllegalArgumentException("Activity level is required.")
+                    activityLevel = user.activityLevel ?: throw IllegalArgumentException("Activity level is required."),
+                    goalType = user.goalType?.name
                 )
             ).toDomain()
 
