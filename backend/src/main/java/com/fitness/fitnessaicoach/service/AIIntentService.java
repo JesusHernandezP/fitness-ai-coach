@@ -20,6 +20,7 @@ import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
 import com.fitness.fitnessaicoach.repository.ExerciseRepository;
 import com.fitness.fitnessaicoach.repository.GoalRepository;
+import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,8 @@ public class AIIntentService {
     private static final Pattern GOAL_LOSE_FAT_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:lose\\s+(?:fat|weight)|cut)\\b");
     private static final Pattern GOAL_GAIN_MUSCLE_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:gain\\s+muscle|bulk|build\\s+muscle)\\b");
     private static final Pattern GOAL_MAINTAIN_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:maintain|stay\\s+the\\s+same)\\b");
+    private static final Pattern ADVICE_REQUEST_PATTERN = Pattern.compile("\\b(advice|recommend|recommendation|suggest|suggestion|what should i do|what should i eat|how can i improve|coach me|help me improve)\\b");
+    private static final Pattern QUESTION_PATTERN = Pattern.compile("\\?|\\b(how|what|why|should|can|could|am i|did i|is my)\\b");
     private static final Pattern WORKOUT_KEYWORDS_PATTERN = Pattern.compile("\\b(workout|training|trained|lifted|did\\s+(?:a\\s+)?.*?(push|pull|legs|leg|run|running|walk|walking|cardio|chest|back|shoulders|arms|full body))\\b");
     private static final Pattern EXERCISE_NAME_PATTERN = Pattern.compile("(bench press|squat|deadlift|shoulder press|overhead press|lat pulldown|pull up|push up|row|lunges?|leg press|cardio|running|run|walking|walk)");
 
@@ -59,6 +62,7 @@ public class AIIntentService {
     private final GoalRepository goalRepository;
     private final DailyLogRepository dailyLogRepository;
     private final BodyMetricsRepository bodyMetricsRepository;
+    private final MealItemRepository mealItemRepository;
     private final AIRecommendationRepository aiRecommendationRepository;
     private final ExerciseRepository exerciseRepository;
     private final DailyLogService dailyLogService;
@@ -73,7 +77,8 @@ public class AIIntentService {
     public Optional<String> handleIntent(User user, String messageContent) {
         String normalized = normalize(messageContent);
 
-        if (isProgressQuestion(normalized)) {
+        AIIntentType intentType = detectIntentType(normalized);
+        if (intentType == AIIntentType.QUESTION || intentType == AIIntentType.ADVICE_REQUEST) {
             return Optional.of(generateCoachingReply(user));
         }
 
@@ -111,12 +116,26 @@ public class AIIntentService {
     }
 
     public PromptBuilder.ChatPromptContext buildPromptContext(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow();
         Goal latestGoal = goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(userId).orElse(null);
         DailyLog latestDailyLog = dailyLogRepository.findTopByUserIdOrderByLogDateDescIdDesc(userId).orElse(null);
         BodyMetrics latestBodyMetrics = bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(userId).orElse(null);
+        double proteinConsumed = latestDailyLog != null
+                ? mealItemRepository.findAllByDailyLogId(latestDailyLog.getId()).stream()
+                .mapToDouble(item -> item.getFood().getProtein() * item.getQuantity())
+                .sum()
+                : 0.0;
+        Object latestWeight = latestBodyMetrics != null && latestBodyMetrics.getWeight() != null
+                ? latestBodyMetrics.getWeight()
+                : user.getWeightKg() != null ? user.getWeightKg() : "unknown";
 
         return new PromptBuilder.ChatPromptContext(
+                user.getAge() != null ? user.getAge() : "unknown",
+                user.getSex() != null ? user.getSex().name() : "unknown",
+                user.getHeightCm() != null ? user.getHeightCm() : "unknown",
+                user.getActivityLevel() != null ? user.getActivityLevel().name() : "unknown",
                 latestGoal != null && latestGoal.getGoalType() != null ? latestGoal.getGoalType().name() : "UNKNOWN",
+                latestGoal != null && latestGoal.getTargetWeight() != null ? latestGoal.getTargetWeight() : "unknown",
                 latestGoal != null && latestGoal.getTargetCalories() != null ? latestGoal.getTargetCalories() : "unknown",
                 latestGoal != null && latestGoal.getTargetProtein() != null ? latestGoal.getTargetProtein() : "unknown",
                 latestGoal != null && latestGoal.getTargetCarbs() != null ? latestGoal.getTargetCarbs() : "unknown",
@@ -125,7 +144,8 @@ public class AIIntentService {
                 latestDailyLog != null && latestDailyLog.getCaloriesBurned() != null ? latestDailyLog.getCaloriesBurned() : 0.0,
                 calculateBalance(latestDailyLog),
                 latestDailyLog != null && latestDailyLog.getSteps() != null ? latestDailyLog.getSteps() : 0,
-                latestBodyMetrics != null && latestBodyMetrics.getWeight() != null ? latestBodyMetrics.getWeight() : "unknown"
+                proteinConsumed,
+                latestWeight
         );
     }
 
@@ -466,12 +486,33 @@ public class AIIntentService {
         return null;
     }
 
-    private boolean isProgressQuestion(String normalized) {
-        return normalized.contains("?")
-                || normalized.contains("deficit")
+    private AIIntentType detectIntentType(String normalized) {
+        if (normalized.contains("deficit")
                 || normalized.contains("progress")
                 || normalized.contains("how did i do")
-                || normalized.contains("calorie balance");
+                || normalized.contains("calorie balance")
+                || QUESTION_PATTERN.matcher(normalized).find()) {
+            return AIIntentType.QUESTION;
+        }
+
+        if (ADVICE_REQUEST_PATTERN.matcher(normalized).find()) {
+            return AIIntentType.ADVICE_REQUEST;
+        }
+
+        if (parseFood(normalized) != null) {
+            return AIIntentType.FOOD_LOG;
+        }
+        if (parseWorkout(normalized) != null) {
+            return AIIntentType.WORKOUT_LOG;
+        }
+        if (parseWeight(normalized) != null) {
+            return AIIntentType.WEIGHT_LOG;
+        }
+        if (parseSteps(normalized) != null) {
+            return AIIntentType.STEPS_LOG;
+        }
+
+        return AIIntentType.UNKNOWN;
     }
 
     private boolean looksLikeWorkout(String normalized) {
@@ -672,5 +713,15 @@ public class AIIntentService {
     }
 
     private record ParsedGoal(UserGoalType goalType) {
+    }
+
+    private enum AIIntentType {
+        FOOD_LOG,
+        WORKOUT_LOG,
+        WEIGHT_LOG,
+        STEPS_LOG,
+        QUESTION,
+        ADVICE_REQUEST,
+        UNKNOWN
     }
 }

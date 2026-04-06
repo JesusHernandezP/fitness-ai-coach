@@ -97,26 +97,39 @@ public class PromptBuilder {
 
     public String buildChatPrompt(ChatPromptContext context, String conversationHistory, String latestUserMessage) {
         return """
-                You are a continuous AI fitness coach in an ongoing conversation.
+                You are a conversational fitness coach for a mobile app.
+                Behave like a nutritionist and personal trainer.
+                Your tone must be concise, supportive, and professional.
 
-                Current user context:
+                User profile:
+                - age: %s
+                - sex: %s
+                - heightCm: %s
+                - activityLevel: %s
+
+                Goals:
                 - goalType: %s
+                - targetWeight: %s
                 - targetCalories: %s
                 - targetProtein: %s
                 - targetCarbs: %s
                 - targetFat: %s
+
+                Current daily summary:
                 - caloriesConsumed: %s
                 - caloriesBurned: %s
                 - calorieBalance: %s
                 - steps: %s
+                - proteinConsumed: %s
                 - latestWeight: %s
 
                 Conversation rules:
-                - Be supportive, clear, and actionable.
-                - Keep replies short: at most 4 sentences.
-                - Avoid repetition.
-                - Use the recent conversation and the latest fitness context.
-                - If data is missing, say so briefly and still help.
+                - Keep replies short: 2 to 4 sentences.
+                - Use recent conversation and stored fitness data as context.
+                - If the user asks for advice, reference goal alignment, activity, nutrition, or recovery when relevant.
+                - If data is missing, say so briefly and still give a practical next step.
+                - Never invent values that are not present.
+                - Do not return JSON, markdown tables, or bullet lists.
 
                 Recent conversation:
                 %s
@@ -124,7 +137,12 @@ public class PromptBuilder {
                 Latest user message:
                 %s
                 """.formatted(
+                context.age(),
+                context.sex(),
+                context.heightCm(),
+                context.activityLevel(),
                 context.goalType(),
+                context.targetWeight(),
                 context.targetCalories(),
                 context.targetProtein(),
                 context.targetCarbs(),
@@ -133,6 +151,7 @@ public class PromptBuilder {
                 context.caloriesBurned(),
                 context.calorieBalance(),
                 context.steps(),
+                context.proteinConsumed(),
                 context.latestWeight(),
                 conversationHistory,
                 latestUserMessage
@@ -180,7 +199,12 @@ public class PromptBuilder {
     }
 
     public record ChatPromptContext(
+            Object age,
+            String sex,
+            Object heightCm,
+            String activityLevel,
             String goalType,
+            Object targetWeight,
             Object targetCalories,
             Object targetProtein,
             Object targetCarbs,
@@ -189,6 +213,7 @@ public class PromptBuilder {
             double caloriesBurned,
             double calorieBalance,
             int steps,
+            double proteinConsumed,
             Object latestWeight
     ) {
     }
