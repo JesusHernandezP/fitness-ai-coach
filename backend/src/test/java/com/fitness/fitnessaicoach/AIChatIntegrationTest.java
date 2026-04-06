@@ -204,14 +204,121 @@ class AIChatIntegrationTest {
         verify(aiTextGenerationClient, atLeastOnce()).generateText(promptCaptor.capture());
 
         String prompt = promptCaptor.getValue();
-        assertThat(prompt).contains("USER: Message 3");
+        assertThat(prompt).contains("USER: Message 9");
         assertThat(prompt).contains("AI: Context-aware reply.");
         assertThat(prompt).contains("USER: Message 11");
-        assertThat(prompt).contains("Latest user message:");
+        assertThat(prompt).contains("USER MESSAGE");
         assertThat(prompt).contains("Message 12");
-        assertThat(prompt).doesNotContain("USER: Message 1\r\n");
+        assertThat(prompt).doesNotContain("USER: Message 7\r\n");
         assertThat(prompt).doesNotContain("USER: Message 12");
-        assertThat(prompt.indexOf("USER: Message 3")).isLessThan(prompt.indexOf("USER: Message 11"));
+        assertThat(prompt.indexOf("USER: Message 9")).isLessThan(prompt.indexOf("USER: Message 11"));
+    }
+
+    @Test
+    void testFoodAnalysisResponse() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Great choice. Chicken and rice gives you a solid base of protein and carbs for recovery. You still have room to add vegetables and another protein-rich meal later today. Would you like ideas for that next meal?");
+
+        UserContext user = registerAndLogin("food-analysis");
+        createGoal(user.token(), 82);
+        createFood(user.token(), "chicken", 1.65);
+        createFood(user.token(), "rice", 1.30);
+
+        sendMessageExpectingReply(
+                user.token(),
+                "I ate 200g chicken and rice today",
+                "Great choice. Chicken and rice gives you a solid base of protein and carbs for recovery. You still have room to add vegetables and another protein-rich meal later today. Would you like ideas for that next meal?"
+        );
+    }
+
+    @Test
+    void testTrainingAnalysisResponse() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Nice work today. Leg training plus your steps creates a strong training stimulus, so recovery and protein intake matter even more tonight. Make sure you eat a protein-rich meal and stay well hydrated.");
+
+        UserContext user = registerAndLogin("training-analysis");
+
+        sendMessageExpectingReply(
+                user.token(),
+                "I trained legs today and walked 8000 steps",
+                "Nice work today. Leg training plus your steps creates a strong training stimulus, so recovery and protein intake matter even more tonight. Make sure you eat a protein-rich meal and stay well hydrated."
+        );
+    }
+
+    @Test
+    void testLowProteinWarning() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("You are still quite low on protein for the day, which can make recovery harder. Try adding a protein-rich meal such as eggs, yogurt, chicken, or fish before the day ends. That will help you stay aligned with your goal.");
+
+        UserContext user = registerAndLogin("low-protein");
+        createGoal(user.token(), 80);
+        createDailyLog(user.token(), user.userId());
+
+        sendMessageExpectingReply(
+                user.token(),
+                "today I only ate once",
+                "You are still quite low on protein for the day, which can make recovery harder. Try adding a protein-rich meal such as eggs, yogurt, chicken, or fish before the day ends. That will help you stay aligned with your goal."
+        );
+    }
+
+    @Test
+    void testPositiveFeedback() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("You are doing a good job staying consistent. Your training and daily activity are supporting your goal, and that kind of consistency is what drives progress over time. Keep building on that momentum.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("positive-feedback");
+        createGoal(user.token(), 80);
+        createDailyLog(user.token(), user.userId());
+
+        sendMessageExpectingReply(
+                user.token(),
+                "am I on track?",
+                "You are doing a good job staying consistent. Your training and daily activity are supporting your goal, and that kind of consistency is what drives progress over time. Keep building on that momentum."
+        );
+    }
+
+    @Test
+    void testFollowupQuestionGeneration() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Fatigue can be a sign that your intake or recovery is too low for your current routine. Make sure you eat enough overall, keep protein high, and prioritize sleep tonight. Have you also noticed low energy during training?");
+
+        UserContext user = registerAndLogin("followup-question");
+
+        sendMessageExpectingReply(
+                user.token(),
+                "I feel tired lately",
+                "Fatigue can be a sign that your intake or recovery is too low for your current routine. Make sure you eat enough overall, keep protein high, and prioritize sleep tonight. Have you also noticed low energy during training?"
+        );
+    }
+
+    @Test
+    void testCoachPromptShouldIncludeNutritionAndTrainingContext() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Coach reply.");
+
+        UserContext user = registerAndLogin("prompt-context");
+        createGoal(user.token(), 82);
+        createFood(user.token(), "chicken", 1.65);
+        createFood(user.token(), "rice", 1.30);
+
+        sendMessage(user.token(), "I ate 200g chicken and rice today");
+        reset(aiTextGenerationClient);
+        when(aiTextGenerationClient.generateText(anyString())).thenReturn("Coach reply.");
+
+        sendMessage(user.token(), "I trained legs today and walked 8000 steps");
+
+        ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
+        verify(aiTextGenerationClient, atLeastOnce()).generateText(promptCaptor.capture());
+        String prompt = promptCaptor.getValue();
+
+        assertThat(prompt).contains("INTERPRETATION RULES");
+        assertThat(prompt).contains("FOOD ANALYSIS RULES");
+        assertThat(prompt).contains("TRAINING ANALYSIS RULES");
+        assertThat(prompt).contains("NUTRITION CONTEXT");
+        assertThat(prompt).contains("Training today:");
+        assertThat(prompt).contains("Steps today:");
+        assertThat(prompt).contains("Strength training: YES");
     }
 
     @Test

@@ -55,7 +55,7 @@ public class AIChatService {
     private String buildPrompt(UUID userId, String latestUserMessage, String structuredAction) {
         PromptBuilder.ChatPromptContext context = aiIntentService.buildPromptContext(userId);
         PromptBuilder.NutritionContext nutritionContext = nutritionContextBuilder.build(userId);
-        List<AIChatMessage> recentMessages = aiChatHistoryService.getRecentMessages(userId, 20);
+        List<AIChatMessage> recentMessages = aiChatHistoryService.getRecentMessages(userId, 8);
         Collections.reverse(recentMessages);
         return promptBuilder.buildChatPrompt(
                 context,

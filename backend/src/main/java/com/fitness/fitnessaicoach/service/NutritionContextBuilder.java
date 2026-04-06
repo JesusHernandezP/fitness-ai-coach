@@ -5,11 +5,13 @@ import com.fitness.fitnessaicoach.domain.DailyLog;
 import com.fitness.fitnessaicoach.domain.Goal;
 import com.fitness.fitnessaicoach.domain.MealItem;
 import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.domain.WorkoutSession;
 import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
 import com.fitness.fitnessaicoach.repository.GoalRepository;
 import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
+import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,7 @@ public class NutritionContextBuilder {
     private final DailyLogRepository dailyLogRepository;
     private final BodyMetricsRepository bodyMetricsRepository;
     private final MealItemRepository mealItemRepository;
+    private final WorkoutSessionRepository workoutSessionRepository;
 
     public PromptBuilder.NutritionContext build(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow();
@@ -34,6 +37,9 @@ public class NutritionContextBuilder {
 
         List<MealItem> mealItems = latestDailyLog != null
                 ? mealItemRepository.findAllByDailyLogId(latestDailyLog.getId())
+                : List.of();
+        List<WorkoutSession> workouts = latestDailyLog != null
+                ? workoutSessionRepository.findByDailyLogId(latestDailyLog.getId())
                 : List.of();
 
         double consumedCalories = latestDailyLog != null && latestDailyLog.getCaloriesConsumed() != null
@@ -65,6 +71,18 @@ public class NutritionContextBuilder {
         Object weight = latestBodyMetrics != null && latestBodyMetrics.getWeight() != null
                 ? latestBodyMetrics.getWeight()
                 : user.getWeightKg() != null ? user.getWeightKg() : "unknown";
+        boolean strengthTraining = workouts.stream().anyMatch(workout -> workout.getSets() != null && workout.getSets() > 0);
+        int cardioMinutes = workouts.stream()
+                .filter(workout -> workout.getExercise() != null && workout.getExercise().getName() != null)
+                .filter(workout -> {
+                    String name = workout.getExercise().getName().toLowerCase();
+                    return name.contains("cardio")
+                            || name.contains("run")
+                            || name.contains("walk");
+                })
+                .mapToInt(workout -> workout.getDuration() != null ? workout.getDuration() : 0)
+                .sum();
+        int steps = latestDailyLog != null && latestDailyLog.getSteps() != null ? latestDailyLog.getSteps() : 0;
 
         return new PromptBuilder.NutritionContext(
                 latestGoal != null && latestGoal.getGoalType() != null ? latestGoal.getGoalType().name() : "UNKNOWN",
@@ -82,6 +100,9 @@ public class NutritionContextBuilder {
                 Math.max(0.0, targetProtein - consumedProtein),
                 Math.max(0.0, targetCarbs - consumedCarbs),
                 Math.max(0.0, targetFat - consumedFat),
+                strengthTraining,
+                cardioMinutes,
+                steps,
                 latestGoal != null || latestDailyLog != null
         );
     }

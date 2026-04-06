@@ -124,6 +124,9 @@ class PromptBuilderTest {
                         107.0,
                         292.0,
                         74.0,
+                        true,
+                        30,
+                        8000,
                         true
                 ),
                 "USER: I ate chicken and rice\nAI: Good protein choice.",
@@ -139,14 +142,19 @@ class PromptBuilderTest {
         assertThat(prompt).contains("target calories 2900.0");
         assertThat(prompt).contains("protein consumed 145.0");
         assertThat(prompt).contains("The user's meal was already recorded successfully.");
+        assertThat(prompt).contains("INTERPRETATION RULES");
+        assertThat(prompt).contains("FOOD ANALYSIS RULES");
+        assertThat(prompt).contains("TRAINING ANALYSIS RULES");
         assertThat(prompt).contains("NUTRITION CONTEXT");
-        assertThat(prompt).contains("USER PROFILE");
-        assertThat(prompt).contains("goal: BUILD_MUSCLE");
-        assertThat(prompt).contains("target calories: 2800 kcal");
-        assertThat(prompt).contains("consumed protein today: 63 g");
-        assertThat(prompt).contains("remaining carbs: 292 g");
-        assertThat(prompt).contains("Recent conversation:");
-        assertThat(prompt).contains("Latest user message:");
+        assertThat(prompt).contains("Goal: BUILD_MUSCLE");
+        assertThat(prompt).contains("Calories target: 2800 kcal");
+        assertThat(prompt).contains("Protein consumed: 63 g");
+        assertThat(prompt).contains("Carbs remaining: 292 g");
+        assertThat(prompt).contains("Strength training: YES");
+        assertThat(prompt).contains("Cardio minutes: 30");
+        assertThat(prompt).contains("8000 steps");
+        assertThat(prompt).contains("CHAT HISTORY");
+        assertThat(prompt).contains("USER MESSAGE");
         assertThat(prompt).contains("How can I improve dinner?");
     }
 }
