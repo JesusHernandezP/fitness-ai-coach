@@ -28,11 +28,20 @@ public class Goal {
     @Column(nullable = false)
     private UserGoalType goalType;
 
-    @Column(nullable = false)
+    @Column
     private Double targetWeight;
 
     @Column(nullable = false)
     private Double targetCalories;
+
+    @Column
+    private Double targetProtein;
+
+    @Column
+    private Double targetCarbs;
+
+    @Column
+    private Double targetFat;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

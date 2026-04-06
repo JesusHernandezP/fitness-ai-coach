@@ -10,5 +10,7 @@ fun UserResponseDto.toDomain(): User = User(
     age = age,
     heightCm = heightCm,
     weightKg = weightKg,
+    sex = sex,
+    activityLevel = activityLevel,
     createdAt = createdAt
 )

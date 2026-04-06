@@ -1,5 +1,6 @@
 package com.fitness.fitnessaicoach.controller;
 
+import com.fitness.fitnessaicoach.dto.UserProfileUpdateRequest;
 import com.fitness.fitnessaicoach.dto.UserRequest;
 import com.fitness.fitnessaicoach.dto.UserResponse;
 import com.fitness.fitnessaicoach.service.UserService;
@@ -9,7 +10,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.UUID;
@@ -42,5 +50,17 @@ public class UserController {
     @SecurityRequirement(name = "bearerAuth")
     public List<UserResponse> getAllUsers() {
         return userService.getAllUsers();
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update current user metabolic profile")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<UserResponse> updateUserProfile(
+            @PathVariable UUID id,
+            @Valid @RequestBody UserProfileUpdateRequest request,
+            @AuthenticationPrincipal String email
+    ) {
+        UserResponse updated = userService.updateProfile(id, email, request);
+        return ResponseEntity.ok(updated);
     }
 }

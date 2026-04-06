@@ -14,7 +14,9 @@ import com.fitness.fitnessaicoach.repository.MealRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,6 +38,7 @@ public class DailyLogService {
     private final WorkoutSessionRepository workoutSessionRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public DailyLogResponse createDailyLog(DailyLogRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado."));
@@ -135,6 +138,7 @@ public class DailyLogService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public DailyLogResponse getDailyLogByUserIdAndDate(UUID userId, LocalDate date) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
@@ -145,6 +149,7 @@ public class DailyLogService {
         return toResponse(dailyLog);
     }
 
+    @Transactional
     public DailyLogResponse getOrCreateTodayLog(UUID userId) {
         Objects.requireNonNull(userId, "userId must not be null");
 
@@ -158,6 +163,7 @@ public class DailyLogService {
                 .orElseGet(() -> createTodayLog(user, today));
     }
 
+    @Transactional
     public DailyLogResponse getOrCreateTodayLogForAuthenticatedUser(String email) {
         Objects.requireNonNull(email, "email must not be null");
 
@@ -175,8 +181,14 @@ public class DailyLogService {
         dailyLog.setCaloriesBurned(0.0);
         dailyLog.setUser(user);
 
-        DailyLog savedDailyLog = dailyLogRepository.save(dailyLog);
-        return toResponse(savedDailyLog);
+        try {
+            DailyLog savedDailyLog = dailyLogRepository.saveAndFlush(dailyLog);
+            return toResponse(savedDailyLog);
+        } catch (DataIntegrityViolationException exception) {
+            DailyLog existingLog = dailyLogRepository.findByUserIdAndLogDate(user.getId(), today)
+                    .orElseThrow(() -> exception);
+            return toResponse(existingLog);
+        }
     }
 
     private DailyLogResponse toResponse(DailyLog dailyLog) {

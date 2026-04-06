@@ -53,12 +53,10 @@ public class GoalControllerIntegrationTest {
 
         String goalBody = """
                 {
-                  "userId": "%s",
                   "goalType": "LOSE_WEIGHT",
-                  "targetWeight": 75,
-                  "targetCalories": 2000
+                  "targetWeight": 75
                 }
-                """.formatted(user.userId());
+                """;
 
         String createResult = mockMvc.perform(post("/api/goals")
                         .header("Authorization", "Bearer " + token)
@@ -67,7 +65,10 @@ public class GoalControllerIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"))
                 .andExpect(jsonPath("$.targetWeight").value(75.0))
-                .andExpect(jsonPath("$.targetCalories").value(2000))
+                .andExpect(jsonPath("$.targetCalories").value(2451.25))
+                .andExpect(jsonPath("$.targetProtein").value(160.0))
+                .andExpect(jsonPath("$.targetFat").value(64.0))
+                .andExpect(jsonPath("$.targetCarbs").value(308.81))
                 .andExpect(jsonPath("$.userId").value(user.userId()))
                 .andReturn()
                 .getResponse()
@@ -77,7 +78,8 @@ public class GoalControllerIntegrationTest {
 
         mockMvc.perform(get("/api/goals")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(goalId));
 
         mockMvc.perform(get("/api/goals/" + goalId)
                         .header("Authorization", "Bearer " + token))
@@ -88,6 +90,54 @@ public class GoalControllerIntegrationTest {
         mockMvc.perform(delete("/api/goals/" + goalId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void goalShouldAllowMissingTargetWeight() throws Exception {
+        UserContext user = registerAndLogin();
+
+        String goalBody = """
+                {
+                  "goalType": "MAINTAIN"
+                }
+                """;
+
+        mockMvc.perform(post("/api/goals")
+                        .header("Authorization", "Bearer " + user.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(goalBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.goalType").value("MAINTAIN"))
+                .andExpect(jsonPath("$.targetWeight").isEmpty())
+                .andExpect(jsonPath("$.targetCalories").value(2751.25))
+                .andExpect(jsonPath("$.targetProtein").value(128.0))
+                .andExpect(jsonPath("$.targetFat").value(64.0))
+                .andExpect(jsonPath("$.targetCarbs").value(415.81));
+    }
+
+    @Test
+    void shouldRejectDuplicateGoalForSameDay() throws Exception {
+        UserContext user = registerAndLogin();
+
+        String goalBody = """
+                {
+                  "goalType": "LOSE_WEIGHT",
+                  "targetWeight": 75
+                }
+                """;
+
+        mockMvc.perform(post("/api/goals")
+                        .header("Authorization", "Bearer " + user.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(goalBody))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/goals")
+                        .header("Authorization", "Bearer " + user.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(goalBody))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("You already set your goal today"));
     }
 
     private UserContext registerAndLogin() throws Exception {

@@ -148,6 +148,42 @@ public class DailyLogSearchIntegrationTest {
                 .andExpect(jsonPath("$.date").value(today.toString()))
                 .andExpect(jsonPath("$.steps").value(4321))
                 .andExpect(jsonPath("$.userId").value(user.userId()));
+
+        mockMvc.perform(get("/api/daily-logs/today")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(today.toString()))
+                .andExpect(jsonPath("$.steps").value(4321))
+                .andExpect(jsonPath("$.userId").value(user.userId()));
+    }
+
+    @Test
+    void shouldCreateTodayLogForAuthenticatedUserWhenMissing() throws Exception {
+        UserContext user = registerAndLogin();
+        String token = user.token();
+        LocalDate today = LocalDate.now();
+
+        mockMvc.perform(get("/api/daily-logs/today")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(today.toString()))
+                .andExpect(jsonPath("$.steps").value(0))
+                .andExpect(jsonPath("$.caloriesConsumed").value(0.0))
+                .andExpect(jsonPath("$.caloriesBurned").value(0.0))
+                .andExpect(jsonPath("$.userId").value(user.userId()));
+
+        mockMvc.perform(get("/api/daily-logs/today")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.date").value(today.toString()))
+                .andExpect(jsonPath("$.steps").value(0))
+                .andExpect(jsonPath("$.userId").value(user.userId()));
+
+        mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].date").value(today.toString()));
     }
 
     @Test

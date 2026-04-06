@@ -1,0 +1,368 @@
+package com.fitness.fitnessaicoach;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
+import com.fitness.fitnessaicoach.domain.AIChatMessage;
+import com.fitness.fitnessaicoach.domain.ChatRole;
+import com.fitness.fitnessaicoach.domain.ChatSession;
+import com.fitness.fitnessaicoach.domain.DailyLog;
+import com.fitness.fitnessaicoach.domain.Meal;
+import com.fitness.fitnessaicoach.domain.MealItem;
+import com.fitness.fitnessaicoach.domain.WorkoutSession;
+import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
+import com.fitness.fitnessaicoach.repository.AIChatMessageRepository;
+import com.fitness.fitnessaicoach.repository.ChatSessionRepository;
+import com.fitness.fitnessaicoach.repository.DailyLogRepository;
+import com.fitness.fitnessaicoach.repository.MealItemRepository;
+import com.fitness.fitnessaicoach.repository.MealRepository;
+import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@TestPropertySource(properties = {
+        "app.swagger.public=true",
+        "springdoc.api-docs.enabled=true",
+        "springdoc.swagger-ui.enabled=true"
+})
+class AIChatIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private ChatSessionRepository chatSessionRepository;
+
+    @Autowired
+    private AIChatMessageRepository aiChatMessageRepository;
+
+    @Autowired
+    private DailyLogRepository dailyLogRepository;
+
+    @Autowired
+    private MealRepository mealRepository;
+
+    @Autowired
+    private MealItemRepository mealItemRepository;
+
+    @Autowired
+    private WorkoutSessionRepository workoutSessionRepository;
+
+    @Autowired
+    private BodyMetricsRepository bodyMetricsRepository;
+
+    @MockBean
+    private AITextGenerationClient aiTextGenerationClient;
+
+    @Test
+    void swaggerSpecShouldExposeAiChatEndpoint() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$['paths']['/api/ai-chat/message']").exists())
+                .andExpect(jsonPath("$['paths']['/api/ai-chat/message']['post']").exists());
+    }
+
+    @Test
+    void aiChatShouldStoreConversationAndReuseSession() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("You are close to your calorie target. Add a short walk and keep dinner lighter.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("ai-chat");
+        createGoal(user.token(), 75);
+        createBodyMetric(user.token(), 79.4);
+        createDailyLog(user.token(), user.userId());
+
+        sendMessage(user.token(), "How did I do today?");
+        sendMessage(user.token(), "What should I do tomorrow?");
+
+        List<ChatSession> sessions = chatSessionRepository.findAll().stream()
+                .filter(session -> session.getUser() != null && user.userId().equals(session.getUser().getId().toString()))
+                .toList();
+        assertThat(sessions).hasSize(1);
+
+        ChatSession session = sessions.get(0);
+        List<AIChatMessage> messages = aiChatMessageRepository.findBySessionIdOrderByCreatedAtAscIdAsc(session.getId());
+
+        assertThat(messages).hasSize(4);
+        assertThat(messages.get(0).getRole()).isEqualTo(ChatRole.USER);
+        assertThat(messages.get(0).getContent()).isEqualTo("How did I do today?");
+        assertThat(messages.get(1).getRole()).isEqualTo(ChatRole.AI);
+        assertThat(messages.get(2).getRole()).isEqualTo(ChatRole.USER);
+        assertThat(messages.get(2).getContent()).isEqualTo("What should I do tomorrow?");
+        assertThat(messages.get(3).getRole()).isEqualTo(ChatRole.AI);
+    }
+
+    @Test
+    void aiChatShouldKeepOnlyLastTwentyStoredMessagesPerSession() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Keep your calories steady and hit your step target tomorrow.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("trim-chat");
+        createDailyLog(user.token(), user.userId());
+
+        for (int index = 1; index <= 11; index++) {
+            sendMessage(user.token(), "Message " + index);
+        }
+
+        ChatSession session = chatSessionRepository.findAll().stream()
+                .filter(candidate -> candidate.getUser() != null && user.userId().equals(candidate.getUser().getId().toString()))
+                .findFirst()
+                .orElseThrow();
+        List<AIChatMessage> messages = aiChatMessageRepository.findBySessionIdOrderByCreatedAtAscIdAsc(session.getId());
+
+        assertThat(messages).hasSize(20);
+        assertThat(messages.get(0).getContent()).isEqualTo("Message 2");
+        assertThat(messages.get(1).getContent()).isEqualTo("Keep your calories steady and hit your step target tomorrow.");
+        assertThat(messages.get(messages.size() - 2).getContent()).isEqualTo("Message 11");
+        assertThat(messages.get(messages.size() - 1).getRole()).isEqualTo(ChatRole.AI);
+    }
+
+    @Test
+    void aiChatShouldBuildChronologicalTrimmedPromptContextFromRecentUserHistory() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Context-aware reply.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("history-chat");
+        createDailyLog(user.token(), user.userId());
+
+        for (int index = 1; index <= 11; index++) {
+            sendMessage(user.token(), "Message " + index);
+        }
+
+        reset(aiTextGenerationClient);
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Context-aware reply.");
+
+        sendMessage(user.token(), "Message 12");
+
+        ArgumentCaptor<String> promptCaptor = ArgumentCaptor.forClass(String.class);
+        verify(aiTextGenerationClient, atLeastOnce()).generateText(promptCaptor.capture());
+
+        String prompt = promptCaptor.getValue();
+        assertThat(prompt).contains("USER: Message 3");
+        assertThat(prompt).contains("AI: Context-aware reply.");
+        assertThat(prompt).contains("USER: Message 11");
+        assertThat(prompt).contains("Latest user message:");
+        assertThat(prompt).contains("Message 12");
+        assertThat(prompt).doesNotContain("USER: Message 1\r\n");
+        assertThat(prompt).doesNotContain("USER: Message 12");
+        assertThat(prompt.indexOf("USER: Message 3")).isLessThan(prompt.indexOf("USER: Message 11"));
+    }
+
+    @Test
+    void aiChatShouldLogFoodWorkoutStepsWeightAndAnswerProgressQuestion() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("You are in a calorie deficit today. Keep protein high and stay near your step target.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("log-chat");
+        createGoal(user.token(), 75);
+        createFood(user.token(), "eggs", 78.0);
+        createFood(user.token(), "toast", 90.0);
+
+        sendMessageExpectingReply(user.token(), "2 eggs and toast", "Logged 2 food item(s) for snack. Quantity total: 3.");
+        sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Logged workout \"Pull\" with 4x8.");
+        sendMessageExpectingReply(user.token(), "9000 steps today", "Logged 9000 steps for today.");
+        sendMessageExpectingReply(user.token(), "weight 78.5 kg", "Logged your weight at 78.5 kg for today.");
+        sendMessageExpectingReply(user.token(), "am I in deficit?", "You are in a calorie deficit today. Keep protein high and stay near your step target.");
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
+                .orElseThrow();
+        assertThat(dailyLog.getSteps()).isEqualTo(9000);
+        assertThat(dailyLog.getCaloriesConsumed()).isGreaterThan(0.0);
+        assertThat(dailyLog.getCaloriesBurned()).isGreaterThan(0.0);
+
+        List<Meal> meals = mealRepository.findByDailyLogId(dailyLog.getId());
+        assertThat(meals).hasSize(1);
+
+        List<MealItem> mealItems = mealItemRepository.findAllByDailyLogId(dailyLog.getId());
+        assertThat(mealItems).hasSize(2);
+        assertThat(mealItems).extracting(item -> item.getFood().getName().toLowerCase()).contains("eggs", "toast");
+
+        List<WorkoutSession> workouts = workoutSessionRepository.findByDailyLogId(dailyLog.getId());
+        assertThat(workouts).hasSize(1);
+        assertThat(workouts.get(0).getSets()).isEqualTo(4);
+        assertThat(workouts.get(0).getReps()).isEqualTo(8);
+
+        assertThat(bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(UUID.fromString(user.userId())))
+                .get()
+                .extracting(metric -> metric.getWeight())
+                .isEqualTo(78.5);
+    }
+
+    private void sendMessage(String token, String message) throws Exception {
+        String body = """
+                {
+                  "message": "%s"
+                }
+                """.formatted(message);
+
+        mockMvc.perform(post("/api/ai-chat/message")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply").isString());
+    }
+
+    private void sendMessageExpectingReply(String token, String message, String expectedReply) throws Exception {
+        String body = """
+                {
+                  "message": "%s"
+                }
+                """.formatted(message);
+
+        mockMvc.perform(post("/api/ai-chat/message")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply").value(expectedReply));
+    }
+
+    private void createGoal(String token, double targetWeight) throws Exception {
+        String body = """
+                {
+                  "goalType": "LOSE_WEIGHT",
+                  "targetWeight": %s
+                }
+                """.formatted(targetWeight);
+
+        mockMvc.perform(post("/api/goals")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
+    private void createBodyMetric(String token, double weight) throws Exception {
+        String body = """
+                {
+                  "weight": %s,
+                  "date": "2026-04-15"
+                }
+                """.formatted(weight);
+
+        mockMvc.perform(post("/api/body-metrics")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
+    private void createDailyLog(String token, String userId) throws Exception {
+        String body = """
+                {
+                  "logDate": "2026-04-15",
+                  "steps": 6400,
+                  "caloriesConsumed": 2100.0,
+                  "caloriesBurned": 450.0,
+                  "userId": "%s"
+                }
+                """.formatted(userId);
+
+        mockMvc.perform(post("/api/daily-logs")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
+    private void createFood(String token, String name, double calories) throws Exception {
+        String body = """
+                {
+                  "name": "%s",
+                  "calories": %s,
+                  "protein": 6.0,
+                  "carbs": 12.0,
+                  "fat": 4.0
+                }
+                """.formatted(name, calories);
+
+        mockMvc.perform(post("/api/foods")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isCreated());
+    }
+
+    private UserContext registerAndLogin(String prefix) throws Exception {
+        String email = prefix + "-" + UUID.randomUUID() + "@example.com";
+        String password = "Passw0rd!";
+
+        String registerBody = """
+                {
+                  "name": "AI Chat User",
+                  "email": "%s",
+                  "password": "%s",
+                  "age": 31,
+                  "heightCm": 178.0,
+                  "weightKg": 80.0
+                }
+                """.formatted(email, password);
+
+        MvcResult registerResult = mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registerBody))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("id")
+                .asText();
+
+        String loginBody = """
+                {
+                  "email": "%s",
+                  "password": "%s"
+                }
+                """.formatted(email, password);
+
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andReturn();
+
+        String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("token")
+                .asText();
+
+        return new UserContext(token, userId);
+    }
+
+    private record UserContext(String token, String userId) {
+    }
+}

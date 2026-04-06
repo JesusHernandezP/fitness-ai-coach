@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,28 +27,37 @@ public class GoalController {
 
     @PostMapping
     @Operation(summary = "Create a new goal")
-    public ResponseEntity<GoalResponse> createGoal(@Valid @RequestBody GoalRequest request) {
-        GoalResponse response = goalService.createGoal(request);
+    public ResponseEntity<GoalResponse> createGoal(
+            Authentication authentication,
+            @Valid @RequestBody GoalRequest request) {
+
+        GoalResponse response = goalService.createGoal(authentication.getName(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
     @Operation(summary = "Get all goals")
-    public List<GoalResponse> getAllGoals() {
-        return goalService.getAllGoals();
+    public List<GoalResponse> getAllGoals(Authentication authentication) {
+        return goalService.getAllGoals(authentication.getName());
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get goal by id")
-    public ResponseEntity<GoalResponse> getGoalById(@PathVariable UUID id) {
-        GoalResponse response = goalService.getGoalById(id);
+    public ResponseEntity<GoalResponse> getGoalById(
+            Authentication authentication,
+            @PathVariable UUID id) {
+
+        GoalResponse response = goalService.getGoalById(authentication.getName(), id);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete goal by id")
-    public ResponseEntity<Void> deleteGoal(@PathVariable UUID id) {
-        goalService.deleteGoal(id);
+    public ResponseEntity<Void> deleteGoal(
+            Authentication authentication,
+            @PathVariable UUID id) {
+
+        goalService.deleteGoal(authentication.getName(), id);
         return ResponseEntity.noContent().build();
     }
 }

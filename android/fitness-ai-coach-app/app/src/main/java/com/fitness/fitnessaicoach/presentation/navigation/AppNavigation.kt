@@ -5,10 +5,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.fitness.fitnessaicoach.presentation.auth.LoginScreen
+import com.fitness.fitnessaicoach.presentation.bodymetrics.BodyMetricsScreen
+import com.fitness.fitnessaicoach.presentation.chat.AIChatScreen
 import com.fitness.fitnessaicoach.presentation.coach.CoachScreen
 import com.fitness.fitnessaicoach.presentation.dailylog.DailyLogScreen
+import com.fitness.fitnessaicoach.presentation.goals.GoalsScreen
 import com.fitness.fitnessaicoach.presentation.home.HomeScreen
 import com.fitness.fitnessaicoach.presentation.meal.MealScreen
+import com.fitness.fitnessaicoach.presentation.profile.MetabolicProfileScreen
 import com.fitness.fitnessaicoach.presentation.workout.WorkoutScreen
 
 @Composable
@@ -31,7 +35,29 @@ fun AppNavigation() {
             )
         }
         composable(AppDestination.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                onOpenProfile = {
+                    navController.navigate(AppDestination.Profile.route)
+                },
+                onOpenBodyMetrics = {
+                    navController.navigate(AppDestination.BodyMetrics.route)
+                },
+                onOpenGoals = {
+                    navController.navigate(AppDestination.Goals.route)
+                },
+                onOpenAIChat = {
+                    navController.navigate(AppDestination.AIChat.route)
+                }
+            )
+        }
+        composable(AppDestination.Profile.route) {
+            MetabolicProfileScreen()
+        }
+        composable(AppDestination.BodyMetrics.route) {
+            BodyMetricsScreen()
+        }
+        composable(AppDestination.Goals.route) {
+            GoalsScreen()
         }
         composable(AppDestination.DailyLog.route) {
             DailyLogScreen()
@@ -44,6 +70,9 @@ fun AppNavigation() {
         }
         composable(AppDestination.Coach.route) {
             CoachScreen()
+        }
+        composable(AppDestination.AIChat.route) {
+            AIChatScreen()
         }
     }
 }

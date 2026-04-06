@@ -18,10 +18,17 @@ fun DailyLogDto.toDomain(): DailyLog = DailyLog(
     userId = userId
 )
 
-fun DailyLog.toRequestDto(resolvedUserId: String): DailyLogRequestDto = DailyLogRequestDto(
-    logDate = date,
-    steps = steps,
-    caloriesConsumed = caloriesConsumed ?: totalCalories,
-    caloriesBurned = caloriesBurned ?: 0.0,
-    userId = userId ?: resolvedUserId
-)
+fun DailyLog.toRequestDto(resolvedUserId: String): DailyLogRequestDto {
+
+    require(!date.isNullOrBlank()) {
+        "DailyLog date cannot be null"
+    }
+
+    return DailyLogRequestDto(
+        logDate = date,
+        steps = steps,
+        caloriesConsumed = caloriesConsumed ?: 0.0,
+        caloriesBurned = caloriesBurned ?: 0.0,
+        userId = userId ?: resolvedUserId
+    )
+}

@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AICoachingResponseDto(
-    val message: String
+    val analysis: String,
+    val advice: String
 )

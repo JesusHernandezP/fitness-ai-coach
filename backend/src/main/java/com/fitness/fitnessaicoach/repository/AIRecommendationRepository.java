@@ -5,11 +5,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface AIRecommendationRepository extends JpaRepository<AIRecommendation, UUID> {
 
     List<AIRecommendation> findByDailyLogId(UUID dailyLogId);
+
+    Optional<AIRecommendation> findFirstByDailyLogIdOrderByCreatedAtDescIdDesc(UUID dailyLogId);
+
+    void deleteByDailyLogId(UUID dailyLogId);
 
     @Query("""
             select aiRecommendation

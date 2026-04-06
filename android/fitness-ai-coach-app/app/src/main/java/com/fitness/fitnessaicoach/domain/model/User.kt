@@ -7,5 +7,7 @@ data class User(
     val age: Int?,
     val heightCm: Double?,
     val weightKg: Double?,
+    val sex: String? = null,
+    val activityLevel: String? = null,
     val createdAt: String
 )

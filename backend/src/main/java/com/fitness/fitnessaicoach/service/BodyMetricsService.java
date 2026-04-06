@@ -4,6 +4,7 @@ import com.fitness.fitnessaicoach.domain.BodyMetrics;
 import com.fitness.fitnessaicoach.domain.User;
 import com.fitness.fitnessaicoach.dto.BodyMetricsRequest;
 import com.fitness.fitnessaicoach.dto.BodyMetricsResponse;
+import com.fitness.fitnessaicoach.exception.BodyMetricsAlreadyExistsException;
 import com.fitness.fitnessaicoach.exception.BodyMetricsNotFoundException;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
 import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
@@ -21,15 +22,17 @@ public class BodyMetricsService {
     private final BodyMetricsRepository bodyMetricsRepository;
     private final UserRepository userRepository;
 
-    public BodyMetricsResponse createBodyMetrics(BodyMetricsRequest request) {
-        User user = userRepository.findById(request.getUserId())
+    public BodyMetricsResponse createBodyMetrics(String email, BodyMetricsRequest request) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        if (bodyMetricsRepository.existsByUserIdAndDate(user.getId(), request.getDate())) {
+            throw new BodyMetricsAlreadyExistsException("You already recorded your weight today");
+        }
 
         BodyMetrics bodyMetrics = BodyMetrics.builder()
                 .user(user)
                 .weight(request.getWeight())
-                .bodyFat(request.getBodyFat())
-                .muscleMass(request.getMuscleMass())
                 .date(request.getDate())
                 .build();
 
@@ -38,22 +41,31 @@ public class BodyMetricsService {
         return toResponse(saved);
     }
 
-    public List<BodyMetricsResponse> getAllBodyMetrics() {
-        return bodyMetricsRepository.findAll()
+    public List<BodyMetricsResponse> getAllBodyMetrics(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        return bodyMetricsRepository.findAllByUserIdOrderByDateDescIdDesc(user.getId())
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public BodyMetricsResponse getBodyMetricsById(UUID id) {
-        BodyMetrics bodyMetrics = bodyMetricsRepository.findById(id)
+    public BodyMetricsResponse getBodyMetricsById(String email, UUID id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        BodyMetrics bodyMetrics = bodyMetricsRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new BodyMetricsNotFoundException("Body metrics not found."));
 
         return toResponse(bodyMetrics);
     }
 
-    public void deleteBodyMetrics(UUID id) {
-        BodyMetrics bodyMetrics = bodyMetricsRepository.findById(id)
+    public void deleteBodyMetrics(String email, UUID id) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        BodyMetrics bodyMetrics = bodyMetricsRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new BodyMetricsNotFoundException("Body metrics not found."));
 
         bodyMetricsRepository.delete(bodyMetrics);
@@ -64,8 +76,6 @@ public class BodyMetricsService {
                 .id(bodyMetrics.getId())
                 .userId(bodyMetrics.getUser() != null ? bodyMetrics.getUser().getId() : null)
                 .weight(bodyMetrics.getWeight())
-                .bodyFat(bodyMetrics.getBodyFat())
-                .muscleMass(bodyMetrics.getMuscleMass())
                 .date(bodyMetrics.getDate())
                 .build();
     }

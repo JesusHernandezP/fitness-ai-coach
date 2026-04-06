@@ -4,7 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -14,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,8 +42,9 @@ fun LoginScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {
         Text(
             text = "Login",
@@ -48,8 +52,7 @@ fun LoginScreen(
         )
         Text(
             text = "Sign in to retrieve and store your JWT token.",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(top = 8.dp, bottom = 24.dp)
+            style = MaterialTheme.typography.bodyMedium
         )
 
         OutlinedTextField(
@@ -69,9 +72,7 @@ fun LoginScreen(
             onValueChange = viewModel::onPasswordChanged,
             label = { Text("Password") },
             singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp),
+            modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password,
@@ -83,8 +84,7 @@ fun LoginScreen(
             Text(
                 text = message,
                 color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(top = 12.dp)
+                style = MaterialTheme.typography.bodyMedium
             )
         }
 
@@ -93,7 +93,7 @@ fun LoginScreen(
             enabled = !uiState.isLoading,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 24.dp)
+                .heightIn(min = 48.dp)
         ) {
             if (uiState.isLoading) {
                 CircularProgressIndicator(

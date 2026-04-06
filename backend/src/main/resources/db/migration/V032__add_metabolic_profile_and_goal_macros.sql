@@ -1,0 +1,18 @@
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS sex VARCHAR(255);
+
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS activity_level VARCHAR(255);
+
+UPDATE users
+SET sex = COALESCE(sex, 'MALE'),
+    activity_level = COALESCE(activity_level, 'MODERATE');
+
+ALTER TABLE goals
+    ADD COLUMN IF NOT EXISTS target_protein DOUBLE PRECISION;
+
+ALTER TABLE goals
+    ADD COLUMN IF NOT EXISTS target_carbs DOUBLE PRECISION;
+
+ALTER TABLE goals
+    ADD COLUMN IF NOT EXISTS target_fat DOUBLE PRECISION;

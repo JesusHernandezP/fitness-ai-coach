@@ -18,5 +18,11 @@ public class GoalResponse {
 
     private Double targetCalories;
 
+    private Double targetProtein;
+
+    private Double targetCarbs;
+
+    private Double targetFat;
+
     private UUID userId;
 }

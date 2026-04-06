@@ -5,15 +5,29 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.fitness.fitnessaicoach.core.constants.NetworkConstants
+import com.fitness.fitnessaicoach.data.chat.AIChatRepository
+import com.fitness.fitnessaicoach.data.chat.AIChatRepositoryImpl
 import com.fitness.fitnessaicoach.data.local.datastore.DataStoreTokenStorage
 import com.fitness.fitnessaicoach.data.local.datastore.TokenStorage
+import com.fitness.fitnessaicoach.data.remote.api.AIChatApiService
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
+import com.fitness.fitnessaicoach.data.remote.api.BodyMetricsApi
+import com.fitness.fitnessaicoach.data.remote.api.CoachApi
 import com.fitness.fitnessaicoach.data.remote.api.DailyLogApi
+import com.fitness.fitnessaicoach.data.remote.api.GoalsApi
 import com.fitness.fitnessaicoach.data.remote.api.UserApi
+import com.fitness.fitnessaicoach.data.repository.AICoachRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.AuthRepositoryImpl
+import com.fitness.fitnessaicoach.data.repository.BodyMetricsRepositoryImpl
 import com.fitness.fitnessaicoach.data.repository.DailyLogRepositoryImpl
+import com.fitness.fitnessaicoach.data.repository.GoalsRepositoryImpl
+import com.fitness.fitnessaicoach.data.repository.UserRepositoryImpl
+import com.fitness.fitnessaicoach.domain.repository.AICoachRepository
 import com.fitness.fitnessaicoach.domain.repository.AuthRepository
+import com.fitness.fitnessaicoach.domain.repository.BodyMetricsRepository
 import com.fitness.fitnessaicoach.domain.repository.DailyLogRepository
+import com.fitness.fitnessaicoach.domain.repository.GoalsRepository
+import com.fitness.fitnessaicoach.domain.repository.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -55,6 +69,16 @@ object RepositoryModule {
 
     @Provides
     @Singleton
+    fun provideBodyMetricsRepository(
+        bodyMetricsApi: BodyMetricsApi
+    ): BodyMetricsRepository {
+        return BodyMetricsRepositoryImpl(
+            bodyMetricsApi = bodyMetricsApi
+        )
+    }
+
+    @Provides
+    @Singleton
     fun provideDailyLogRepository(
         dailyLogApi: DailyLogApi,
         userApi: UserApi,
@@ -64,6 +88,48 @@ object RepositoryModule {
             dailyLogApi = dailyLogApi,
             userApi = userApi,
             tokenStorage = tokenStorage
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideGoalsRepository(
+        goalsApi: GoalsApi
+    ): GoalsRepository {
+        return GoalsRepositoryImpl(
+            goalsApi = goalsApi
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserRepository(
+        userApi: UserApi,
+        tokenStorage: TokenStorage
+    ): UserRepository {
+        return UserRepositoryImpl(
+            userApi = userApi,
+            tokenStorage = tokenStorage
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAICoachRepository(
+        coachApi: CoachApi
+    ): AICoachRepository {
+        return AICoachRepositoryImpl(
+            coachApi = coachApi
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideAIChatRepository(
+        aiChatApiService: AIChatApiService
+    ): AIChatRepository {
+        return AIChatRepositoryImpl(
+            aiChatApiService = aiChatApiService
         )
     }
 }

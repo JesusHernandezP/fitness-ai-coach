@@ -33,6 +33,12 @@ public class User {
     private Double heightCm;
     private Double weightKg;
 
+    @Enumerated(EnumType.STRING)
+    private UserSex sex;
+
+    @Enumerated(EnumType.STRING)
+    private ActivityLevel activityLevel;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 }
