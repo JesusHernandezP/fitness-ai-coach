@@ -40,14 +40,17 @@ public class AIIntentService {
     private static final Pattern WALK_STEPS_PATTERN = Pattern.compile("(?:walk(?:ed)?|did|got|made)\\s+(\\d{3,6})\\s*steps?");
     private static final Pattern WEIGHT_PATTERN = Pattern.compile("(?:my\\s+weight\\s+is\\s+|weight\\s*(?:is\\s+)?)?(\\d{2,3}(?:[.,]\\d{1,2})?)\\s*kg");
     private static final Pattern SETS_REPS_PATTERN = Pattern.compile("(\\d{1,2})\\s*x\\s*(\\d{1,3})");
+    private static final Pattern SETS_REPS_WORDS_PATTERN = Pattern.compile("(\\d{1,2})\\s*sets?\\s*(\\d{1,3})\\s*reps?");
     private static final Pattern EXERCISE_COUNT_PATTERN = Pattern.compile("(\\d{1,2})\\s+exercises?");
     private static final Pattern CALORIES_BURNED_PATTERN = Pattern.compile("(?:burn(?:ed|t)?|burning)\\s+(\\d{2,4}(?:[.,]\\d{1,2})?)\\s*calories?");
+    private static final Pattern DURATION_PATTERN = Pattern.compile("(\\d{1,3})\\s*(?:minutes?|mins?)");
     private static final Pattern FOOD_ITEM_SPLIT_PATTERN = Pattern.compile("\\s*(?:,| and )\\s*");
     private static final Pattern FOOD_ENTRY_PATTERN = Pattern.compile("^(\\d+(?:[.,]\\d+)?)\\s+(.+)$");
     private static final Pattern GOAL_LOSE_FAT_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:lose\\s+(?:fat|weight)|cut)\\b");
     private static final Pattern GOAL_GAIN_MUSCLE_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:gain\\s+muscle|bulk|build\\s+muscle)\\b");
     private static final Pattern GOAL_MAINTAIN_PATTERN = Pattern.compile("\\b(?:want|need|trying|plan)\\s+to\\s+(?:maintain|stay\\s+the\\s+same)\\b");
     private static final Pattern WORKOUT_KEYWORDS_PATTERN = Pattern.compile("\\b(workout|training|trained|lifted|did\\s+(?:a\\s+)?.*?(push|pull|legs|leg|run|running|walk|walking|cardio|chest|back|shoulders|arms|full body))\\b");
+    private static final Pattern EXERCISE_NAME_PATTERN = Pattern.compile("(bench press|squat|deadlift|shoulder press|overhead press|lat pulldown|pull up|push up|row|lunges?|leg press|cardio|running|run|walking|walk)");
 
     private final UserRepository userRepository;
     private final GoalRepository goalRepository;
@@ -183,19 +186,28 @@ public class AIIntentService {
 
     private String logWorkout(User user, ParsedWorkout parsedWorkout) {
         DailyLog todayLog = resolveTodayDailyLog(user);
-        Exercise exercise = resolveOrCreateExercise(parsedWorkout.name());
+        List<Exercise> exercises = resolveExercises(parsedWorkout);
+        double caloriesPerExercise = parsedWorkout.caloriesBurned() / exercises.size();
+        int durationPerExercise = Math.max(1, parsedWorkout.durationMinutes() / exercises.size());
 
-        WorkoutSessionRequest request = new WorkoutSessionRequest();
-        request.setDailyLogId(todayLog.getId());
-        request.setExerciseId(exercise.getId());
-        request.setSets(parsedWorkout.sets());
-        request.setReps(parsedWorkout.reps());
-        request.setDuration(parsedWorkout.durationMinutes());
-        request.setCaloriesBurned(parsedWorkout.caloriesBurned());
+        for (Exercise exercise : exercises) {
+            WorkoutSessionRequest request = new WorkoutSessionRequest();
+            request.setDailyLogId(todayLog.getId());
+            request.setExerciseId(exercise.getId());
+            request.setSets(parsedWorkout.sets());
+            request.setReps(parsedWorkout.reps());
+            request.setDuration(durationPerExercise);
+            request.setCaloriesBurned(caloriesPerExercise);
+            workoutSessionService.createWorkoutSession(request);
+        }
 
-        workoutSessionService.createWorkoutSession(request);
         invalidateCoaching(todayLog.getId());
-        return "Logged workout \"" + exercise.getName() + "\" with " + parsedWorkout.sets() + "x" + parsedWorkout.reps() + ".";
+        if (exercises.size() == 1) {
+            return "Logged workout \"" + exercises.get(0).getName() + "\" with " + parsedWorkout.sets() + "x" + parsedWorkout.reps() + ".";
+        }
+
+        return "Logged " + exercises.size() + " workout exercise(s) for \"" + parsedWorkout.name() + "\" with "
+                + parsedWorkout.sets() + "x" + parsedWorkout.reps() + ".";
     }
 
     private String logFood(User user, ParsedFood parsedFood) {
@@ -230,17 +242,29 @@ public class AIIntentService {
         return "Set your goal to " + formatGoalType(goalType) + ".";
     }
 
+    private List<Exercise> resolveExercises(ParsedWorkout parsedWorkout) {
+        if (parsedWorkout.exerciseCount() <= 1) {
+            return List.of(resolveOrCreateExercise(parsedWorkout.name()));
+        }
+
+        return java.util.stream.IntStream.rangeClosed(1, parsedWorkout.exerciseCount())
+                .mapToObj(index -> resolveOrCreateExercise(parsedWorkout.name() + " Exercise " + index))
+                .toList();
+    }
+
     private Exercise resolveOrCreateExercise(String workoutName) {
         return exerciseRepository.findFirstByNameIgnoreCase(workoutName)
-                .orElseGet(() -> {
-                    ExerciseRequest request = new ExerciseRequest();
-                    request.setName(workoutName);
-                    request.setMuscleGroup(inferMuscleGroup(workoutName));
-                    request.setEquipment("Unknown");
-                    request.setDescription("Created from conversational workout logging.");
-                    UUID exerciseId = exerciseService.createExercise(request).getId();
-                    return exerciseRepository.findById(exerciseId).orElseThrow();
-                });
+                .orElseGet(() -> createExercise(workoutName));
+    }
+
+    private Exercise createExercise(String workoutName) {
+        ExerciseRequest request = new ExerciseRequest();
+        request.setName(workoutName);
+        request.setMuscleGroup(inferMuscleGroup(workoutName));
+        request.setEquipment("Unknown");
+        request.setDescription("Created from conversational workout logging.");
+        UUID exerciseId = exerciseService.createExercise(request).getId();
+        return exerciseRepository.findById(exerciseId).orElseThrow();
     }
 
     private DailyLog resolveTodayDailyLog(User user) {
@@ -288,38 +312,21 @@ public class AIIntentService {
             return null;
         }
 
-        Matcher setsRepsMatcher = SETS_REPS_PATTERN.matcher(normalized);
-        int sets = 3;
-        int reps = 10;
-        if (setsRepsMatcher.find()) {
-            sets = Integer.parseInt(setsRepsMatcher.group(1));
-            reps = Integer.parseInt(setsRepsMatcher.group(2));
-        }
+        RepetitionScheme repetitionScheme = resolveRepetitionScheme(normalized);
+        int sets = repetitionScheme.sets();
+        int reps = repetitionScheme.reps();
 
         Matcher exerciseCountMatcher = EXERCISE_COUNT_PATTERN.matcher(normalized);
         int exerciseCount = exerciseCountMatcher.find() ? Integer.parseInt(exerciseCountMatcher.group(1)) : 1;
-        int duration = Math.max(20, exerciseCount * 12);
+        int duration = resolveWorkoutDuration(normalized, exerciseCount);
         double caloriesBurned = parseExplicitWorkoutCalories(normalized);
         if (caloriesBurned <= 0.0) {
-            caloriesBurned = Math.max(120.0, exerciseCount * sets * reps * 0.75);
+            caloriesBurned = estimateWorkoutCalories(normalized, exerciseCount, sets, reps, duration);
         }
 
-        String name = normalized.replace("today", "")
-                .replace("heavy", "")
-                .replace("did", "")
-                .replace("completed", "")
-                .replace("trained", "")
-                .replaceAll("\\d+\\s*exercises?", "")
-                .replaceAll("\\d+\\s*x\\s*\\d+", "")
-                .replaceAll("(?:burn(?:ed|t)?|burning)\\s+\\d+(?:[.,]\\d+)?\\s*calories?", "")
-                .replace("workout", "")
-                .replace("training", "")
-                .trim();
-        if (name.isBlank()) {
-            name = "Workout";
-        }
+        String name = resolveWorkoutName(normalized);
 
-        return new ParsedWorkout(titleCase(name), sets, reps, duration, caloriesBurned);
+        return new ParsedWorkout(name, sets, reps, duration, caloriesBurned, exerciseCount);
     }
 
     private ParsedFood parseFood(String normalized) {
@@ -416,6 +423,13 @@ public class AIIntentService {
                 || normalized.contains("training")
                 || normalized.contains("trained")
                 || normalized.contains("lifted")
+                || normalized.contains("day")
+                || normalized.contains("cardio")
+                || normalized.contains("ran")
+                || normalized.contains("run ")
+                || SETS_REPS_PATTERN.matcher(normalized).find()
+                || SETS_REPS_WORDS_PATTERN.matcher(normalized).find()
+                || EXERCISE_NAME_PATTERN.matcher(normalized).find()
                 || WORKOUT_KEYWORDS_PATTERN.matcher(normalized).find();
     }
 
@@ -425,6 +439,104 @@ public class AIIntentService {
             return 0.0;
         }
         return Double.parseDouble(matcher.group(1).replace(',', '.'));
+    }
+
+    private RepetitionScheme resolveRepetitionScheme(String normalized) {
+        Matcher setsRepsMatcher = SETS_REPS_PATTERN.matcher(normalized);
+        if (setsRepsMatcher.find()) {
+            return new RepetitionScheme(
+                    Integer.parseInt(setsRepsMatcher.group(1)),
+                    Integer.parseInt(setsRepsMatcher.group(2))
+            );
+        }
+
+        Matcher setsRepsWordsMatcher = SETS_REPS_WORDS_PATTERN.matcher(normalized);
+        if (setsRepsWordsMatcher.find()) {
+            return new RepetitionScheme(
+                    Integer.parseInt(setsRepsWordsMatcher.group(1)),
+                    Integer.parseInt(setsRepsWordsMatcher.group(2))
+            );
+        }
+
+        return new RepetitionScheme(3, 10);
+    }
+
+    private int resolveWorkoutDuration(String normalized, int exerciseCount) {
+        Matcher durationMatcher = DURATION_PATTERN.matcher(normalized);
+        if (durationMatcher.find()) {
+            return Integer.parseInt(durationMatcher.group(1));
+        }
+        if (normalized.contains("cardio") || normalized.contains("ran") || normalized.contains("running")) {
+            return 30;
+        }
+        return Math.max(20, exerciseCount * 12);
+    }
+
+    private double estimateWorkoutCalories(String normalized, int exerciseCount, int sets, int reps, int duration) {
+        double baseCalories = Math.max(120.0, exerciseCount * sets * reps * 0.75);
+        if (normalized.contains("cardio") || normalized.contains("ran") || normalized.contains("running")) {
+            baseCalories = Math.max(baseCalories, duration * 9.0);
+        }
+        if (normalized.contains("intense")) {
+            baseCalories *= 1.25;
+        }
+        if (normalized.contains("light")) {
+            baseCalories *= 0.8;
+        }
+        return baseCalories;
+    }
+
+    private String resolveWorkoutName(String normalized) {
+        if (normalized.contains("push")) {
+            return "Push";
+        }
+        if (normalized.contains("pull")) {
+            return "Pull";
+        }
+        if (normalized.contains("leg day") || normalized.contains("legs") || normalized.contains("leg ")) {
+            return "Leg Day";
+        }
+        if (normalized.contains("trained chest") || normalized.contains("chest")) {
+            return "Chest";
+        }
+        if (normalized.contains("trained back") || normalized.contains("back")) {
+            return "Back";
+        }
+        if (normalized.contains("trained shoulders") || normalized.contains("shoulders")) {
+            return "Shoulders";
+        }
+        if (normalized.contains("cardio")) {
+            return "Cardio";
+        }
+        if (normalized.contains("ran") || normalized.contains("running") || normalized.matches(".*\\brun\\b.*")) {
+            return "Running";
+        }
+
+        Matcher namedExerciseMatcher = EXERCISE_NAME_PATTERN.matcher(normalized);
+        if (namedExerciseMatcher.find()) {
+            return titleCase(namedExerciseMatcher.group(1));
+        }
+
+        String fallback = normalized.replace("today", "")
+                .replace("heavy", "")
+                .replace("light", "")
+                .replace("intense", "")
+                .replace("did", "")
+                .replace("completed", "")
+                .replace("trained", "")
+                .replace("day", "")
+                .replaceAll("\\d+\\s*exercises?", "")
+                .replaceAll("\\d+\\s*x\\s*\\d+", "")
+                .replaceAll("\\d+\\s*sets?\\s*\\d+\\s*reps?", "")
+                .replaceAll("\\d+\\s*(?:minutes?|mins?)", "")
+                .replaceAll("(?:burn(?:ed|t)?|burning)\\s+\\d+(?:[.,]\\d+)?\\s*calories?", "")
+                .replace("workout", "")
+                .replace("training", "")
+                .trim();
+        if (fallback.isBlank()) {
+            return "Unknown";
+        }
+        return titleCase(fallback);
     }
 
     private double calculateBalance(DailyLog latestDailyLog) {
@@ -491,7 +603,10 @@ public class AIIntentService {
     private record ParsedCaloriesBurned(double caloriesBurned) {
     }
 
-    private record ParsedWorkout(String name, int sets, int reps, int durationMinutes, double caloriesBurned) {
+    private record RepetitionScheme(int sets, int reps) {
+    }
+
+    private record ParsedWorkout(String name, int sets, int reps, int durationMinutes, double caloriesBurned, int exerciseCount) {
     }
 
     private record FoodEntry(String foodName, double quantity) {
