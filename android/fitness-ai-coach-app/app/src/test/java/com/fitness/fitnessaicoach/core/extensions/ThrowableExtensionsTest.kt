@@ -19,4 +19,16 @@ class ThrowableExtensionsTest {
 
         assertEquals("You already recorded your weight today", message)
     }
+
+    @Test
+    fun `returns generic unauthorized message for non auth 401 errors`() {
+        val response = Response.error<Any>(
+            401,
+            """{"message":"Token expired"}""".toResponseBody("application/json".toMediaType())
+        )
+
+        val message = HttpException(response).toErrorMessage()
+
+        assertEquals("Token expired", message)
+    }
 }

@@ -1,19 +1,20 @@
 package com.fitness.fitnessaicoach.data.remote.api
 
+import com.fitness.fitnessaicoach.data.remote.dto.UserProfileResponseDto
 import com.fitness.fitnessaicoach.data.remote.dto.UserResponseDto
 import com.fitness.fitnessaicoach.data.remote.dto.UserUpdateRequestDto
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.PUT
-import retrofit2.http.Path
 
 interface UserApi {
-    @GET("users")
-    suspend fun getUsers(): List<UserResponseDto>
+    @GET("users/profile")
+    suspend fun getCurrentProfile(): UserProfileResponseDto
 
-    @PUT("users/{id}")
-    suspend fun updateUserProfile(
-        @Path("id") id: String,
-        @Body request: UserUpdateRequestDto
-    ): UserResponseDto
+    @POST("users/profile")
+    suspend fun saveUserProfile(@Body request: UserUpdateRequestDto): UserProfileResponseDto
+
+    @PUT("users/profile")
+    suspend fun updateUserProfile(@Body request: UserUpdateRequestDto): UserProfileResponseDto
 }

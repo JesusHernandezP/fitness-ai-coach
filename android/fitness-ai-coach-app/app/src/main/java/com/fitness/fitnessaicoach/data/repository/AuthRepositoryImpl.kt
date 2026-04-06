@@ -11,6 +11,7 @@ import com.fitness.fitnessaicoach.domain.model.UserCredentials
 import com.fitness.fitnessaicoach.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import retrofit2.HttpException
 
 class AuthRepositoryImpl @Inject constructor(
     private val authApi: AuthApi,
@@ -28,7 +29,12 @@ class AuthRepositoryImpl @Inject constructor(
             tokenStorage.saveToken(response.token)
             AppResult.Success(response.toDomain())
         } catch (throwable: Throwable) {
-            AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
+            val message = if (throwable is HttpException && throwable.code() == 401) {
+                "Invalid email or password."
+            } else {
+                throwable.toErrorMessage()
+            }
+            AppResult.Error(message = message, throwable = throwable)
         }
     }
 

@@ -81,13 +81,11 @@ object RepositoryModule {
     @Singleton
     fun provideDailyLogRepository(
         dailyLogApi: DailyLogApi,
-        userApi: UserApi,
-        tokenStorage: TokenStorage
+        userApi: UserApi
     ): DailyLogRepository {
         return DailyLogRepositoryImpl(
             dailyLogApi = dailyLogApi,
-            userApi = userApi,
-            tokenStorage = tokenStorage
+            userApi = userApi
         )
     }
 
@@ -104,12 +102,10 @@ object RepositoryModule {
     @Provides
     @Singleton
     fun provideUserRepository(
-        userApi: UserApi,
-        tokenStorage: TokenStorage
+        userApi: UserApi
     ): UserRepository {
         return UserRepositoryImpl(
-            userApi = userApi,
-            tokenStorage = tokenStorage
+            userApi = userApi
         )
     }
 
