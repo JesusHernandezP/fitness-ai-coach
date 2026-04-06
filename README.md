@@ -1,178 +1,195 @@
-# Fitness AI Coach API
+# Fitness AI Coach
 
-API backend para una plataforma de seguimiento de habitos fitness con coaching inteligente usando Groq.
-Este repositorio es un monorepo: existen modulos de frontend/mobile, pero actualmente se trabaja con validacion por API.
+Aplicación multiplataforma que combina seguimiento fitness con inteligencia artificial para analizar el progreso del usuario y ofrecer recomendaciones personalizadas.
 
---------------------------------------------------
-Que hace esta aplicacion?
---------------------------------------------------
+## Descripción
 
-- Gestiona usuarios, registros diarios y entidades relacionadas del entrenamiento.
-- Calcula y expone analisis diarios de actividad/calorias.
-- Genera recomendaciones con IA para un `daily-log` usando Groq.
-- Expone endpoints de salud para validaciones rapidas.
-- Usa autenticacion con JWT.
+Fitness AI Coach es una aplicación que actúa como un nutricionista y entrenador personal digital.
 
-Estructura del repositorio
+Permite registrar datos de salud y entrenamiento y utiliza inteligencia artificial para interpretar el progreso y ofrecer recomendaciones útiles.
 
-- `backend/`: API Java + Spring Boot (`fitness-ai-coach`).
-- `mobile/`: proyecto Android (Kotlin + MVVM).
-- `web/`: proyecto web en Angular.
-- `docs/`: documentacion del proyecto.
+El objetivo es transformar datos aislados en información comprensible y accionable.
 
---------------------------------------------------
-Requisitos
---------------------------------------------------
+## Problema que resuelve
+
+Muchas personas registran:
+
+- comidas
+- entrenamientos
+- peso
+- objetivos
+
+pero estos datos quedan dispersos y no se transforman en conocimiento útil.
+
+La aplicación centraliza la información y utiliza IA para generar análisis personalizados.
+
+## Funcionalidades principales
+
+### Registro de log diario
+
+- calorías consumidas
+- calorías quemadas
+- pasos
+
+### Registro de métricas corporales
+
+- peso
+- grasa corporal
+- masa muscular
+
+### Dashboard web
+
+- gráfico de progreso de peso
+- resumen semanal generado por IA
+- chat con IA
+
+### Chat persistente
+
+- historial de conversación almacenado en base de datos
+
+### Seguridad y datos
+
+- autenticación segura con JWT
+- base de datos Dockerizada con PostgreSQL
+- migraciones automáticas con Flyway
+
+## Arquitectura
+
+El backend sigue una arquitectura limpia basada en:
+
+`controller -> service -> repository`
+
+Se utilizan DTOs para desacoplar la API del modelo de datos y mantener contratos estables.
+
+El sistema está dividido en tres partes:
+
+### Backend
+
+- Spring Boot
+- Spring Security
+- Spring Data JPA
+- PostgreSQL
+- Flyway
+
+### Frontend web
+
+- Angular
+
+### Aplicación móvil
+
+- Android Kotlin
+- Jetpack Compose
+
+### Inteligencia artificial
+
+- integración mediante proveedor Groq
+- arquitectura preparada para cambiar de proveedor sin rehacer la lógica principal
+
+## Stack tecnológico
+
+### Backend
 
 - Java 17
-- Maven 3.9+ (o `mvnw` si lo tienes disponible)
-- PostgreSQL 16+ en ejecucion
-- PowerShell o Bash
-- Clave de Groq valida (`GROQ_API_KEY`)
+- Spring Boot
+- Spring Security
+- Spring Data JPA
 
---------------------------------------------------
-Variables de entorno
---------------------------------------------------
+### Base de datos
 
-La configuracion se carga desde:
+- PostgreSQL
+- Flyway
+- Docker
 
-`backend/src/main/resources/application.yml`
+### Frontend
 
-Variables clave:
+- Angular
 
-- `DB_URL` (por defecto `jdbc:postgresql://localhost:5432/fitness_db`)
-- `DB_USERNAME` (por defecto `postgres`)
-- `DB_PASSWORD` (por defecto `1234`)
-- `JWT_SECRET` (obligatorio en produccion, minimo 32 bytes)
-- `GROQ_API_KEY` (obligatorio para coaching IA)
-- `GROQ_MODEL` (opcional, por defecto `llama-3.1-8b-instant`)
+### Mobile
 
-Ejemplo en PowerShell:
+- Kotlin
+- Jetpack Compose
 
-```powershell
-$env:DB_URL="jdbc:postgresql://localhost:5432/fitness_db"
-$env:DB_USERNAME="postgres"
-$env:DB_PASSWORD="1234"
-$env:JWT_SECRET="change-this-in-env-to-a-32-byte-minimum-secret-key"
-$env:GROQ_API_KEY="TU_API_KEY_DE_GROQ"
-$env:GROQ_MODEL="llama-3.1-8b-instant"
+### IA
+
+- Groq API
+
+### Herramientas
+
+- Git
+- GitHub
+- Maven
+- Swagger
+
+## Estructura del proyecto
+
+- `/backend` -> API REST Spring Boot
+- `/android` -> aplicación móvil Kotlin
+- `/web` -> dashboard Angular
+- `/docs` -> documentación del proyecto
+
+## Cómo ejecutar el proyecto en local
+
+### 1. Iniciar base de datos
+
+Desde la carpeta `backend`:
+
+```bash
+docker compose up -d
 ```
 
---------------------------------------------------
-Levantar backend en desarrollo (con Swagger)
---------------------------------------------------
-Desde la raiz del proyecto:
+### 2. Ejecutar backend
 
-```powershell
-.\backend\run-dev.ps1
+```bash
+cd backend
+mvn spring-boot:run
 ```
 
-El script:
-- arranca el perfil `dev`
-- habilita Swagger
-- usa `llama-3.1-8b-instant` como modelo por defecto
-- empaqueta el jar si no existe
+Notas:
 
-Tambien puedes levantarlo manualmente (mismo modo dev):
+- El backend usa PostgreSQL y ejecuta migraciones Flyway automáticamente al arrancar.
+- Para funcionalidades de IA reales, conviene definir `GROQ_API_KEY` como variable de entorno.
+- `JWT_SECRET` debe configurarse explícitamente fuera de desarrollo.
 
-```powershell
-Set-Location backend
-mvn -DskipTests package
-java '-Dspring.profiles.active=dev' -jar target\fitness-ai-coach-0.0.1-SNAPSHOT.jar
+### 3. Ejecutar frontend Angular
+
+```bash
+cd web
+npm install
+npm start
 ```
 
-Chequeos rapidos:
+### 4. Ejecutar aplicación Android
 
-- `GET http://localhost:8080/api/health` -> responde `OK`.
-- `GET http://localhost:8080/api/health/groq` -> valida conectividad con Groq.
+1. Abrir la carpeta `android` en Android Studio.
+2. Sincronizar Gradle.
+3. Ejecutar un emulador o un dispositivo físico.
+4. Lanzar la aplicación.
 
---------------------------------------------------
-Ejecutar tests
---------------------------------------------------
+## Documentación API
 
-```powershell
-Set-Location backend
-mvn test
-```
+Swagger está disponible en entorno de desarrollo.
 
---------------------------------------------------
-Probar con Swagger
---------------------------------------------------
-
-URL:
+URL habitual:
 
 `http://localhost:8080/swagger-ui/index.html`
 
---------------------------------------------------
-Probar con Postman (sin frontend)
---------------------------------------------------
+## Demo del proyecto
 
-1) Registrar usuario
+Script de presentación:
 
-`POST http://localhost:8080/api/users`
+[`docs/demo-script.md`](C:/PracticaUcademy/ProyectoIntermodular/fitness-ai-coach/docs/demo-script.md)
 
-Body:
+## Posibles mejoras futuras
 
-```json
-{
-  "name": "Usuario Prueba",
-  "email": "test@fitness.local",
-  "password": "123456",
-  "age": 28,
-  "heightCm": 175,
-  "weightKg": 72
-}
-```
+- integración con wearables
+- recordatorios inteligentes
+- análisis de imágenes de comida
+- planes de entrenamiento automáticos
 
-2) Iniciar sesion y obtener JWT
+## Autor
 
-`POST http://localhost:8080/api/auth/login`
+Jesus Hernandez
 
-Body:
+Estudiante de FP Desarrollo de Aplicaciones Multiplataforma (DAM)
 
-```json
-{
-  "email": "test@fitness.local",
-  "password": "123456"
-}
-```
-
-Usa el `token` en `Authorization: Bearer <token>` para endpoints protegidos.
-
-3) Crear un registro diario
-
-`POST http://localhost:8080/api/daily-logs`
-
-Body:
-
-```json
-{
-  "logDate": "2026-03-20",
-  "steps": 8300,
-  "caloriesConsumed": 2300,
-  "caloriesBurned": 600,
-  "userId": "<USER_ID_DEL_PASO_1>"
-}
-```
-
-4) Solicitar coaching IA para un registro
-
-`GET http://localhost:8080/api/ai-coach/daily-log/<DAILY_LOG_ID>`
-
-El `<DAILY_LOG_ID>` es el `id` de la respuesta del paso anterior.
-
-Respuesta esperada:
-
-- `analysis`: metricas y resumen del `daily-log`.
-- `advice`: texto de recomendacion generado por IA.
-
---------------------------------------------------
-Notas de diagnostico
---------------------------------------------------
-
-- Si el endpoint de coaching sigue devolviendo el mensaje fallback, revisa:
-  - que `GROQ_API_KEY` este en el proceso de Java que corre la app.
-  - que `GET /api/health/groq` devuelva `available=true`.
-  - que el modelo configurado sea compatible y activo.
-- `GROQ_MODEL` te permite cambiar modelo sin tocar codigo.
-- Este README esta pensado para pruebas API-first mientras no haya frontend publicado.
+Proyecto intermodular
