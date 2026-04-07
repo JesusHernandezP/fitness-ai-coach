@@ -27,8 +27,10 @@ class UserRepositoryImpl @Inject constructor(
                 request = UserUpdateRequestDto(
                     age = user.age ?: throw IllegalArgumentException("Age is required."),
                     heightCm = user.heightCm ?: throw IllegalArgumentException("Height is required."),
+                    weightKg = user.weightKg ?: throw IllegalArgumentException("Weight is required."),
                     sex = user.sex ?: throw IllegalArgumentException("Sex is required."),
                     activityLevel = user.activityLevel ?: throw IllegalArgumentException("Activity level is required."),
+                    dietType = user.dietType ?: "STANDARD",
                     goalType = user.goalType?.name
                 )
             ).toDomain()

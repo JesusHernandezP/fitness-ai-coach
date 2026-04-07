@@ -5,22 +5,23 @@
 }
 
 .dashboard-card {
-  background: #ffffff;
-  border: 1px solid #d7e4df;
+  background: #1e1e1e;
+  border: 1px solid #2a2a2a;
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 14px 34px rgba(22, 48, 43, 0.06);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
   min-height: 180px;
 }
 
 .dashboard-card h2 {
   margin: 0 0 16px;
   font-size: 1.25rem;
+  color: #ffffff;
 }
 
 .dashboard-card p {
   margin: 0;
-  color: #49645d;
+  color: #a0a0a0;
   line-height: 1.5;
 }
 

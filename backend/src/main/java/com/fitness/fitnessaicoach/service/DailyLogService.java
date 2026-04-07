@@ -156,11 +156,26 @@ public class DailyLogService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
-        LocalDate today = LocalDate.now();
+        return getOrCreateLogForDate(user, LocalDate.now());
+    }
 
-        return dailyLogRepository.findByUserIdAndLogDate(userId, today)
+    @Transactional
+    public DailyLogResponse getOrCreateLogForDate(UUID userId, LocalDate date) {
+        Objects.requireNonNull(userId, "userId must not be null");
+        Objects.requireNonNull(date, "date must not be null");
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        return getOrCreateLogForDate(user, date);
+    }
+
+    private DailyLogResponse getOrCreateLogForDate(User user, LocalDate date) {
+        LocalDate targetDate = Objects.requireNonNull(date, "date must not be null");
+
+        return dailyLogRepository.findByUserIdAndLogDate(user.getId(), targetDate)
                 .map(this::toResponse)
-                .orElseGet(() -> createTodayLog(user, today));
+                .orElseGet(() -> createTodayLog(user, targetDate));
     }
 
     @Transactional

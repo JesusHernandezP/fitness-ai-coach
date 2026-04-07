@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -139,8 +141,9 @@ fun AIChatScreen(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(
-                            text = "Go",
-                            style = MaterialTheme.typography.labelLarge
+                            text = "\u2191",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
                         )
                     }
                 }
@@ -268,15 +271,16 @@ private fun ChatBubble(message: AIChatMessageItem) {
 
             Row(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(CardDark)
+                        .clip(RoundedCornerShape(16.dp))
+                    .background(if (isUser) SurfaceDark else CardDark)
                     .border(1.dp, BorderSubtle, RoundedCornerShape(16.dp))
             ) {
                 if (!isUser) {
                     Box(
                         modifier = Modifier
                             .background(YellowPrimary)
-                            .size(width = 4.dp, height = 64.dp)
+                            .fillMaxHeight()
+                            .width(4.dp)
                     )
                 }
 

@@ -12,21 +12,21 @@
   min-height: 260px;
   display: grid;
   place-items: center;
-  color: #49645d;
-  border: 1px dashed #c9dbd4;
+  color: #a0a0a0;
+  border: 1px dashed #2a2a2a;
   border-radius: 16px;
-  background: #f8fbfa;
+  background: #121212;
   text-align: center;
   padding: 24px;
 }
 
 .weekly-summary__state--error {
-  color: #a33d3d;
+  color: #ef4444;
 }
 
 .weekly-summary__range {
   margin: 0;
-  color: #49645d;
+  color: #ffe01e;
   font-size: 0.95rem;
   font-weight: 600;
 }
@@ -39,11 +39,11 @@
 .weekly-summary__section h3 {
   margin: 0;
   font-size: 1rem;
-  color: #1f3932;
+  color: #ffffff;
 }
 
 .weekly-summary__section p {
   margin: 0;
-  color: #345148;
+  color: #a0a0a0;
   line-height: 1.6;
 }

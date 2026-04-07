@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.domain.BodyMetrics;
 import com.fitness.fitnessaicoach.domain.DailyLog;
+import com.fitness.fitnessaicoach.domain.DietType;
 import com.fitness.fitnessaicoach.domain.Goal;
 import com.fitness.fitnessaicoach.domain.MealItem;
 import com.fitness.fitnessaicoach.domain.User;
@@ -88,6 +89,7 @@ public class NutritionContextBuilder {
                 latestGoal != null && latestGoal.getGoalType() != null ? latestGoal.getGoalType().name() : "UNKNOWN",
                 weight,
                 user.getActivityLevel() != null ? user.getActivityLevel().name() : "unknown",
+                (user.getDietType() != null ? user.getDietType() : DietType.STANDARD).name(),
                 targetCalories,
                 targetProtein,
                 targetCarbs,

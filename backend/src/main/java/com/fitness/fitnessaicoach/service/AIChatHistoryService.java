@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,19 +46,30 @@ public class AIChatHistoryService {
 
     @Transactional(readOnly = true)
     public List<AIChatMessageDto> getChatHistory(UUID userId) {
-        findUser(userId);
-        return aiChatMessageRepository.findBySessionUserIdOrderByCreatedAtAscIdAsc(userId).stream()
-                .map(this::toDto)
-                .toList();
+        User user = findUser(userId);
+        return findCurrentDailySession(user)
+                .map(session -> aiChatMessageRepository.findBySessionIdOrderByCreatedAtAscIdAsc(session.getId()).stream()
+                        .map(this::toDto)
+                        .toList())
+                .orElseGet(List::of);
     }
 
     @Transactional(readOnly = true)
     public List<AIChatMessage> getRecentMessages(UUID userId, int limit) {
-        List<AIChatMessage> recentMessages = aiChatMessageRepository.findTop20BySessionUserIdOrderByCreatedAtDescIdDesc(userId);
+        User user = findUser(userId);
+        List<AIChatMessage> recentMessages = findCurrentDailySession(user)
+                .map(session -> aiChatMessageRepository.findTop20BySessionIdOrderByCreatedAtDescIdDesc(session.getId()))
+                .orElseGet(List::of);
         if (recentMessages.size() <= limit) {
             return recentMessages;
         }
         return recentMessages.subList(0, limit);
+    }
+
+    private java.util.Optional<ChatSession> findCurrentDailySession(User user) {
+        LocalDate today = LocalDate.now();
+        return chatSessionRepository.findTopByUserIdOrderByLastActivityAtDescIdDesc(user.getId())
+                .filter(existing -> existing.getCreatedAt() != null && existing.getCreatedAt().toLocalDate().isEqual(today));
     }
 
     private User findUser(UUID userId) {
@@ -66,15 +78,18 @@ public class AIChatHistoryService {
     }
 
     private ChatSession getOrCreateActiveSession(User user) {
-        return chatSessionRepository.findTopByUserIdOrderByLastActivityAtDescIdDesc(user.getId())
-                .map(existing -> {
-                    existing.setLastActivityAt(LocalDateTime.now());
-                    return chatSessionRepository.save(existing);
-                })
+        LocalDateTime now = LocalDateTime.now();
+        return findCurrentDailySession(user)
+                .map(existing -> touchSession(existing, now))
                 .orElseGet(() -> chatSessionRepository.save(ChatSession.builder()
                         .user(user)
-                        .lastActivityAt(LocalDateTime.now())
+                        .lastActivityAt(now)
                         .build()));
+    }
+
+    private ChatSession touchSession(ChatSession session, LocalDateTime now) {
+        session.setLastActivityAt(now);
+        return chatSessionRepository.save(session);
     }
 
     private void saveMessage(ChatSession session, ChatRole role, String content) {

@@ -26,6 +26,7 @@ export interface SendChatMessageRequestDto {
 
 export interface SendChatMessageResponseDto {
   reply: string;
+  loggedSummary?: string[];
 }
 
 @Injectable({

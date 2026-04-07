@@ -24,6 +24,7 @@ data class MetabolicProfileUiState(
     val heightCm: String = "",
     val sex: String = "",
     val activityLevel: String = "",
+    val dietType: String = "",
     val goalType: String = "",
     val targetCalories: Double? = null,
     val targetProtein: Double? = null,
@@ -70,6 +71,16 @@ class MetabolicProfileViewModel @Inject constructor(
         _uiState.update { it.copy(heightCm = value, errorMessage = null, successMessage = null) }
     }
 
+    fun onWeightChanged(value: String) {
+        _uiState.update {
+            it.copy(
+                weightKg = value.toDoubleOrNull(),
+                errorMessage = null,
+                successMessage = null
+            )
+        }
+    }
+
     fun onSexChanged(value: String) {
         _uiState.update { it.copy(sex = value, errorMessage = null, successMessage = null) }
     }
@@ -82,10 +93,15 @@ class MetabolicProfileViewModel @Inject constructor(
         _uiState.update { it.copy(goalType = value, errorMessage = null, successMessage = null) }
     }
 
+    fun onDietTypeChanged(value: String) {
+        _uiState.update { it.copy(dietType = value, errorMessage = null, successMessage = null) }
+    }
+
     fun saveUserProfile() {
         val currentState = _uiState.value
         val age = currentState.age.toIntOrNull()
         val heightCm = currentState.heightCm.toDoubleOrNull()
+        val weightKg = currentState.weightKg
 
         if (age == null || age !in 15..80) {
             _uiState.update { it.copy(errorMessage = "Age must be between 15 and 80.") }
@@ -93,6 +109,10 @@ class MetabolicProfileViewModel @Inject constructor(
         }
         if (heightCm == null || heightCm < 120.0 || heightCm > 220.0) {
             _uiState.update { it.copy(errorMessage = "Height must be between 120 and 220 cm.") }
+            return
+        }
+        if (weightKg == null || weightKg < 30.0 || weightKg > 400.0) {
+            _uiState.update { it.copy(errorMessage = "Weight must be between 30 and 400 kg.") }
             return
         }
         if (currentState.sex.isBlank()) {
@@ -107,6 +127,10 @@ class MetabolicProfileViewModel @Inject constructor(
             _uiState.update { it.copy(errorMessage = "Goal is required.") }
             return
         }
+        if (currentState.dietType.isBlank()) {
+            _uiState.update { it.copy(errorMessage = "Diet type is required.") }
+            return
+        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null, successMessage = null) }
@@ -116,9 +140,10 @@ class MetabolicProfileViewModel @Inject constructor(
                 email = currentState.email,
                 age = age,
                 heightCm = heightCm,
-                weightKg = currentState.weightKg,
+                weightKg = weightKg,
                 sex = currentState.sex,
                 activityLevel = currentState.activityLevel,
+                dietType = currentState.dietType,
                 goalType = GoalType.valueOf(currentState.goalType),
                 targetCalories = currentState.targetCalories,
                 targetProtein = currentState.targetProtein,
@@ -152,6 +177,7 @@ class MetabolicProfileViewModel @Inject constructor(
                 heightCm = user.heightCm?.toString().orEmpty(),
                 sex = user.sex.orEmpty(),
                 activityLevel = user.activityLevel.orEmpty(),
+                dietType = user.dietType.orEmpty(),
                 goalType = user.goalType?.name.orEmpty(),
                 targetCalories = user.targetCalories,
                 targetProtein = user.targetProtein,

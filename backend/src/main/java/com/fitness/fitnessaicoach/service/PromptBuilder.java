@@ -166,6 +166,7 @@ public class PromptBuilder {
                 sex %s
                 height %s cm
                 activity level %s
+                diet type %s
 
                 Goal context:
                 goal %s
@@ -199,6 +200,7 @@ public class PromptBuilder {
                 context.sex(),
                 context.heightCm(),
                 context.activityLevel(),
+                context.dietType(),
                 context.goalType(),
                 context.targetWeight(),
                 context.targetCalories(),
@@ -229,6 +231,7 @@ public class PromptBuilder {
                 Body data:
                 Weight: %s kg
                 Activity level: %s
+                Diet type: %s
 
                 Daily targets:
                 Calories target: %s kcal
@@ -258,6 +261,7 @@ public class PromptBuilder {
                 context.goal(),
                 context.weight(),
                 context.activityLevel(),
+                context.dietType(),
                 formatDecimal(context.targetCalories()),
                 formatDecimal(context.targetProtein()),
                 formatDecimal(context.targetCarbs()),
@@ -321,6 +325,7 @@ public class PromptBuilder {
             String sex,
             Object heightCm,
             String activityLevel,
+            String dietType,
             String goalType,
             Object targetWeight,
             Object targetCalories,
@@ -334,12 +339,33 @@ public class PromptBuilder {
             double proteinConsumed,
             Object latestWeight
     ) {
+        public ChatPromptContext(
+                Object age,
+                String sex,
+                Object heightCm,
+                String activityLevel,
+                String goalType,
+                Object targetWeight,
+                Object targetCalories,
+                Object targetProtein,
+                Object targetCarbs,
+                Object targetFat,
+                double caloriesConsumed,
+                double caloriesBurned,
+                double calorieBalance,
+                int steps,
+                double proteinConsumed,
+                Object latestWeight
+        ) {
+            this(age, sex, heightCm, activityLevel, "STANDARD", goalType, targetWeight, targetCalories, targetProtein, targetCarbs, targetFat, caloriesConsumed, caloriesBurned, calorieBalance, steps, proteinConsumed, latestWeight);
+        }
     }
 
     public record NutritionContext(
             String goal,
             Object weight,
             String activityLevel,
+            String dietType,
             double targetCalories,
             double targetProtein,
             double targetCarbs,
@@ -357,6 +383,29 @@ public class PromptBuilder {
             int steps,
             boolean available
     ) {
+        public NutritionContext(
+                String goal,
+                Object weight,
+                String activityLevel,
+                double targetCalories,
+                double targetProtein,
+                double targetCarbs,
+                double targetFat,
+                double consumedCalories,
+                double consumedProtein,
+                double consumedCarbs,
+                double consumedFat,
+                double remainingCalories,
+                double remainingProtein,
+                double remainingCarbs,
+                double remainingFat,
+                boolean strengthTraining,
+                int cardioMinutes,
+                int steps,
+                boolean available
+        ) {
+            this(goal, weight, activityLevel, "STANDARD", targetCalories, targetProtein, targetCarbs, targetFat, consumedCalories, consumedProtein, consumedCarbs, consumedFat, remainingCalories, remainingProtein, remainingCarbs, remainingFat, strengthTraining, cardioMinutes, steps, available);
+        }
     }
 
     public record WeeklySummaryPromptContext(

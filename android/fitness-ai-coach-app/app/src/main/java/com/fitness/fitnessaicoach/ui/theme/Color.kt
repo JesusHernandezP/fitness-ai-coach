@@ -4,13 +4,13 @@ import androidx.compose.ui.graphics.Color
 
 val YellowPrimary = Color(0xFFFFE01E)
 
-val BackgroundMain = Color(0xFF0B0B0B)
-val SurfaceDark = Color(0xFF121212)
-val CardDark = Color(0xFF1E1E1E)
+val BackgroundMain = Color(0xFF111318)
+val SurfaceDark = Color(0xFF171A20)
+val CardDark = Color(0xFF1D2128)
 
 val BorderSubtle = Color(0xFF2A2A2A)
 val DividerDark = Color(0xFF333333)
-val HoverDark = Color(0xFF242424)
+val HoverDark = Color(0xFF242831)
 
 val TextPrimary = Color(0xFFFFFFFF)
 val TextSecondary = Color(0xFFA0A0A0)

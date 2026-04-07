@@ -41,8 +41,10 @@ class MetabolicProfileIntegrationTest {
                 .andExpect(jsonPath("$.userId").value(user.userId()))
                 .andExpect(jsonPath("$.age").value(29))
                 .andExpect(jsonPath("$.heightCm").value(178.0))
+                .andExpect(jsonPath("$.weightKg").value(84.0))
                 .andExpect(jsonPath("$.sex").value("FEMALE"))
                 .andExpect(jsonPath("$.activityLevel").value("ACTIVE"))
+                .andExpect(jsonPath("$.dietType").value("STANDARD"))
                 .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"))
                 .andExpect(jsonPath("$.targetCalories").isNumber())
                 .andExpect(jsonPath("$.targetProtein").isNumber())
@@ -66,8 +68,10 @@ class MetabolicProfileIntegrationTest {
                 .andExpect(jsonPath("$.userId").value(user.userId()))
                 .andExpect(jsonPath("$.age").value(31))
                 .andExpect(jsonPath("$.heightCm").value(181.5))
+                .andExpect(jsonPath("$.weightKg").value(84.0))
                 .andExpect(jsonPath("$.sex").value("MALE"))
                 .andExpect(jsonPath("$.activityLevel").value("MODERATE"))
+                .andExpect(jsonPath("$.dietType").value("STANDARD"))
                 .andExpect(jsonPath("$.goalType").value("BUILD_MUSCLE"))
                 .andExpect(jsonPath("$.targetCalories").isNumber());
     }
@@ -89,7 +93,9 @@ class MetabolicProfileIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.age").value(30))
                 .andExpect(jsonPath("$.heightCm").value(176.0))
+                .andExpect(jsonPath("$.weightKg").value(84.0))
                 .andExpect(jsonPath("$.activityLevel").value("ACTIVE"))
+                .andExpect(jsonPath("$.dietType").value("STANDARD"))
                 .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"))
                 .andExpect(jsonPath("$.targetCalories").isNumber());
     }
@@ -101,10 +107,21 @@ class MetabolicProfileIntegrationTest {
         mockMvc.perform(post("/api/users/profile")
                         .header("Authorization", "Bearer " + user.token())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(validProfileBody(-1, -180.0, "MALE", "SEDENTARY", "MAINTAIN")))
+                        .content("""
+                                {
+                                  "age": -1,
+                                  "heightCm": -180.0,
+                                  "weightKg": -72.0,
+                                  "sex": "MALE",
+                                  "activityLevel": "SEDENTARY",
+                                  "dietType": "STANDARD",
+                                  "goalType": "MAINTAIN"
+                                }
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.age").value("Age must be greater than 0."))
-                .andExpect(jsonPath("$.errors.heightCm").value("Height must be greater than 0."));
+                .andExpect(jsonPath("$.errors.heightCm").value("Height must be greater than 0."))
+                .andExpect(jsonPath("$.errors.weightKg").value("Weight must be greater than 0."));
     }
 
     private String validProfileBody(int age, double heightCm, String sex, String activityLevel, String goalType) {
@@ -112,8 +129,10 @@ class MetabolicProfileIntegrationTest {
                 {
                   "age": %d,
                   "heightCm": %s,
+                  "weightKg": 84.0,
                   "sex": "%s",
                   "activityLevel": "%s",
+                  "dietType": "STANDARD",
                   "goalType": "%s"
                 }
                 """.formatted(age, heightCm, sex, activityLevel, goalType);

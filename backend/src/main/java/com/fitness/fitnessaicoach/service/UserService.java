@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
+import com.fitness.fitnessaicoach.domain.DietType;
 import com.fitness.fitnessaicoach.domain.User;
 import com.fitness.fitnessaicoach.domain.UserSex;
 import com.fitness.fitnessaicoach.dto.UserProfileUpdateRequest;
@@ -38,6 +39,7 @@ public class UserService {
                 .weightKg(request.getWeightKg())
                 .sex(request.getSex() != null ? request.getSex() : UserSex.MALE)
                 .activityLevel(request.getActivityLevel() != null ? request.getActivityLevel() : ActivityLevel.MODERATE)
+                .dietType(DietType.STANDARD)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -66,6 +68,7 @@ public class UserService {
         user.setHeightCm(request.getHeightCm());
         user.setSex(request.getSex());
         user.setActivityLevel(request.getActivityLevel());
+        user.setDietType(request.getDietType());
 
         User saved = userRepository.save(user);
         return toResponse(saved);
@@ -81,6 +84,7 @@ public class UserService {
                 .weightKg(user.getWeightKg())
                 .sex(user.getSex())
                 .activityLevel(user.getActivityLevel())
+                .dietType(user.getDietType())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

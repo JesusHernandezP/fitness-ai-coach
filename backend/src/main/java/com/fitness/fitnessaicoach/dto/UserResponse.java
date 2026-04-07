@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.dto;
 
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
+import com.fitness.fitnessaicoach.domain.DietType;
 import com.fitness.fitnessaicoach.domain.UserSex;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -21,5 +22,6 @@ public class UserResponse {
     private Double weightKg;
     private UserSex sex;
     private ActivityLevel activityLevel;
+    private DietType dietType;
     private LocalDateTime createdAt;
 }

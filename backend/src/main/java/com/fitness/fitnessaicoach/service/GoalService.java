@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
+import com.fitness.fitnessaicoach.domain.DietType;
 import com.fitness.fitnessaicoach.domain.Goal;
 import com.fitness.fitnessaicoach.domain.User;
 import com.fitness.fitnessaicoach.domain.UserGoalType;
@@ -158,9 +159,19 @@ public class GoalService {
             case MAINTAIN -> 1.6;
         };
         double targetProtein = roundToScale(currentWeight * proteinMultiplier);
-        double targetFat = roundToScale(currentWeight * 0.8);
-        double carbCalories = adjustedCalories - ((targetProtein * 4) + (targetFat * 9));
-        double targetCarbs = roundToScale(Math.max(0.0, carbCalories / 4.0));
+        DietType dietType = user.getDietType() != null ? user.getDietType() : DietType.STANDARD;
+        double targetFat;
+        double targetCarbs;
+
+        if (dietType == DietType.KETO) {
+            targetCarbs = roundToScale(Math.min(30.0, Math.max(20.0, currentWeight * 0.25)));
+            double remainingCaloriesForFat = adjustedCalories - ((targetProtein * 4) + (targetCarbs * 4));
+            targetFat = roundToScale(Math.max(currentWeight * 1.0, remainingCaloriesForFat / 9.0));
+        } else {
+            targetFat = roundToScale(currentWeight * 0.8);
+            double carbCalories = adjustedCalories - ((targetProtein * 4) + (targetFat * 9));
+            targetCarbs = roundToScale(Math.max(0.0, carbCalories / 4.0));
+        }
 
         return new MacroTargets(
                 roundToScale(adjustedCalories),

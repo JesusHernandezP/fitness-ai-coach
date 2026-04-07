@@ -77,8 +77,11 @@ public class UserController {
                     com.fitness.fitnessaicoach.dto.MetabolicProfileRequest.builder()
                             .age(request.getAge())
                             .heightCm(request.getHeightCm())
+                            .weightKg(request.getWeightKg())
                             .sex(request.getSex())
                             .activityLevel(request.getActivityLevel())
+                            .dietType(request.getDietType())
+                            .goalType(request.getGoalType())
                             .build()
             );
             return ResponseEntity.ok(profile);

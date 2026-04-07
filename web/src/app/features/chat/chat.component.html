@@ -31,7 +31,13 @@
       [disabled]="isSending"
       placeholder="Write a message to your AI coach" />
     <button type="submit" [disabled]="isSending || !draftMessage.trim()">
-      {{ isSending ? 'Sending...' : 'Send' }}
+      @if (isSending) {
+        <span>...</span>
+      } @else {
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 12h11.17l-4.58 4.59L12 18l8-8-8-8-1.41 1.41L15.17 8H4v2z"/>
+        </svg>
+      }
     </button>
   </form>
 </section>

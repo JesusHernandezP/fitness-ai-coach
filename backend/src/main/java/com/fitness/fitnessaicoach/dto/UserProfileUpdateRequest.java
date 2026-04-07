@@ -1,6 +1,8 @@
 package com.fitness.fitnessaicoach.dto;
 
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
+import com.fitness.fitnessaicoach.domain.DietType;
+import com.fitness.fitnessaicoach.domain.UserGoalType;
 import com.fitness.fitnessaicoach.domain.UserSex;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -27,7 +29,15 @@ public class UserProfileUpdateRequest {
     @DecimalMax(value = "220.0", message = "Height cannot be greater than 220 cm.")
     private Double heightCm;
 
+    @DecimalMin(value = "30.0", message = "Weight must be at least 30 kg.")
+    @DecimalMax(value = "400.0", message = "Weight cannot be greater than 400 kg.")
+    private Double weightKg;
+
     private UserSex sex;
 
     private ActivityLevel activityLevel;
+
+    private DietType dietType;
+
+    private UserGoalType goalType;
 }

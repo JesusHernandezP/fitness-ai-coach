@@ -39,6 +39,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private ActivityLevel activityLevel;
 
+    @Enumerated(EnumType.STRING)
+    private DietType dietType;
+
     @Column(nullable = false)
     private LocalDateTime createdAt;
 }

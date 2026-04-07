@@ -8,8 +8,30 @@
   } @else if (dataPoints.length === 0) {
     <div class="weight-progress-chart__state">No weight progress data available yet.</div>
   } @else {
+    <div class="weight-progress-chart__summary">
+      <div class="weight-progress-chart__metric">
+        <span>Start</span>
+        <strong>{{ startWeight }} kg</strong>
+      </div>
+      <div class="weight-progress-chart__metric">
+        <span>Current</span>
+        <strong>{{ currentWeight }} kg</strong>
+      </div>
+      <div class="weight-progress-chart__metric">
+        <span>Progress</span>
+        <strong>{{ trendLabel }}</strong>
+      </div>
+    </div>
     <div class="weight-progress-chart__canvas-wrapper">
       <canvas #chartCanvas></canvas>
+    </div>
+    <div class="weight-progress-chart__table">
+      @for (point of dataPoints; track point.date) {
+        <div class="weight-progress-chart__row">
+          <span>{{ point.date }}</span>
+          <strong style="color: #ffffff;">{{ point.weight }} kg</strong>
+        </div>
+      }
     </div>
   }
 </div>

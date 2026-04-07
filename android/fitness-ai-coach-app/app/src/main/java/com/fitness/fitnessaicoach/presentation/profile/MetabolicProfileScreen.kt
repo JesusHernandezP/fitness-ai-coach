@@ -49,6 +49,7 @@ import com.fitness.fitnessaicoach.ui.theme.YellowPrimary
 
 private val sexOptions = listOf("MALE", "FEMALE")
 private val activityLevelOptions = listOf("SEDENTARY", "LIGHT", "MODERATE", "ACTIVE", "VERY_ACTIVE")
+private val dietTypeOptions = listOf("STANDARD", "KETO", "VEGETARIAN")
 private val goalTypeOptions = listOf("LOSE_WEIGHT", "BUILD_MUSCLE", "MAINTAIN")
 
 @Composable
@@ -58,6 +59,7 @@ fun MetabolicProfileScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var sexExpanded by remember { mutableStateOf(false) }
     var activityExpanded by remember { mutableStateOf(false) }
+    var dietExpanded by remember { mutableStateOf(false) }
     var goalExpanded by remember { mutableStateOf(false) }
 
     LazyColumn(
@@ -98,6 +100,13 @@ fun MetabolicProfileScreen(
                     label = "Height cm",
                     keyboardType = KeyboardType.Decimal
                 )
+                Spacer(modifier = Modifier.height(12.dp))
+                AppTextField(
+                    value = uiState.weightKg?.toString().orEmpty(),
+                    onValueChange = viewModel::onWeightChanged,
+                    label = "Weight kg",
+                    keyboardType = KeyboardType.Decimal
+                )
             }
         }
 
@@ -128,6 +137,20 @@ fun MetabolicProfileScreen(
                     onSelect = {
                         viewModel.onActivityLevelChanged(it)
                         activityExpanded = false
+                    }
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                SelectionField(
+                    value = uiState.dietType,
+                    label = "Diet type",
+                    buttonLabel = "Select diet",
+                    expanded = dietExpanded,
+                    onExpand = { dietExpanded = true },
+                    onDismiss = { dietExpanded = false },
+                    options = dietTypeOptions,
+                    onSelect = {
+                        viewModel.onDietTypeChanged(it)
+                        dietExpanded = false
                     }
                 )
             }

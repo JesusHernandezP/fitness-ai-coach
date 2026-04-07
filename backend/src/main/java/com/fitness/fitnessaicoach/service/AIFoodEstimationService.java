@@ -61,6 +61,16 @@ public class AIFoodEstimationService {
             protein = 31.0;
             carbs = 0.0;
             fat = 3.6;
+        } else if (normalized.contains("pollo") || normalized.contains("atun") || normalized.contains("atún") || normalized.contains("carne molida") || normalized.contains("res")) {
+            calories = normalized.contains("atun") || normalized.contains("atún") ? 116.0 : 176.0;
+            protein = normalized.contains("atun") || normalized.contains("atún") ? 26.0 : 26.0;
+            carbs = 0.0;
+            fat = normalized.contains("atun") || normalized.contains("atún") ? 1.0 : 10.0;
+        } else if (normalized.contains("arroz") || normalized.contains("pan") || normalized.contains("avena")) {
+            calories = normalized.contains("pan") ? 265.0 : 130.0;
+            protein = normalized.contains("pan") ? 9.0 : 2.7;
+            carbs = normalized.contains("pan") ? 49.0 : 28.0;
+            fat = normalized.contains("pan") ? 3.2 : 0.3;
         } else if (normalized.contains("rice") || normalized.contains("pasta") || normalized.contains("bread")) {
             calories = 130.0;
             protein = 2.7;
@@ -71,6 +81,26 @@ public class AIFoodEstimationService {
             protein = 6.0;
             carbs = 0.6;
             fat = 5.0;
+        } else if (normalized.contains("huevo")) {
+            calories = 78.0;
+            protein = 6.0;
+            carbs = 0.6;
+            fat = 5.0;
+        } else if (normalized.contains("bacon") || normalized.contains("tocino")) {
+            calories = 43.0;
+            protein = 3.0;
+            carbs = 0.1;
+            fat = 3.3;
+        } else if (normalized.contains("aguacate") || normalized.contains("avocado")) {
+            calories = 160.0;
+            protein = 2.0;
+            carbs = 8.5;
+            fat = 14.7;
+        } else if (normalized.contains("ensalada")) {
+            calories = 25.0;
+            protein = 1.2;
+            carbs = 4.0;
+            fat = 0.3;
         } else if (normalized.contains("banana") || normalized.contains("apple")) {
             calories = 95.0;
             protein = 0.5;

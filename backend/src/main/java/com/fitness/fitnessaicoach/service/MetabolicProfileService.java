@@ -2,18 +2,23 @@ package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.domain.Goal;
 import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.domain.BodyMetrics;
 import com.fitness.fitnessaicoach.dto.MetabolicProfileRequest;
 import com.fitness.fitnessaicoach.dto.MetabolicProfileResponse;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
+import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
 public class MetabolicProfileService {
 
     private final UserRepository userRepository;
+    private final BodyMetricsRepository bodyMetricsRepository;
     private final GoalService goalService;
 
     public MetabolicProfileResponse saveProfile(String email, MetabolicProfileRequest request) {
@@ -53,8 +58,26 @@ public class MetabolicProfileService {
     private void applyProfile(User user, MetabolicProfileRequest request) {
         user.setAge(request.getAge());
         user.setHeightCm(request.getHeightCm());
+        user.setWeightKg(request.getWeightKg());
         user.setSex(request.getSex());
         user.setActivityLevel(request.getActivityLevel());
+        user.setDietType(request.getDietType());
+        syncTodayWeight(user, request.getWeightKg());
+    }
+
+    private void syncTodayWeight(User user, Double weightKg) {
+        if (weightKg == null) {
+            return;
+        }
+
+        LocalDate today = LocalDate.now();
+        BodyMetrics bodyMetrics = bodyMetricsRepository.findByUserIdAndDate(user.getId(), today)
+                .orElseGet(() -> BodyMetrics.builder()
+                        .user(user)
+                        .date(today)
+                        .build());
+        bodyMetrics.setWeight(weightKg);
+        bodyMetricsRepository.save(bodyMetrics);
     }
 
     private MetabolicProfileResponse toResponse(User user, Goal goal) {
@@ -62,8 +85,10 @@ public class MetabolicProfileService {
                 .userId(user.getId())
                 .age(user.getAge())
                 .heightCm(user.getHeightCm())
+                .weightKg(user.getWeightKg())
                 .sex(user.getSex())
                 .activityLevel(user.getActivityLevel())
+                .dietType(user.getDietType())
                 .goalType(goal != null ? goal.getGoalType() : null)
                 .targetCalories(goal != null ? goal.getTargetCalories() : null)
                 .targetProtein(goal != null ? goal.getTargetProtein() : null)

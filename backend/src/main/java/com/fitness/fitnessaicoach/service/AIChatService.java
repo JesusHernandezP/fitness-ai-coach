@@ -3,7 +3,9 @@ package com.fitness.fitnessaicoach.service;
 import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
 import com.fitness.fitnessaicoach.domain.AIChatMessage;
 import com.fitness.fitnessaicoach.domain.ChatRole;
+import com.fitness.fitnessaicoach.domain.DietType;
 import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.dto.DailyNutritionSummaryResponse;
 import com.fitness.fitnessaicoach.dto.ai.AIChatMessageDto;
 import com.fitness.fitnessaicoach.dto.ai.AIChatMessageResponse;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
@@ -25,6 +27,7 @@ public class AIChatService {
     private final AIChatHistoryService aiChatHistoryService;
     private final AIIntentService aiIntentService;
     private final NutritionContextBuilder nutritionContextBuilder;
+    private final NutritionSummaryService nutritionSummaryService;
     private final AITextGenerationClient aiTextGenerationClient;
     private final PromptBuilder promptBuilder;
 
@@ -34,15 +37,21 @@ public class AIChatService {
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         aiChatHistoryService.saveUserMessage(user.getId(), messageContent);
-        String structuredAction = aiIntentService.handleIntent(user, messageContent).orElse(null);
-        String reply = aiTextGenerationClient.generateText(buildPrompt(user.getId(), messageContent, structuredAction)).trim();
-        if (reply.isBlank() && structuredAction != null) {
-            reply = structuredAction;
+        AIIntentService.ChatIntentResult processing = aiIntentService.processMessage(user, messageContent);
+        DailyNutritionSummaryResponse dailySummary = nutritionSummaryService.buildForDate(user.getId(), processing.targetDate());
+        String reply;
+        try {
+            reply = aiTextGenerationClient.generateText(buildPrompt(user.getId(), messageContent, processing.structuredAction())).trim();
+        } catch (Exception exception) {
+            reply = "";
+        }
+        if (reply.isBlank()) {
+            reply = buildFallbackReply(user, dailySummary, processing.loggedSummary());
         }
 
         aiChatHistoryService.saveAssistantMessage(user.getId(), reply);
 
-        return new AIChatMessageResponse(reply);
+        return new AIChatMessageResponse(reply, processing.loggedSummary(), dailySummary);
     }
 
     @Transactional(readOnly = true)
@@ -64,6 +73,29 @@ public class AIChatService {
                 latestUserMessage,
                 structuredAction
         );
+    }
+
+    private String buildFallbackReply(User user, DailyNutritionSummaryResponse dailySummary, List<String> loggedSummary) {
+        String note = dailySummary.getAdherenceNotes() != null && !dailySummary.getAdherenceNotes().isEmpty()
+                ? dailySummary.getAdherenceNotes().get(0)
+                : "Sigue registrando tu dia para afinar las recomendaciones.";
+        if ((user.getDietType() != null ? user.getDietType() : DietType.STANDARD) == DietType.KETO
+                && dailySummary.getRemainingProtein() != null
+                && dailySummary.getRemainingFat() != null) {
+            return "Buen registro. " + note + " Aun te faltan " + round(dailySummary.getRemainingProtein())
+                    + " g de proteina y " + round(dailySummary.getRemainingFat())
+                    + " g de grasa; para keto puedes completar con pechuga de pollo, atun, huevos o aguacate.";
+        }
+        return "Buen registro. " + note + " Hoy te faltan " + round(dailySummary.getRemainingProtein())
+                + " g de proteina y " + round(dailySummary.getRemainingCalories())
+                + " kcal para cerrar mejor el dia.";
+    }
+
+    private String round(Double value) {
+        if (value == null) {
+            return "0";
+        }
+        return value == Math.rint(value) ? String.valueOf(value.longValue()) : String.format(java.util.Locale.US, "%.1f", value);
     }
 
     private String formatConversation(List<AIChatMessage> recentMessages) {

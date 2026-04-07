@@ -11,18 +11,64 @@
   min-height: 260px;
 }
 
+.weight-progress-chart__summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.weight-progress-chart__metric {
+  background: #121212;
+  border: 1px solid #2a2a2a;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.weight-progress-chart__metric span {
+  color: #a0a0a0;
+  font-size: 0.85rem;
+}
+
+.weight-progress-chart__metric strong {
+  color: #ffe01e;
+  font-size: 1rem;
+}
+
+.weight-progress-chart__table {
+  margin-top: 16px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.weight-progress-chart__row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 2px;
+  border-bottom: 1px solid #2a2a2a;
+  color: #a0a0a0;
+}
+
 .weight-progress-chart__state {
   min-height: 260px;
   display: grid;
   place-items: center;
-  color: #49645d;
-  border: 1px dashed #c9dbd4;
+  color: #a0a0a0;
+  border: 1px dashed #2a2a2a;
   border-radius: 16px;
-  background: #f8fbfa;
+  background: #121212;
   text-align: center;
   padding: 24px;
 }
 
 .weight-progress-chart__state--error {
-  color: #a33d3d;
+  color: #ef4444;
+}
+
+@media (max-width: 720px) {
+  .weight-progress-chart__summary {
+    grid-template-columns: 1fr;
+  }
 }
