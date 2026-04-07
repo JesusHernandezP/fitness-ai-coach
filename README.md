@@ -177,7 +177,11 @@ URL habitual:
 
 Script de presentación:
 
-[`docs/demo-script.md`](C:/PracticaUcademy/ProyectoIntermodular/fitness-ai-coach/docs/demo-script.md)
+[`docs/demo-script.md`](D:/pruebaCodex/fitness-ai-coach/docs/demo-script.md)
+
+Guía de despliegue gratuito:
+
+[`docs/free-deploy-guide.md`](D:/pruebaCodex/fitness-ai-coach/docs/free-deploy-guide.md)
 
 ## Posibles mejoras futuras
 

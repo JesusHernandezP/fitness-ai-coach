@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface BodyMetricsProgressDto {
   date: string;
@@ -29,12 +30,27 @@ export interface SendChatMessageResponseDto {
   loggedSummary?: string[];
 }
 
+export interface MetabolicProfileDto {
+  userId?: string;
+  age: number | null;
+  heightCm: number | null;
+  weightKg: number | null;
+  sex: 'MALE' | 'FEMALE' | '' | null;
+  activityLevel: 'SEDENTARY' | 'LIGHT' | 'MODERATE' | 'ACTIVE' | 'VERY_ACTIVE' | '' | null;
+  dietType: 'STANDARD' | 'KETO' | 'VEGETARIAN' | '' | null;
+  goalType: 'LOSE_WEIGHT' | 'BUILD_MUSCLE' | 'MAINTAIN' | '' | null;
+  targetCalories?: number | null;
+  targetProtein?: number | null;
+  targetCarbs?: number | null;
+  targetFat?: number | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080/api';
+  private readonly baseUrl = environment.apiBaseUrl;
 
   getWeightProgress(): Observable<BodyMetricsProgressDto[]> {
     return this.http.get<BodyMetricsProgressDto[]>(`${this.baseUrl}/body-metrics/progress`);
@@ -50,5 +66,13 @@ export class ApiService {
 
   sendChatMessage(payload: SendChatMessageRequestDto): Observable<SendChatMessageResponseDto> {
     return this.http.post<SendChatMessageResponseDto>(`${this.baseUrl}/ai-chat/message`, payload);
+  }
+
+  getProfile(): Observable<MetabolicProfileDto> {
+    return this.http.get<MetabolicProfileDto>(`${this.baseUrl}/users/profile`);
+  }
+
+  updateProfile(payload: MetabolicProfileDto): Observable<MetabolicProfileDto> {
+    return this.http.put<MetabolicProfileDto>(`${this.baseUrl}/users/profile`, payload);
   }
 }

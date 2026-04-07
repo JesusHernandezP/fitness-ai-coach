@@ -46,6 +46,8 @@ public class AIIntentService {
     private final BodyMetricsService bodyMetricsService;
     private final ExerciseService exerciseService;
     private final GoalService goalService;
+    private final NutritionMath nutritionMath;
+    private final WorkoutSessionRepository workoutSessionRepository;
 
     @Transactional
     public ChatIntentResult processMessage(User user, String messageContent) {
@@ -66,8 +68,20 @@ public class AIIntentService {
         Goal goal = goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(userId).orElse(null);
         DailyLog log = dailyLogRepository.findTopByUserIdOrderByLogDateDescIdDesc(userId).orElse(null);
         BodyMetrics metrics = bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(userId).orElse(null);
-        double protein = log == null ? 0.0 : mealItemRepository.findAllByDailyLogId(log.getId()).stream().mapToDouble(i -> i.getFood().getProtein() * i.getQuantity()).sum();
+        double protein = log == null
+                ? 0.0
+                : mealItemRepository.findAllByDailyLogId(log.getId()).stream()
+                .mapToDouble(nutritionMath::proteinFor)
+                .sum();
         Object latestWeight = metrics != null && metrics.getWeight() != null ? metrics.getWeight() : user.getWeightKg() != null ? user.getWeightKg() : "unknown";
+        double caloriesBurned = log == null
+                ? 0.0
+                : Math.max(
+                        log.getCaloriesBurned() != null ? log.getCaloriesBurned() : 0.0,
+                        workoutSessionRepository.sumCaloriesBurnedByDailyLogId(log.getId()) != null
+                                ? workoutSessionRepository.sumCaloriesBurnedByDailyLogId(log.getId())
+                                : 0.0
+                );
         return new PromptBuilder.ChatPromptContext(
                 user.getAge() != null ? user.getAge() : "unknown",
                 user.getSex() != null ? user.getSex().name() : "unknown",
@@ -81,7 +95,7 @@ public class AIIntentService {
                 goal != null && goal.getTargetCarbs() != null ? goal.getTargetCarbs() : "unknown",
                 goal != null && goal.getTargetFat() != null ? goal.getTargetFat() : "unknown",
                 log != null && log.getCaloriesConsumed() != null ? log.getCaloriesConsumed() : 0.0,
-                log != null && log.getCaloriesBurned() != null ? log.getCaloriesBurned() : 0.0,
+                caloriesBurned,
                 calculateBalance(log),
                 log != null && log.getSteps() != null ? log.getSteps() : 0,
                 protein,
@@ -202,8 +216,26 @@ public class AIIntentService {
     }
 
     private int findWorkoutStart(String text) {
+        boolean metricsOnlyPhrase = (text.contains("pasos") || text.contains("calorias") || text.contains("calories"))
+                && !text.contains("gym")
+                && !text.contains("gimnasio")
+                && !text.contains("press")
+                && !text.contains("sentadilla")
+                && !text.contains("pecho")
+                && !text.contains("espalda")
+                && !text.contains("hombro")
+                && !text.contains("pierna")
+                && !text.contains("cardio")
+                && !text.contains("run")
+                && !text.contains("correr")
+                && !SETS_REPS.matcher(text).find()
+                && !SETS_REPS_WORDS.matcher(text).find();
+
         int start = Integer.MAX_VALUE;
         for (String key : WORKOUT_KEYS) {
+            if (metricsOnlyPhrase && "hice".equals(key)) {
+                continue;
+            }
             int idx = text.indexOf(key);
             if (idx >= 0 && idx < start) start = idx;
         }
@@ -400,7 +432,13 @@ public class AIIntentService {
 
     private double calculateBalance(DailyLog log) {
         if (log == null) return 0.0;
-        return (log.getCaloriesConsumed() != null ? log.getCaloriesConsumed() : 0.0) - (log.getCaloriesBurned() != null ? log.getCaloriesBurned() : 0.0);
+        double caloriesBurned = Math.max(
+                log.getCaloriesBurned() != null ? log.getCaloriesBurned() : 0.0,
+                workoutSessionRepository.sumCaloriesBurnedByDailyLogId(log.getId()) != null
+                        ? workoutSessionRepository.sumCaloriesBurnedByDailyLogId(log.getId())
+                        : 0.0
+        );
+        return (log.getCaloriesConsumed() != null ? log.getCaloriesConsumed() : 0.0) - caloriesBurned;
     }
 
     private void invalidateCoaching(UUID dailyLogId) {

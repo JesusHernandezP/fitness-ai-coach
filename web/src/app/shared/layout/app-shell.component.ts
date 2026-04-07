@@ -23,6 +23,9 @@ import { AuthService } from '../../core/auth/auth.service';
             <a routerLink="/dashboard" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
               Dashboard
             </a>
+            <a routerLink="/profile" routerLinkActive="is-active">
+              Profile
+            </a>
           </nav>
 
           <main class="shell__content">

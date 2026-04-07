@@ -11,11 +11,19 @@ import { AuthService } from '../../core/auth/auth.service';
   imports: [CommonModule, FormsModule],
   template: `
     <section class="login">
-      <div class="login__panel">
+      <div class="login__hero">
+        <img src="/logo-fitness-ai-coach.png" alt="Fitness AI Coach" class="login__logo" />
         <p class="login__eyebrow">Fitness AI Coach</p>
-        <h1>Sign in</h1>
-        <p class="login__copy">Use the same account as the Android app to keep your chat, progress and coaching in sync.</p>
+        <h1>{{ isRegisterMode ? 'Crea tu cuenta' : 'Bienvenido de vuelta' }}</h1>
+        <p class="login__slogan">Tu coach de bolsillo</p>
+        <p class="login__copy">
+          {{ isRegisterMode
+            ? 'Empieza con email y contraseña. Tu progreso y coaching quedarán listos en web y Android.'
+            : 'Entra para continuar tu progreso, tu chat y tus recomendaciones sincronizadas.' }}
+        </p>
+      </div>
 
+      <div class="login__panel">
         <form class="login__form" (ngSubmit)="submit()">
           <label>
             <span>Email</span>
@@ -32,7 +40,11 @@ import { AuthService } from '../../core/auth/auth.service';
           }
 
           <button type="submit" [disabled]="isLoading || !email.trim() || !password.trim()">
-            {{ isLoading ? 'Signing in...' : 'Enter dashboard' }}
+            {{ isLoading ? (isRegisterMode ? 'Creating account...' : 'Signing in...') : (isRegisterMode ? 'Crear usuario' : 'Entrar') }}
+          </button>
+
+          <button type="button" class="login__ghost" (click)="toggleMode()" [disabled]="isLoading">
+            {{ isRegisterMode ? 'Ya tengo cuenta' : 'Crear usuario' }}
           </button>
         </form>
       </div>
@@ -52,37 +64,67 @@ import { AuthService } from '../../core/auth/auth.service';
     .login {
       min-height: 100vh;
       display: grid;
-      place-items: center;
-      padding: 24px;
+      grid-template-columns: minmax(320px, 1.1fr) minmax(320px, 0.9fr);
+      gap: 28px;
+      align-items: center;
+      padding: 32px;
     }
 
+    .login__hero,
     .login__panel {
-      width: min(100%, 440px);
-      background: rgba(30, 30, 30, 0.94);
+      background: rgba(30, 30, 30, 0.92);
       border: 1px solid #2a2a2a;
-      border-radius: 24px;
-      padding: 32px;
+      border-radius: 28px;
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
     }
 
+    .login__hero {
+      padding: 36px;
+      display: grid;
+      gap: 12px;
+      align-content: center;
+      min-height: 520px;
+    }
+
+    .login__panel {
+      padding: 32px;
+    }
+
+    .login__logo {
+      width: min(100%, 320px);
+      justify-self: center;
+      filter: drop-shadow(0 24px 40px rgba(255, 224, 30, 0.12));
+      margin-bottom: 8px;
+    }
+
     .login__eyebrow {
-      margin: 0 0 12px;
+      margin: 0;
       color: #ffe01e;
       text-transform: uppercase;
       letter-spacing: 0.16em;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       font-weight: 700;
     }
 
     h1 {
-      margin: 0 0 8px;
-      font-size: 2rem;
+      margin: 0;
+      font-size: 2.6rem;
+      line-height: 1;
+    }
+
+    .login__slogan {
+      margin: 0;
+      color: #ffe01e;
+      font-size: 1.2rem;
+      font-weight: 700;
     }
 
     .login__copy {
-      margin: 0 0 24px;
+      margin: 0;
+      max-width: 34rem;
       color: #a0a0a0;
-      line-height: 1.5;
+      line-height: 1.6;
+      font-size: 1rem;
     }
 
     .login__form {
@@ -98,8 +140,8 @@ import { AuthService } from '../../core/auth/auth.service';
     }
 
     input {
-      min-height: 52px;
-      border-radius: 14px;
+      min-height: 56px;
+      border-radius: 16px;
       border: 1px solid #2a2a2a;
       background: #121212;
       color: #ffffff;
@@ -113,14 +155,20 @@ import { AuthService } from '../../core/auth/auth.service';
     }
 
     button {
-      min-height: 52px;
+      min-height: 54px;
       border: none;
-      border-radius: 14px;
+      border-radius: 16px;
       background: #ffe01e;
       color: #000000;
       font: inherit;
       font-weight: 700;
       cursor: pointer;
+    }
+
+    .login__ghost {
+      background: transparent;
+      border: 1px solid #2a2a2a;
+      color: #ffffff;
     }
 
     button:disabled {
@@ -132,6 +180,16 @@ import { AuthService } from '../../core/auth/auth.service';
       margin: 0;
       color: #ef4444;
     }
+
+    @media (max-width: 980px) {
+      .login {
+        grid-template-columns: 1fr;
+      }
+
+      .login__hero {
+        min-height: auto;
+      }
+    }
   `]
 })
 export class LoginComponent {
@@ -142,6 +200,16 @@ export class LoginComponent {
   protected password = '';
   protected isLoading = false;
   protected errorMessage = '';
+  protected isRegisterMode = false;
+
+  protected toggleMode(): void {
+    if (this.isLoading) {
+      return;
+    }
+
+    this.isRegisterMode = !this.isRegisterMode;
+    this.errorMessage = '';
+  }
 
   protected submit(): void {
     if (this.isLoading) {
@@ -151,10 +219,17 @@ export class LoginComponent {
     this.errorMessage = '';
     this.isLoading = true;
 
-    this.authService.login({
-      email: this.email.trim(),
-      password: this.password.trim()
-    }).pipe(
+    const authRequest = this.isRegisterMode
+      ? this.authService.register({
+          email: this.email.trim(),
+          password: this.password.trim()
+        })
+      : this.authService.login({
+          email: this.email.trim(),
+          password: this.password.trim()
+        });
+
+    authRequest.pipe(
       timeout(10000)
     ).subscribe({
       next: () => {
@@ -163,7 +238,9 @@ export class LoginComponent {
       },
       error: () => {
         this.isLoading = false;
-        this.errorMessage = 'Unable to sign in. Check your credentials and backend connection.';
+        this.errorMessage = this.isRegisterMode
+          ? 'Unable to create the account. Check the email, password and backend connection.'
+          : 'Unable to sign in. Check your credentials and backend connection.';
       }
     });
   }

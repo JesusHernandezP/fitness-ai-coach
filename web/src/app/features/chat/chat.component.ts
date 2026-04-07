@@ -27,18 +27,7 @@ export class ChatComponent implements OnInit {
   protected errorMessage = '';
 
   ngOnInit(): void {
-    const subscription = this.apiService.getChatHistory().subscribe({
-      next: (messages) => {
-        this.messages = messages.map((message) => this.toChatMessage(message));
-        this.isLoadingHistory = false;
-      },
-      error: () => {
-        this.errorMessage = 'Unable to load chat history right now.';
-        this.isLoadingHistory = false;
-      }
-    });
-
-    this.destroyRef.onDestroy(() => subscription.unsubscribe());
+    this.loadHistory(true);
   }
 
   protected sendMessage(): void {
@@ -60,16 +49,9 @@ export class ChatComponent implements OnInit {
     this.draftMessage = '';
 
     const subscription = this.apiService.sendChatMessage({ message }).subscribe({
-      next: (response) => {
-        this.messages = [
-          ...this.messages,
-          {
-            role: 'ASSISTANT',
-            message: response.reply,
-            createdAt: new Date().toISOString()
-          }
-        ];
+      next: () => {
         this.isSending = false;
+        this.loadHistory(false);
       },
       error: () => {
         this.messages = this.messages.filter((chatMessage) => chatMessage !== optimisticUserMessage);
@@ -91,5 +73,25 @@ export class ChatComponent implements OnInit {
       message: message.message,
       createdAt: message.createdAt
     };
+  }
+
+  private loadHistory(showLoading: boolean): void {
+    if (showLoading) {
+      this.isLoadingHistory = true;
+    }
+
+    const subscription = this.apiService.getChatHistory().subscribe({
+      next: (messages) => {
+        this.errorMessage = '';
+        this.messages = messages.map((message) => this.toChatMessage(message));
+        this.isLoadingHistory = false;
+      },
+      error: () => {
+        this.errorMessage = 'Unable to load chat history right now.';
+        this.isLoadingHistory = false;
+      }
+    });
+
+    this.destroyRef.onDestroy(() => subscription.unsubscribe());
   }
 }

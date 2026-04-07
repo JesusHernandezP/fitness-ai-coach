@@ -334,7 +334,7 @@ class AIChatIntegrationTest {
 
         sendMessageExpectingReply(user.token(), "2 eggs and toast", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
         sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
-        sendMessageExpectingReply(user.token(), "9000 steps today", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
+        sendMessageExpectingReplyContaining(user.token(), "9000 steps today", "Actividad:");
         sendMessageExpectingReply(user.token(), "weight 78.5 kg", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
         sendMessageExpectingReply(user.token(), "am I in deficit?", "Good job staying consistent today. Keep your protein high and try to finish the day with a balanced meal.");
 
@@ -377,9 +377,9 @@ class AIChatIntegrationTest {
         createFood(user.token(), "rice", 130.0);
 
         sendMessageExpectingReply(user.token(), "I ate 3 eggs and rice", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
-        sendMessageExpectingReply(user.token(), "today I walked 8000 steps", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
+        sendMessageExpectingReplyContaining(user.token(), "today I walked 8000 steps", "Actividad:");
         sendMessageExpectingReply(user.token(), "did push workout 4 exercises 4x8", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
-        sendMessageExpectingReply(user.token(), "burned 500 calories", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
+        sendMessageExpectingReplyContaining(user.token(), "burned 500 calories", "Actividad:");
         sendMessageExpectingReply(user.token(), "my weight is 82kg", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
         sendMessageExpectingReply(user.token(), "I want to gain muscle", "That fits well with your routine. Keep your meals and training consistent so your progress stays on track.");
 
@@ -474,6 +474,57 @@ class AIChatIntegrationTest {
                 .satisfies(item -> assertThat(item.getQuantity()).isEqualTo(2.0));
     }
 
+    @Test
+    void aiChatShouldNotExplodeCaloriesWhenMealsUseGramQuantities() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Resumen.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("realistic-macros");
+
+        sendMessage(user.token(), "desayune 2 huevos y 100 gr de pollo mechado");
+        sendMessage(user.token(), "de almuerzo comi 300gr de cerdo con grasa cocido con una cucharada de aceite y 200gr de vegetales salteados");
+
+        String dinnerBody = """
+                {
+                  "message": "de cena he comido 3 huevos y una lata de atun"
+                }
+                """;
+
+        mockMvc.perform(post("/api/ai-chat/message")
+                        .header("Authorization", "Bearer " + user.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(dinnerBody))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.dailySummary.consumedCalories").isNumber())
+                .andExpect(jsonPath("$.dailySummary.consumedCalories").value(org.hamcrest.Matchers.lessThan(5000.0)))
+                .andExpect(jsonPath("$.dailySummary.consumedProtein").value(org.hamcrest.Matchers.lessThan(500.0)));
+    }
+
+    @Test
+    void aiChatShouldUseActivityFocusedReplyForStepsAndBurnOnlyMessages() throws Exception {
+        when(aiTextGenerationClient.generateText(anyString()))
+                .thenReturn("Texto libre que no deberia usarse aqui.");
+        when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+
+        UserContext user = registerAndLogin("activity-only");
+
+        String body = """
+                {
+                  "message": "hice 10000 pasos y queme 1000 calorias"
+                }
+                """;
+
+        mockMvc.perform(post("/api/ai-chat/message")
+                        .header("Authorization", "Bearer " + user.token())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply").value(org.hamcrest.Matchers.containsString("Actividad:")))
+                .andExpect(jsonPath("$.reply").value(org.hamcrest.Matchers.containsString("10000 pasos")))
+                .andExpect(jsonPath("$.reply").value(org.hamcrest.Matchers.containsString("1000")));
+    }
+
     private void sendMessage(String token, String message) throws Exception {
         String body = """
                 {
@@ -502,6 +553,21 @@ class AIChatIntegrationTest {
                         .content(body))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.reply").value(expectedReply));
+    }
+
+    private void sendMessageExpectingReplyContaining(String token, String message, String expectedReplyFragment) throws Exception {
+        String body = """
+                {
+                  "message": "%s"
+                }
+                """.formatted(message);
+
+        mockMvc.perform(post("/api/ai-chat/message")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply").value(org.hamcrest.Matchers.containsString(expectedReplyFragment)));
     }
 
     private void createGoal(String token, double targetWeight) throws Exception {

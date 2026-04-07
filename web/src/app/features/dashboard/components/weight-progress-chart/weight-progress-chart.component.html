@@ -21,6 +21,14 @@
         <span>Progress</span>
         <strong>{{ trendLabel }}</strong>
       </div>
+      <div class="weight-progress-chart__metric">
+        <span>Lowest</span>
+        <strong>{{ lowestWeight }} kg</strong>
+      </div>
+    </div>
+    <div class="weight-progress-chart__headline">
+      <strong>{{ trendLabel }}</strong>
+      <span>{{ spanLabel }}</span>
     </div>
     <div class="weight-progress-chart__canvas-wrapper">
       <canvas #chartCanvas></canvas>

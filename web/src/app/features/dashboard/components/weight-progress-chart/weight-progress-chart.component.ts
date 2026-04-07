@@ -25,6 +25,7 @@ export class WeightProgressChartComponent implements AfterViewInit, OnDestroy {
   protected startWeight: number | null = null;
   protected currentWeight: number | null = null;
   protected totalChange: number | null = null;
+  protected lowestWeight: number | null = null;
 
   private chart?: Chart;
 
@@ -34,6 +35,7 @@ export class WeightProgressChartComponent implements AfterViewInit, OnDestroy {
         this.dataPoints = progress;
         this.startWeight = progress.length > 0 ? progress[0].weight : null;
         this.currentWeight = progress.length > 0 ? progress[progress.length - 1].weight : null;
+        this.lowestWeight = progress.length > 0 ? Math.min(...progress.map((point) => point.weight)) : null;
         this.totalChange =
           this.startWeight !== null && this.currentWeight !== null
             ? Number((this.currentWeight - this.startWeight).toFixed(1))
@@ -82,7 +84,8 @@ export class WeightProgressChartComponent implements AfterViewInit, OnDestroy {
             pointRadius: 4,
             pointHoverRadius: 5,
             pointBackgroundColor: '#ffe01e',
-            pointBorderColor: '#111318'
+            pointBorderColor: '#111318',
+            pointBorderWidth: 2
           }
         ]
       },
@@ -92,6 +95,17 @@ export class WeightProgressChartComponent implements AfterViewInit, OnDestroy {
         plugins: {
           legend: {
             display: false
+          },
+          tooltip: {
+            backgroundColor: '#111318',
+            borderColor: '#2a2a2a',
+            borderWidth: 1,
+            titleColor: '#ffffff',
+            bodyColor: '#ffe01e',
+            displayColors: false,
+            callbacks: {
+              label: (context) => `${context.parsed.y} kg`
+            }
           }
         },
         scales: {
@@ -129,5 +143,13 @@ export class WeightProgressChartComponent implements AfterViewInit, OnDestroy {
       return `${this.totalChange} kg up`;
     }
     return 'No change';
+  }
+
+  protected get spanLabel(): string {
+    if (this.dataPoints.length < 2) {
+      return 'Primer registro';
+    }
+
+    return `${this.dataPoints.length} registros`;
   }
 }

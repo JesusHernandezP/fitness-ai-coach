@@ -29,6 +29,7 @@ public class NutritionContextBuilder {
     private final BodyMetricsRepository bodyMetricsRepository;
     private final MealItemRepository mealItemRepository;
     private final WorkoutSessionRepository workoutSessionRepository;
+    private final NutritionMath nutritionMath;
 
     public PromptBuilder.NutritionContext build(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow();
@@ -47,13 +48,13 @@ public class NutritionContextBuilder {
                 ? latestDailyLog.getCaloriesConsumed()
                 : 0.0;
         double consumedProtein = mealItems.stream()
-                .mapToDouble(item -> item.getFood().getProtein() * item.getQuantity())
+                .mapToDouble(nutritionMath::proteinFor)
                 .sum();
         double consumedCarbs = mealItems.stream()
-                .mapToDouble(item -> item.getFood().getCarbs() * item.getQuantity())
+                .mapToDouble(nutritionMath::carbsFor)
                 .sum();
         double consumedFat = mealItems.stream()
-                .mapToDouble(item -> item.getFood().getFat() * item.getQuantity())
+                .mapToDouble(nutritionMath::fatFor)
                 .sum();
 
         double targetCalories = latestGoal != null && latestGoal.getTargetCalories() != null
@@ -84,6 +85,14 @@ public class NutritionContextBuilder {
                 .mapToInt(workout -> workout.getDuration() != null ? workout.getDuration() : 0)
                 .sum();
         int steps = latestDailyLog != null && latestDailyLog.getSteps() != null ? latestDailyLog.getSteps() : 0;
+        double caloriesBurned = latestDailyLog == null
+                ? 0.0
+                : Math.max(
+                        latestDailyLog.getCaloriesBurned() != null ? latestDailyLog.getCaloriesBurned() : 0.0,
+                        workoutSessionRepository.sumCaloriesBurnedByDailyLogId(latestDailyLog.getId()) != null
+                                ? workoutSessionRepository.sumCaloriesBurnedByDailyLogId(latestDailyLog.getId())
+                                : 0.0
+                );
 
         return new PromptBuilder.NutritionContext(
                 latestGoal != null && latestGoal.getGoalType() != null ? latestGoal.getGoalType().name() : "UNKNOWN",

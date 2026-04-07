@@ -13,7 +13,7 @@
 
 .weight-progress-chart__summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -36,6 +36,22 @@
 .weight-progress-chart__metric strong {
   color: #ffe01e;
   font-size: 1rem;
+}
+
+.weight-progress-chart__headline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2px 14px;
+}
+
+.weight-progress-chart__headline strong {
+  color: #ffffff;
+  font-size: 1.1rem;
+}
+
+.weight-progress-chart__headline span {
+  color: #a0a0a0;
 }
 
 .weight-progress-chart__table {
@@ -69,6 +85,6 @@
 
 @media (max-width: 720px) {
   .weight-progress-chart__summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -163,11 +161,6 @@ fun MetabolicProfileScreen(
                         activityExpanded = false
                     }
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                QuickProfileSnapshot(
-                    weightKg = uiState.weightKg,
-                    dietType = uiState.dietType
-                )
             }
         }
 
@@ -191,7 +184,13 @@ fun MetabolicProfileScreen(
 
         if (uiState.targetCalories != null) {
             item {
-                ProfileSectionCard(title = "Daily targets") {
+                ProfileSectionCard(title = "Daily intake targets") {
+                    Text(
+                        text = "These are your goal-adjusted amounts to consume each day based on your profile and diet type.",
+                        color = TextSecondary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
                     TargetMetricCard(
                         label = "Calories target",
                         value = uiState.targetCalories?.toString().orEmpty()
@@ -264,51 +263,6 @@ fun MetabolicProfileScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun QuickProfileSnapshot(
-    weightKg: Double?,
-    dietType: String
-) {
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        AssistChip(
-            onClick = {},
-            enabled = false,
-            label = {
-                Text(
-                    text = "Weight ${weightKg?.toString() ?: "--"} kg",
-                    color = YellowPrimary
-                )
-            },
-            border = AssistChipDefaults.assistChipBorder(
-                enabled = true,
-                borderColor = BorderSubtle
-            ),
-            colors = AssistChipDefaults.assistChipColors(
-                disabledContainerColor = SurfaceDark,
-                disabledLabelColor = YellowPrimary
-            )
-        )
-        AssistChip(
-            onClick = {},
-            enabled = false,
-            label = {
-                Text(
-                    text = "Diet ${dietType.ifBlank { "--" }}",
-                    color = YellowPrimary
-                )
-            },
-            border = AssistChipDefaults.assistChipBorder(
-                enabled = true,
-                borderColor = BorderSubtle
-            ),
-            colors = AssistChipDefaults.assistChipColors(
-                disabledContainerColor = SurfaceDark,
-                disabledLabelColor = YellowPrimary
-            )
-        )
     }
 }
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fitness.fitnessaicoach.core.result.AppResult
 import com.fitness.fitnessaicoach.domain.usecase.LoginUseCase
+import com.fitness.fitnessaicoach.domain.usecase.RegisterUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,7 @@ import javax.inject.Inject
 data class LoginUiState(
     val email: String = "",
     val password: String = "",
+    val isRegisterMode: Boolean = false,
     val isLoading: Boolean = false,
     val isLoginSuccessful: Boolean = false,
     val errorMessage: String? = null
@@ -22,7 +24,8 @@ data class LoginUiState(
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: LoginUseCase,
+    private val registerUseCase: RegisterUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -40,6 +43,15 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun toggleMode() {
+        _uiState.update { currentState ->
+            currentState.copy(
+                isRegisterMode = !currentState.isRegisterMode,
+                errorMessage = null
+            )
+        }
+    }
+
     fun login() {
         val currentState = _uiState.value
         if (currentState.email.isBlank() || currentState.password.isBlank()) {
@@ -54,7 +66,13 @@ class LoginViewModel @Inject constructor(
                 state.copy(isLoading = true, errorMessage = null)
             }
 
-            when (val result = loginUseCase(currentState.email.trim(), currentState.password)) {
+            val result = if (currentState.isRegisterMode) {
+                registerUseCase(currentState.email.trim(), currentState.password)
+            } else {
+                loginUseCase(currentState.email.trim(), currentState.password)
+            }
+
+            when (result) {
                 AppResult.Loading -> Unit
 
                 is AppResult.Success -> {

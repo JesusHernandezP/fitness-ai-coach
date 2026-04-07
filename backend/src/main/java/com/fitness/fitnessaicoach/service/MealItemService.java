@@ -31,6 +31,7 @@ public class MealItemService {
     private final FoodRepository foodRepository;
     private final DailyLogRepository dailyLogRepository;
     private final AIFoodEstimationService aiFoodEstimationService;
+    private final NutritionMath nutritionMath;
 
     @Transactional
     public MealItemResponse createMealItem(MealItemRequest request) {
@@ -39,7 +40,7 @@ public class MealItemService {
 
         Food food = resolveFood(request);
 
-        Double calculatedCalories = food.getCalories() * request.getQuantity();
+        Double calculatedCalories = nutritionMath.caloriesFor(food, request.getQuantity());
 
         MealItem mealItem = MealItem.builder()
                 .meal(meal)

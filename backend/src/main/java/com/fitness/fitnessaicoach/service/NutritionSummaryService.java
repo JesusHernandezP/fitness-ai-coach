@@ -9,6 +9,7 @@ import com.fitness.fitnessaicoach.repository.DailyLogRepository;
 import com.fitness.fitnessaicoach.repository.GoalRepository;
 import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
+import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,8 @@ public class NutritionSummaryService {
     private final GoalRepository goalRepository;
     private final DailyLogRepository dailyLogRepository;
     private final MealItemRepository mealItemRepository;
+    private final WorkoutSessionRepository workoutSessionRepository;
+    private final NutritionMath nutritionMath;
 
     @Transactional(readOnly = true)
     public DailyNutritionSummaryResponse buildForDate(UUID userId, LocalDate date) {
@@ -37,16 +40,16 @@ public class NutritionSummaryService {
 
         List<MealItem> mealItems = dailyLog != null ? mealItemRepository.findAllByDailyLogId(dailyLog.getId()) : List.of();
         double consumedCalories = mealItems.stream()
-                .mapToDouble(item -> item.getCalculatedCalories() != null ? item.getCalculatedCalories() : 0.0)
+                .mapToDouble(nutritionMath::caloriesFor)
                 .sum();
         double consumedProtein = mealItems.stream()
-                .mapToDouble(item -> item.getFood().getProtein() * item.getQuantity())
+                .mapToDouble(nutritionMath::proteinFor)
                 .sum();
         double consumedCarbs = mealItems.stream()
-                .mapToDouble(item -> item.getFood().getCarbs() * item.getQuantity())
+                .mapToDouble(nutritionMath::carbsFor)
                 .sum();
         double consumedFat = mealItems.stream()
-                .mapToDouble(item -> item.getFood().getFat() * item.getQuantity())
+                .mapToDouble(nutritionMath::fatFor)
                 .sum();
 
         double targetCalories = goal != null && goal.getTargetCalories() != null ? goal.getTargetCalories() : 0.0;
@@ -54,7 +57,7 @@ public class NutritionSummaryService {
         double targetCarbs = goal != null && goal.getTargetCarbs() != null ? goal.getTargetCarbs() : 0.0;
         double targetFat = goal != null && goal.getTargetFat() != null ? goal.getTargetFat() : 0.0;
         int steps = dailyLog != null && dailyLog.getSteps() != null ? dailyLog.getSteps() : 0;
-        double caloriesBurned = dailyLog != null && dailyLog.getCaloriesBurned() != null ? dailyLog.getCaloriesBurned() : 0.0;
+        double caloriesBurned = calculateCaloriesBurned(dailyLog);
 
         return DailyNutritionSummaryResponse.builder()
                 .date(date)
@@ -76,6 +79,19 @@ public class NutritionSummaryService {
                 .goalType(goal != null && goal.getGoalType() != null ? goal.getGoalType().name() : "UNKNOWN")
                 .adherenceNotes(buildAdherenceNotes(user, goal, consumedCalories, consumedProtein, consumedCarbs, targetCalories, targetProtein, targetCarbs))
                 .build();
+    }
+
+    private double calculateCaloriesBurned(DailyLog dailyLog) {
+        if (dailyLog == null) {
+            return 0.0;
+        }
+
+        double manualBurn = dailyLog.getCaloriesBurned() != null ? dailyLog.getCaloriesBurned() : 0.0;
+        double workoutBurn = workoutSessionRepository.sumCaloriesBurnedByDailyLogId(dailyLog.getId()) != null
+                ? workoutSessionRepository.sumCaloriesBurnedByDailyLogId(dailyLog.getId())
+                : 0.0;
+
+        return Math.max(manualBurn, workoutBurn);
     }
 
     private List<String> buildAdherenceNotes(

@@ -1,9 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, switchMap, tap } from 'rxjs';
 
 interface LoginRequestDto {
+  email: string;
+  password: string;
+}
+
+interface RegisterRequestDto {
+  name: string;
   email: string;
   password: string;
 }
@@ -24,6 +30,19 @@ export class AuthService {
   login(payload: LoginRequestDto): Observable<LoginResponseDto> {
     return this.http.post<LoginResponseDto>(`${this.baseUrl}/login`, payload).pipe(
       tap((response) => localStorage.setItem(this.tokenKey, response.token))
+    );
+  }
+
+  register(payload: LoginRequestDto): Observable<LoginResponseDto> {
+    const request: RegisterRequestDto = {
+      name: payload.email.split('@')[0] || 'fitness-user',
+      email: payload.email,
+      password: payload.password
+    };
+
+    return this.http.post(`${this.baseUrl.replace('/auth', '/users')}`, request).pipe(
+      tap(() => undefined),
+      switchMap(() => this.login(payload))
     );
   }
 

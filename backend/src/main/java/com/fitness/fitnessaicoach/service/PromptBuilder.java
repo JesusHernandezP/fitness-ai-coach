@@ -137,13 +137,16 @@ public class PromptBuilder {
                 TRAINING ANALYSIS RULES
                 When the message includes training, connect the session with recovery, protein needs, hydration, and remaining calories.
                 Keep the recommendation short and directly tied to the current day totals.
+                If the latest message is only about steps, calories burned, or activity and does not log food, focus on activity analysis first.
+                Do not invent meal feedback for an activity-only message unless you are tying it to the current remaining calories or protein.
+                If there is no new food in the message, do not pretend the user just ate.
 
                 OUTPUT FORMAT
-                Write exactly 3 short paragraphs.
+                Write exactly 2 short paragraphs.
                 Paragraph 1: what was recorded or what the current day shows.
-                Paragraph 2: numeric assessment of calories/macros versus target.
-                Paragraph 3: next meal or adjustment recommendation with concrete foods.
-                Keep each paragraph to 1 or 2 sentences.
+                Paragraph 2: numeric assessment plus next meal or adjustment recommendation with concrete foods.
+                Keep each paragraph to 1 or 2 short sentences.
+                Keep the full answer under 90 words.
                 Avoid long follow-up questions unless necessary.
                 Do not use bullet points.
 
