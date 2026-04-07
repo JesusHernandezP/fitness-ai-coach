@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.presentation.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,8 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,12 +35,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.compose.ui.graphics.SolidColor
 import com.fitness.fitnessaicoach.ui.theme.BackgroundMain
 import com.fitness.fitnessaicoach.ui.theme.BorderSubtle
 import com.fitness.fitnessaicoach.ui.theme.CardDark
@@ -65,7 +68,14 @@ fun MetabolicProfileScreen(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundMain)
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        BackgroundMain,
+                        CardDark.copy(alpha = 0.96f)
+                    )
+                )
+            )
             .statusBarsPadding()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -107,6 +117,20 @@ fun MetabolicProfileScreen(
                     label = "Weight kg",
                     keyboardType = KeyboardType.Decimal
                 )
+                Spacer(modifier = Modifier.height(12.dp))
+                SelectionField(
+                    value = uiState.dietType,
+                    label = "Diet type",
+                    buttonLabel = "Select diet",
+                    expanded = dietExpanded,
+                    onExpand = { dietExpanded = true },
+                    onDismiss = { dietExpanded = false },
+                    options = dietTypeOptions,
+                    onSelect = {
+                        viewModel.onDietTypeChanged(it)
+                        dietExpanded = false
+                    }
+                )
             }
         }
 
@@ -140,18 +164,9 @@ fun MetabolicProfileScreen(
                     }
                 )
                 Spacer(modifier = Modifier.height(12.dp))
-                SelectionField(
-                    value = uiState.dietType,
-                    label = "Diet type",
-                    buttonLabel = "Select diet",
-                    expanded = dietExpanded,
-                    onExpand = { dietExpanded = true },
-                    onDismiss = { dietExpanded = false },
-                    options = dietTypeOptions,
-                    onSelect = {
-                        viewModel.onDietTypeChanged(it)
-                        dietExpanded = false
-                    }
+                QuickProfileSnapshot(
+                    weightKg = uiState.weightKg,
+                    dietType = uiState.dietType
                 )
             }
         }
@@ -253,16 +268,58 @@ fun MetabolicProfileScreen(
 }
 
 @Composable
+private fun QuickProfileSnapshot(
+    weightKg: Double?,
+    dietType: String
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        AssistChip(
+            onClick = {},
+            enabled = false,
+            label = {
+                Text(
+                    text = "Weight ${weightKg?.toString() ?: "--"} kg",
+                    color = YellowPrimary
+                )
+            },
+            border = AssistChipDefaults.assistChipBorder(
+                enabled = true,
+                borderColor = BorderSubtle
+            ),
+            colors = AssistChipDefaults.assistChipColors(
+                disabledContainerColor = SurfaceDark,
+                disabledLabelColor = YellowPrimary
+            )
+        )
+        AssistChip(
+            onClick = {},
+            enabled = false,
+            label = {
+                Text(
+                    text = "Diet ${dietType.ifBlank { "--" }}",
+                    color = YellowPrimary
+                )
+            },
+            border = AssistChipDefaults.assistChipBorder(
+                enabled = true,
+                borderColor = BorderSubtle
+            ),
+            colors = AssistChipDefaults.assistChipColors(
+                disabledContainerColor = SurfaceDark,
+                disabledLabelColor = YellowPrimary
+            )
+        )
+    }
+}
+
+@Composable
 private fun ProfileSectionCard(
     title: String,
     content: @Composable () -> Unit
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = CardDark),
-        border = CardDefaults.outlinedCardBorder().copy(
-            width = 1.dp,
-            brush = SolidColor(BorderSubtle)
-        ),
+        border = BorderStroke(1.dp, BorderSubtle),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -369,10 +426,7 @@ private fun TargetMetricCard(
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-        border = CardDefaults.outlinedCardBorder().copy(
-            width = 1.dp,
-            brush = SolidColor(BorderSubtle)
-        ),
+        border = BorderStroke(1.dp, BorderSubtle),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -404,10 +458,7 @@ private fun SmallTargetCard(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = SurfaceDark),
-        border = CardDefaults.outlinedCardBorder().copy(
-            width = 1.dp,
-            brush = SolidColor(BorderSubtle)
-        ),
+        border = BorderStroke(1.dp, BorderSubtle),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(

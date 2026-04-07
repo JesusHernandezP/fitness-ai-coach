@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -81,7 +82,14 @@ fun AIChatScreen(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(BackgroundMain)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                CardDark.copy(alpha = 0.96f),
+                                BackgroundMain
+                            )
+                        )
+                    )
                     .border(width = 1.dp, color = DividerDark)
                     .padding(horizontal = 12.dp, vertical = 12.dp)
             ) {
@@ -153,7 +161,14 @@ fun AIChatScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(BackgroundMain)
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            BackgroundMain,
+                            CardDark.copy(alpha = 0.96f)
+                        )
+                    )
+                )
                 .padding(innerPadding)
         ) {
             Row(

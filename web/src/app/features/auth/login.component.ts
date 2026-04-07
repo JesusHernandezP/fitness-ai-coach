@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { timeout } from 'rxjs';
 import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
@@ -153,7 +154,9 @@ export class LoginComponent {
     this.authService.login({
       email: this.email.trim(),
       password: this.password.trim()
-    }).subscribe({
+    }).pipe(
+      timeout(10000)
+    ).subscribe({
       next: () => {
         this.isLoading = false;
         void this.router.navigate(['/dashboard']);
