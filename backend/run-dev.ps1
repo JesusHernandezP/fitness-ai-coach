@@ -17,5 +17,21 @@ if (-not $env:GROQ_MODEL) {
     $env:GROQ_MODEL = "llama-3.1-8b-instant"
 }
 
+if (-not $env:SPRING_DATASOURCE_URL) {
+    $env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/fitness_db"
+}
+
+if (-not $env:SPRING_DATASOURCE_USERNAME) {
+    $env:SPRING_DATASOURCE_USERNAME = "postgres"
+}
+
+if (-not $env:SPRING_DATASOURCE_PASSWORD) {
+    $env:SPRING_DATASOURCE_PASSWORD = "1234"
+}
+
+if (-not $env:JWT_SECRET) {
+    $env:JWT_SECRET = "dev-only-jwt-secret-key-with-32-bytes"
+}
+
 Write-Host "Arrancando en modo DEV (Swagger habilitado)."
 java '-Dspring.profiles.active=dev' -jar target\fitness-ai-coach-0.0.1-SNAPSHOT.jar

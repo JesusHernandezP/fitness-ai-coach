@@ -40,22 +40,37 @@ La configuracion se carga desde:
 
 Variables clave:
 
-- `DB_URL` (por defecto `jdbc:postgresql://localhost:5432/fitness_db`)
-- `DB_USERNAME` (por defecto `postgres`)
-- `DB_PASSWORD` (por defecto `1234`)
-- `JWT_SECRET` (obligatorio en produccion, minimo 32 bytes)
+- `SPRING_DATASOURCE_URL`
+- `SPRING_DATASOURCE_USERNAME`
+- `SPRING_DATASOURCE_PASSWORD`
+- `JWT_SECRET` (obligatorio fuera de tests, minimo 32 bytes)
 - `GROQ_API_KEY` (obligatorio para coaching IA)
 - `GROQ_MODEL` (opcional, por defecto `llama-3.1-8b-instant`)
+
+Notas para PostgreSQL remoto:
+
+- Neon, Render, Railway y Supabase suelen requerir SSL en la URL JDBC.
+- Usa `?sslmode=require` o `&sslmode=require` segun la URL que te entregue el proveedor.
+- La aplicacion fija zona horaria JDBC en `UTC`.
+- Flyway puede inicializar una base remota vacia con las migraciones del proyecto.
 
 Ejemplo en PowerShell:
 
 ```powershell
-$env:DB_URL="jdbc:postgresql://localhost:5432/fitness_db"
-$env:DB_USERNAME="postgres"
-$env:DB_PASSWORD="1234"
+$env:SPRING_DATASOURCE_URL="jdbc:postgresql://ep-example.eu-central-1.aws.neon.tech/fitness_db?sslmode=require"
+$env:SPRING_DATASOURCE_USERNAME="fitness_user"
+$env:SPRING_DATASOURCE_PASSWORD="CHANGE_ME"
 $env:JWT_SECRET="change-this-in-env-to-a-32-byte-minimum-secret-key"
 $env:GROQ_API_KEY="TU_API_KEY_DE_GROQ"
 $env:GROQ_MODEL="llama-3.1-8b-instant"
+```
+
+Ejemplo local en desarrollo:
+
+```powershell
+$env:SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/fitness_db"
+$env:SPRING_DATASOURCE_USERNAME="postgres"
+$env:SPRING_DATASOURCE_PASSWORD="1234"
 ```
 
 --------------------------------------------------

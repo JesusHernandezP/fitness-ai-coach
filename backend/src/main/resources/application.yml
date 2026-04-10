@@ -1,9 +1,18 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/fitness_db}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:1234}
+    url: ${SPRING_DATASOURCE_URL:}
+    username: ${SPRING_DATASOURCE_USERNAME:}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: fitness-ai-coach-pool
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:2}
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:10}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT:30000}
+      validation-timeout: ${SPRING_DATASOURCE_HIKARI_VALIDATION_TIMEOUT:5000}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT:600000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME:1800000}
+      keepalive-time: ${SPRING_DATASOURCE_HIKARI_KEEPALIVE_TIME:300000}
   flyway:
     enabled: false
 
@@ -29,7 +38,7 @@ app:
     public: false
   security:
     jwt:
-      secret: ${JWT_SECRET:change-this-in-env-to-a-32-byte-minimum-secret-key}
+      secret: ${JWT_SECRET:}
       expiration-ms: ${JWT_EXPIRATION_MS:86400000}
 
 groq:
