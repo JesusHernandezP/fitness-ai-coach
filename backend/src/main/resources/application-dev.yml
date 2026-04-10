@@ -3,6 +3,16 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: always
+
 spring:
   flyway:
     enabled: false
