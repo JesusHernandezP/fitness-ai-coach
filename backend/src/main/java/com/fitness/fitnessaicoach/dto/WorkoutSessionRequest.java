@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,5 +30,6 @@ public class WorkoutSessionRequest {
     @Positive(message = "Duration must be greater than 0.")
     private Integer duration;
 
+    @PositiveOrZero(message = "Calories burned cannot be negative.")
     private Double caloriesBurned;
 }
