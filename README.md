@@ -46,6 +46,7 @@ Variables clave:
 - `JWT_SECRET` (obligatorio en produccion, minimo 32 bytes)
 - `GROQ_API_KEY` (obligatorio para coaching IA)
 - `GROQ_MODEL` (opcional, por defecto `llama-3.1-8b-instant`)
+- `APP_CORS_ALLOWED_ORIGINS` (en produccion, lista separada por comas)
 
 Ejemplo en PowerShell:
 
@@ -56,7 +57,12 @@ $env:DB_PASSWORD="1234"
 $env:JWT_SECRET="change-this-in-env-to-a-32-byte-minimum-secret-key"
 $env:GROQ_API_KEY="TU_API_KEY_DE_GROQ"
 $env:GROQ_MODEL="llama-3.1-8b-instant"
+$env:APP_CORS_ALLOWED_ORIGINS="https://app.com,https://admin.app.com"
 ```
+
+Formato de ejemplo para multiples origenes:
+
+`APP_CORS_ALLOWED_ORIGINS=https://app.com,https://admin.app.com`
 
 --------------------------------------------------
 Levantar backend en desarrollo (con Swagger)

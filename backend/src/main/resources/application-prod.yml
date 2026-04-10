@@ -16,3 +16,5 @@ spring:
 app:
   swagger:
     public: false
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
