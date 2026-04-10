@@ -9,6 +9,7 @@ import com.fitness.fitnessaicoach.dto.ai.AICoachingResponse;
 import com.fitness.fitnessaicoach.dto.ai.AICoachingAdviceResponse;
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
 import com.fitness.fitnessaicoach.repository.AIRecommendationRepository;
+import com.fitness.fitnessaicoach.security.LogSanitizer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,12 @@ public class AICoachingService {
         try {
             advice = groqClient.getCoachingResponse(prompt);
         } catch (Exception e) {
-            log.error("AI error", e);
+            log.error(
+                    "AI coaching failed for dailyLogId={} reason={}",
+                    dailyLogId,
+                    LogSanitizer.sanitizeExceptionMessage(e)
+            );
+            log.debug("AI coaching stacktrace for dailyLogId={}", dailyLogId, e);
             advice = fallbackAdvice();
         }
 

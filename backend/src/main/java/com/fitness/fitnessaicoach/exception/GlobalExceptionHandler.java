@@ -1,5 +1,7 @@
 package com.fitness.fitnessaicoach.exception;
 
+import com.fitness.fitnessaicoach.security.LogSanitizer;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -10,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -23,6 +26,8 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(err ->
                 errors.put(err.getField(), err.getDefaultMessage())
         );
+
+        log.warn("Validation failed for fields={}", errors.keySet());
 
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.BAD_REQUEST.value());
@@ -146,6 +151,12 @@ public class GlobalExceptionHandler {
     // Cualquier otra excepción
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneral(Exception ex) {
+        log.error(
+                "Unhandled exception type={} message={}",
+                ex.getClass().getSimpleName(),
+                LogSanitizer.sanitizeExceptionMessage(ex)
+        );
+        log.debug("Unhandled exception stacktrace", ex);
 
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
