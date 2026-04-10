@@ -40,22 +40,33 @@ La configuracion se carga desde:
 
 Variables clave:
 
-- `DB_URL` (por defecto `jdbc:postgresql://localhost:5432/fitness_db`)
-- `DB_USERNAME` (por defecto `postgres`)
-- `DB_PASSWORD` (por defecto `1234`)
-- `JWT_SECRET` (obligatorio en produccion, minimo 32 bytes)
-- `GROQ_API_KEY` (obligatorio para coaching IA)
+- `SPRING_DATASOURCE_URL` (obligatoria en produccion)
+- `SPRING_DATASOURCE_USERNAME` (obligatoria en produccion)
+- `SPRING_DATASOURCE_PASSWORD` (obligatoria en produccion)
+- `JWT_SECRET` (obligatoria en produccion, minimo 32 bytes)
+- `GROQ_API_KEY` (obligatoria en produccion para coaching IA)
 - `GROQ_MODEL` (opcional, por defecto `llama-3.1-8b-instant`)
+- `APP_CORS_ALLOWED_ORIGINS` (obligatoria en produccion, lista separada por comas)
+
+En perfil `prod`, la aplicacion falla al arrancar si falta cualquiera de estas variables requeridas:
+
+- `SPRING_DATASOURCE_URL`
+- `SPRING_DATASOURCE_USERNAME`
+- `SPRING_DATASOURCE_PASSWORD`
+- `JWT_SECRET`
+- `GROQ_API_KEY`
+- `APP_CORS_ALLOWED_ORIGINS`
 
 Ejemplo en PowerShell:
 
 ```powershell
-$env:DB_URL="jdbc:postgresql://localhost:5432/fitness_db"
-$env:DB_USERNAME="postgres"
-$env:DB_PASSWORD="1234"
-$env:JWT_SECRET="change-this-in-env-to-a-32-byte-minimum-secret-key"
+$env:SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/fitness_db"
+$env:SPRING_DATASOURCE_USERNAME="postgres"
+$env:SPRING_DATASOURCE_PASSWORD="<define-tu-password-local>"
+$env:JWT_SECRET="<minimo-32-bytes>"
 $env:GROQ_API_KEY="TU_API_KEY_DE_GROQ"
 $env:GROQ_MODEL="llama-3.1-8b-instant"
+$env:APP_CORS_ALLOWED_ORIGINS="http://localhost:4200,http://127.0.0.1:4200"
 ```
 
 --------------------------------------------------
@@ -70,6 +81,7 @@ Desde la raiz del proyecto:
 El script:
 - arranca el perfil `dev`
 - habilita Swagger
+- genera un `JWT_SECRET` temporal si no existe en la sesion
 - usa `llama-3.1-8b-instant` como modelo por defecto
 - empaqueta el jar si no existe
 
@@ -175,4 +187,5 @@ Notas de diagnostico
   - que `GET /api/health/groq` devuelva `available=true`.
   - que el modelo configurado sea compatible y activo.
 - `GROQ_MODEL` te permite cambiar modelo sin tocar codigo.
+- Para `backend/docker-compose.yml`, define `POSTGRES_PASSWORD` en tu entorno antes de arrancar el contenedor.
 - Este README esta pensado para pruebas API-first mientras no haya frontend publicado.

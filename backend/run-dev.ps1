@@ -13,6 +13,11 @@ if (-not $env:GROQ_API_KEY) {
     Write-Host '$env:GROQ_API_KEY="TU_API_KEY"'
 }
 
+if (-not $env:JWT_SECRET) {
+    $env:JWT_SECRET = [Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))
+    Write-Host "Aviso: JWT_SECRET no estaba configurada. Se genero un valor temporal solo para esta sesion."
+}
+
 if (-not $env:GROQ_MODEL) {
     $env:GROQ_MODEL = "llama-3.1-8b-instant"
 }
