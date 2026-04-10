@@ -40,11 +40,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                         var rules = auth
 
-                        .requestMatchers(
-                                "/api/auth/**"
-                        ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/users").permitAll();
-                        rules.requestMatchers("/api/health/**").permitAll();
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
+                        rules.requestMatchers(HttpMethod.GET, "/api/health").permitAll();
 
                         if (swaggerPublic) {
                             rules.requestMatchers(
@@ -63,6 +61,8 @@ public class SecurityConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) ->
                                 response.sendError(HttpStatus.UNAUTHORIZED.value(), "Unauthorized"))
+                        .accessDeniedHandler((request, response, accessDeniedException) ->
+                                response.sendError(HttpStatus.FORBIDDEN.value(), "Forbidden"))
                 )
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

@@ -170,7 +170,7 @@ public class MealItemControllerIntegrationTest {
                 }
                 """.formatted(email, password);
 
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk())

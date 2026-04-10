@@ -23,7 +23,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    @Operation(summary = "Register a new user", security = {})
+    @Operation(summary = "Create a user")
+    @SecurityRequirement(name = "bearerAuth")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
         UserResponse created = userService.create(request);
         return ResponseEntity.ok(created);
