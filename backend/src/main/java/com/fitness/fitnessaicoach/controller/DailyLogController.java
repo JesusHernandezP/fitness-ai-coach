@@ -13,7 +13,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.fitness.fitnessaicoach.dto.ApiResponse;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.time.LocalDate;
 import java.util.List;
@@ -89,8 +91,8 @@ public class DailyLogController {
 
     @GetMapping("/user/{userId}/today")
     @Operation(summary = "Get or create today's daily log for a user")
-    public ResponseEntity<DailyLogResponse> getOrCreateTodayLog(@PathVariable UUID userId) {
+    public ResponseEntity<ApiResponse<DailyLogResponse>> getOrCreateTodayLog(@PathVariable UUID userId) {
         DailyLogResponse response = dailyLogService.getOrCreateTodayLog(userId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(200, response));
     }
 }
