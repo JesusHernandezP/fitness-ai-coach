@@ -37,6 +37,11 @@ build/
 /mobile/app/build/
 /mobile/local.properties
 /mobile/.cxx/
+/android/fitness-ai-coach-app/.gradle/
+/android/fitness-ai-coach-app/build/
+/android/fitness-ai-coach-app/app/build/
+/android/fitness-ai-coach-app/local.properties
+/android/fitness-ai-coach-app/.cxx/
 
 # ----------------------------------------
 # WEB (Angular)
