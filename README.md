@@ -103,6 +103,11 @@ URL:
 
 `http://localhost:8080/swagger-ui/index.html`
 
+Verificacion esperada por perfil:
+
+- `dev` o `local`: `GET /v3/api-docs` responde `200` y Swagger UI carga.
+- `prod`: `GET /v3/api-docs`, `GET /swagger-ui/index.html` y `GET /swagger-ui.html` no deben quedar expuestos publicamente.
+
 --------------------------------------------------
 Probar con Postman (sin frontend)
 --------------------------------------------------
