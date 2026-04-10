@@ -16,6 +16,7 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -89,6 +90,53 @@ class SecurityIntegrationTest {
 
         mockMvc.perform(get("/api/users")
                         .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void loginShouldReturn429AfterFiveFailedAttemptsFromSameIp() throws Exception {
+        String loginBody = """
+                {
+                  "email": "invalid-email",
+                  "password": ""
+                }
+                """;
+
+        for (int attempt = 0; attempt < 5; attempt++) {
+            mockMvc.perform(post("/api/auth/login")
+                            .header("X-Forwarded-For", "203.0.113.10")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(loginBody))
+                    .andExpect(status().isBadRequest());
+        }
+
+        mockMvc.perform(post("/api/auth/login")
+                        .header("X-Forwarded-For", "203.0.113.10")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginBody))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().string("Retry-After", "60"));
+    }
+
+    @Test
+    void loginRateLimitShouldNotAffectOtherEndpoints() throws Exception {
+        String loginBody = """
+                {
+                  "email": "invalid-email",
+                  "password": ""
+                }
+                """;
+
+        for (int attempt = 0; attempt < 5; attempt++) {
+            mockMvc.perform(post("/api/auth/login")
+                            .header("X-Forwarded-For", "203.0.113.11")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(loginBody))
+                    .andExpect(status().isBadRequest());
+        }
+
+        mockMvc.perform(get("/api/health")
+                        .header("X-Forwarded-For", "203.0.113.11"))
                 .andExpect(status().isOk());
     }
 
