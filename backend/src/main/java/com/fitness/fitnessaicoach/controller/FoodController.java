@@ -1,5 +1,6 @@
 package com.fitness.fitnessaicoach.controller;
 
+import com.fitness.fitnessaicoach.dto.ApiResponse;
 import com.fitness.fitnessaicoach.dto.FoodRequest;
 import com.fitness.fitnessaicoach.dto.FoodResponse;
 import com.fitness.fitnessaicoach.service.FoodService;
@@ -26,35 +27,35 @@ public class FoodController {
 
     @PostMapping
     @Operation(summary = "Create a new food")
-    public ResponseEntity<FoodResponse> createFood(@Valid @RequestBody FoodRequest request) {
+    public ResponseEntity<ApiResponse<FoodResponse>> createFood(@Valid @RequestBody FoodRequest request) {
         FoodResponse response = foodService.createFood(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), response));
     }
 
     @GetMapping
     @Operation(summary = "Get all foods")
-    public List<FoodResponse> getAllFoods() {
-        return foodService.getAllFoods();
+    public ResponseEntity<ApiResponse<List<FoodResponse>>> getAllFoods() {
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), foodService.getAllFoods()));
     }
 
     @GetMapping("/search")
     @Operation(summary = "Search foods by name")
-    public ResponseEntity<List<FoodResponse>> searchFoods(@RequestParam(required = false) String query) {
+    public ResponseEntity<ApiResponse<List<FoodResponse>>> searchFoods(@RequestParam(required = false) String query) {
         List<FoodResponse> response = foodService.searchFoods(query);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), response));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get food by id")
-    public ResponseEntity<FoodResponse> getFoodById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<FoodResponse>> getFoodById(@PathVariable UUID id) {
         FoodResponse response = foodService.getFoodById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), response));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete food by id")
-    public ResponseEntity<Void> deleteFood(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteFood(@PathVariable UUID id) {
         foodService.deleteFood(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), null));
     }
 }

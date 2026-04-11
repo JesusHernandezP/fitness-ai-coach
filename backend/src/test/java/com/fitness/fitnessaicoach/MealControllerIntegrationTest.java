@@ -109,6 +109,7 @@ public class MealControllerIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText());
     }

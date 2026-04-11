@@ -1,5 +1,6 @@
 package com.fitness.fitnessaicoach.controller;
 
+import com.fitness.fitnessaicoach.dto.ApiResponse;
 import com.fitness.fitnessaicoach.dto.UserRequest;
 import com.fitness.fitnessaicoach.dto.UserResponse;
 import com.fitness.fitnessaicoach.service.UserService;
@@ -8,6 +9,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,23 +27,23 @@ public class UserController {
     @PostMapping
     @Operation(summary = "Create a user")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@Valid @RequestBody UserRequest request) {
         UserResponse created = userService.create(request);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), created));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable UUID id) {
         UserResponse user = userService.getById(id);
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), user));
     }
 
     @GetMapping
     @Operation(summary = "Get all users")
     @SecurityRequirement(name = "bearerAuth")
-    public List<UserResponse> getAllUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), userService.getAllUsers()));
     }
 }

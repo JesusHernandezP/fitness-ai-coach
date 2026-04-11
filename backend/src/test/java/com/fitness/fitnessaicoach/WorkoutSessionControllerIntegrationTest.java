@@ -116,6 +116,7 @@ public class WorkoutSessionControllerIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText());
     }

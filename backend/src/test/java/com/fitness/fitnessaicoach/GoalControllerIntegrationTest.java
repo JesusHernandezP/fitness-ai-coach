@@ -65,29 +65,34 @@ public class GoalControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(goalBody))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"))
-                .andExpect(jsonPath("$.targetWeight").value(75.0))
-                .andExpect(jsonPath("$.targetCalories").value(2000))
-                .andExpect(jsonPath("$.userId").value(user.userId()))
+                .andExpect(jsonPath("$.status").value(201))
+                .andExpect(jsonPath("$.data.goalType").value("LOSE_WEIGHT"))
+                .andExpect(jsonPath("$.data.targetWeight").value(75.0))
+                .andExpect(jsonPath("$.data.targetCalories").value(2000))
+                .andExpect(jsonPath("$.data.userId").value(user.userId()))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        String goalId = objectMapper.readTree(createResult).get("id").asText();
+        String goalId = objectMapper.readTree(createResult).get("data").get("id").asText();
 
         mockMvc.perform(get("/api/goals")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").isArray());
 
         mockMvc.perform(get("/api/goals/" + goalId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(goalId))
-                .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(goalId))
+                .andExpect(jsonPath("$.data.goalType").value("LOSE_WEIGHT"));
 
         mockMvc.perform(delete("/api/goals/" + goalId)
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200));
     }
 
     private UserContext registerAndLogin() throws Exception {

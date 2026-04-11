@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  *
  * <p>Endpoints covered here:
  * <ul>
- *   <li>POST /api/users  (register)</li>
+ *   <li>POST /api/auth/register</li>
  *   <li>POST /api/auth/login</li>
  *   <li>POST /api/foods  +  GET /api/foods</li>
  *   <li>POST /api/daily-logs  +  GET /api/daily-logs</li>
@@ -46,7 +46,7 @@ class CoreEndpointsIntegrationTest {
     private ObjectMapper objectMapper;
 
     // ──────────────────────────────────────────────────────────────────────
-    //  POST /api/users  (register)
+    //  POST /api/auth/register
     // ──────────────────────────────────────────────────────────────────────
 
     @Test
@@ -64,7 +64,7 @@ class CoreEndpointsIntegrationTest {
                 }
                 """.formatted(email);
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
@@ -92,12 +92,12 @@ class CoreEndpointsIntegrationTest {
                 }
                 """.formatted(email);
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isConflict());
@@ -112,7 +112,7 @@ class CoreEndpointsIntegrationTest {
                 }
                 """;
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isBadRequest());
@@ -201,12 +201,13 @@ class CoreEndpointsIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(foodBody))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.name").value("Brown Rice"))
-                .andExpect(jsonPath("$.calories").value(216.0))
-                .andExpect(jsonPath("$.protein").value(5.0))
-                .andExpect(jsonPath("$.carbs").value(45.0))
-                .andExpect(jsonPath("$.fat").value(1.8));
+                .andExpect(jsonPath("$.status").value(201))
+                .andExpect(jsonPath("$.data.id").isNotEmpty())
+                .andExpect(jsonPath("$.data.name").value("Brown Rice"))
+                .andExpect(jsonPath("$.data.calories").value(216.0))
+                .andExpect(jsonPath("$.data.protein").value(5.0))
+                .andExpect(jsonPath("$.data.carbs").value(45.0))
+                .andExpect(jsonPath("$.data.fat").value(1.8));
     }
 
     @Test
@@ -233,8 +234,9 @@ class CoreEndpointsIntegrationTest {
         mockMvc.perform(get("/api/foods")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$[?(@.name == '%s')]", unique).exists());
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data[?(@.name == '%s')]", unique).exists());
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -261,12 +263,13 @@ class CoreEndpointsIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.date").value("2026-04-10"))
-                .andExpect(jsonPath("$.steps").value(9500))
-                .andExpect(jsonPath("$.caloriesConsumed").value(2200.0))
-                .andExpect(jsonPath("$.caloriesBurned").value(550.0))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
+                .andExpect(jsonPath("$.status").value(201))
+                .andExpect(jsonPath("$.data.id").isNotEmpty())
+                .andExpect(jsonPath("$.data.date").value("2026-04-10"))
+                .andExpect(jsonPath("$.data.steps").value(9500))
+                .andExpect(jsonPath("$.data.caloriesConsumed").value(2200.0))
+                .andExpect(jsonPath("$.data.caloriesBurned").value(550.0))
+                .andExpect(jsonPath("$.data.userId").value(user.userId()));
     }
 
     @Test
@@ -293,8 +296,9 @@ class CoreEndpointsIntegrationTest {
         mockMvc.perform(get("/api/daily-logs")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(greaterThanOrEqualTo(1)));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(greaterThanOrEqualTo(1)));
     }
 
     // ──────────────────────────────────────────────────────────────────────
@@ -313,7 +317,7 @@ class CoreEndpointsIntegrationTest {
                 }
                 """.formatted(email, password);
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk());
@@ -358,7 +362,7 @@ class CoreEndpointsIntegrationTest {
                 }
                 """.formatted(email, password);
 
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk())

@@ -80,7 +80,7 @@ class ExceptionConsistencyIntegrationTest {
                 }
                 """.formatted(email, password);
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk());

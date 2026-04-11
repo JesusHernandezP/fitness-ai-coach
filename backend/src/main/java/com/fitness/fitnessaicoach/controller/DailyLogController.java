@@ -32,61 +32,61 @@ public class DailyLogController {
 
     @PostMapping
     @Operation(summary = "Create a new daily log")
-    public ResponseEntity<DailyLogResponse> createDailyLog(
+    public ResponseEntity<ApiResponse<DailyLogResponse>> createDailyLog(
             @Valid @RequestBody DailyLogRequest request) {
 
         DailyLogResponse response = dailyLogService.createDailyLog(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), response));
     }
 
     @GetMapping
     @Operation(summary = "Get all daily logs")
-    public List<DailyLogResponse> getAllDailyLogs() {
-        return dailyLogService.getAllDailyLogs();
+    public ResponseEntity<ApiResponse<List<DailyLogResponse>>> getAllDailyLogs() {
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), dailyLogService.getAllDailyLogs()));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get daily log by id")
-    public ResponseEntity<DailyLogResponse> getDailyLogById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<DailyLogResponse>> getDailyLogById(@PathVariable UUID id) {
         DailyLogResponse response = dailyLogService.getDailyLogById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), response));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete daily log by id")
-    public ResponseEntity<Void> deleteDailyLog(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteDailyLog(@PathVariable UUID id) {
         dailyLogService.deleteDailyLog(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), null));
     }
 
     @GetMapping("/{id}/summary")
     @Operation(summary = "Get daily log summary by id")
-    public ResponseEntity<DailyLogSummaryResponseDto> getDailyLogSummary(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<DailyLogSummaryResponseDto>> getDailyLogSummary(@PathVariable UUID id) {
         DailyLogSummaryResponseDto response = dailyLogService.getDailyLogSummary(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), response));
     }
 
     @GetMapping("/{id}/calorie-balance")
     @Operation(summary = "Get calorie balance for a daily log")
-    public ResponseEntity<CalorieBalanceResponse> getDailyLogCalorieBalance(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<CalorieBalanceResponse>> getDailyLogCalorieBalance(@PathVariable UUID id) {
         CalorieBalanceResponse response = dailyLogService.getDailyLogCalorieBalance(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), response));
     }
 
     @GetMapping("/user/{userId}")
     @Operation(summary = "Get daily logs by user id")
-    public List<DailyLogResponse> getDailyLogsByUserId(@PathVariable UUID userId) {
-        return dailyLogService.getDailyLogsByUserId(userId);
+    public ResponseEntity<ApiResponse<List<DailyLogResponse>>> getDailyLogsByUserId(@PathVariable UUID userId) {
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), dailyLogService.getDailyLogsByUserId(userId)));
     }
 
     @GetMapping("/user/{userId}/date/{date}")
     @Operation(summary = "Get daily log for a user by date")
-    public ResponseEntity<DailyLogResponse> getDailyLogByUserIdAndDate(
+    public ResponseEntity<ApiResponse<DailyLogResponse>> getDailyLogByUserIdAndDate(
             @PathVariable UUID userId,
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
         DailyLogResponse response = dailyLogService.getDailyLogByUserIdAndDate(userId, date);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), response));
     }
 
     @GetMapping("/user/{userId}/today")

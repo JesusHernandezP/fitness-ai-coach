@@ -42,6 +42,12 @@ class SecurityIntegrationTest {
     }
 
     @Test
+    void actuatorHealthWithoutTokenShouldReturn200() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void getExercisesWithoutTokenShouldReturn401() throws Exception {
         mockMvc.perform(get("/api/exercises"))
                 .andExpect(status().isUnauthorized());

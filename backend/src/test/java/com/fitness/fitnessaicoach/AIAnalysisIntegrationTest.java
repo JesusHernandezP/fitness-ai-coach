@@ -149,6 +149,7 @@ public class AIAnalysisIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText());
     }
@@ -192,6 +193,7 @@ public class AIAnalysisIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText());
     }

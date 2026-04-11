@@ -1,5 +1,6 @@
 package com.fitness.fitnessaicoach.controller;
 
+import com.fitness.fitnessaicoach.dto.ApiResponse;
 import com.fitness.fitnessaicoach.dto.GoalRequest;
 import com.fitness.fitnessaicoach.dto.GoalResponse;
 import com.fitness.fitnessaicoach.service.GoalService;
@@ -26,28 +27,28 @@ public class GoalController {
 
     @PostMapping
     @Operation(summary = "Create a new goal")
-    public ResponseEntity<GoalResponse> createGoal(@Valid @RequestBody GoalRequest request) {
+    public ResponseEntity<ApiResponse<GoalResponse>> createGoal(@Valid @RequestBody GoalRequest request) {
         GoalResponse response = goalService.createGoal(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new ApiResponse<>(HttpStatus.CREATED.value(), response));
     }
 
     @GetMapping
     @Operation(summary = "Get all goals")
-    public List<GoalResponse> getAllGoals() {
-        return goalService.getAllGoals();
+    public ResponseEntity<ApiResponse<List<GoalResponse>>> getAllGoals() {
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), goalService.getAllGoals()));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get goal by id")
-    public ResponseEntity<GoalResponse> getGoalById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<GoalResponse>> getGoalById(@PathVariable UUID id) {
         GoalResponse response = goalService.getGoalById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), response));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete goal by id")
-    public ResponseEntity<Void> deleteGoal(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteGoal(@PathVariable UUID id) {
         goalService.deleteGoal(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), null));
     }
 }

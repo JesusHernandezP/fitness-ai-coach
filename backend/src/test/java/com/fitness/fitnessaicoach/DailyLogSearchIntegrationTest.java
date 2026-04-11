@@ -55,9 +55,9 @@ public class DailyLogSearchIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].userId").value(user.userId()))
-                .andExpect(jsonPath("$[1].userId").value(user.userId()));
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].userId").value(user.userId()))
+                .andExpect(jsonPath("$.data[1].userId").value(user.userId()));
     }
 
     @Test
@@ -71,9 +71,9 @@ public class DailyLogSearchIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/date/2026-04-15")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.date").value("2026-04-15"))
-                .andExpect(jsonPath("$.steps").value(10500))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
+                .andExpect(jsonPath("$.data.date").value("2026-04-15"))
+                .andExpect(jsonPath("$.data.steps").value(10500))
+                .andExpect(jsonPath("$.data.userId").value(user.userId()));
     }
 
     @Test
@@ -129,8 +129,8 @@ public class DailyLogSearchIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].date").value(today.toString()));
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].date").value(today.toString()));
     }
 
     @Test

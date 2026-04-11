@@ -7,13 +7,17 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/fitness_db}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
-    password: ${SPRING_DATASOURCE_PASSWORD:1234}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
   flyway:
     enabled: false
 
 app:
   swagger:
     public: true
+
+  security:
+    jwt:
+      secret: dev-secret-key-very-long-123456789
 
 groq:
   api:

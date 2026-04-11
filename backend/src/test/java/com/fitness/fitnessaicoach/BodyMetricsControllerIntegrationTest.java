@@ -66,30 +66,35 @@ public class BodyMetricsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.userId").value(user.userId()))
-                .andExpect(jsonPath("$.weight").value(82.5))
-                .andExpect(jsonPath("$.bodyFat").value(18.2))
-                .andExpect(jsonPath("$.muscleMass").value(38.5))
-                .andExpect(jsonPath("$.date").value("2026-04-15"))
+                .andExpect(jsonPath("$.status").value(201))
+                .andExpect(jsonPath("$.data.userId").value(user.userId()))
+                .andExpect(jsonPath("$.data.weight").value(82.5))
+                .andExpect(jsonPath("$.data.bodyFat").value(18.2))
+                .andExpect(jsonPath("$.data.muscleMass").value(38.5))
+                .andExpect(jsonPath("$.data.date").value("2026-04-15"))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        UUID bodyMetricsId = UUID.fromString(objectMapper.readTree(response).get("id").asText());
+        UUID bodyMetricsId = UUID.fromString(objectMapper.readTree(response).get("data").get("id").asText());
 
         mockMvc.perform(get("/api/body-metrics")
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").isArray());
 
         mockMvc.perform(get("/api/body-metrics/" + bodyMetricsId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(bodyMetricsId.toString()))
-                .andExpect(jsonPath("$.weight").value(82.5));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(bodyMetricsId.toString()))
+                .andExpect(jsonPath("$.data.weight").value(82.5));
 
         mockMvc.perform(delete("/api/body-metrics/" + bodyMetricsId)
                         .header("Authorization", "Bearer " + token))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200));
     }
 
     @Test
