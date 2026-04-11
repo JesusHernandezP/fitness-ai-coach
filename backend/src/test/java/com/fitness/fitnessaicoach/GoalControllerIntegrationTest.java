@@ -53,16 +53,26 @@ public class GoalControllerIntegrationTest {
 
         String goalBody = """
                 {
+<<<<<<< HEAD
                   "goalType": "LOSE_WEIGHT",
                   "targetWeight": 75
                 }
                 """;
+=======
+                  "userId": "%s",
+                  "goalType": "LOSE_WEIGHT",
+                  "targetWeight": 75,
+                  "targetCalories": 2000
+                }
+                """.formatted(user.userId());
+>>>>>>> main
 
         String createResult = mockMvc.perform(post("/api/goals")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(goalBody))
                 .andExpect(status().isCreated())
+<<<<<<< HEAD
                 .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"))
                 .andExpect(jsonPath("$.targetWeight").value(75.0))
                 .andExpect(jsonPath("$.targetCalories").value(2451.25))
@@ -70,20 +80,37 @@ public class GoalControllerIntegrationTest {
                 .andExpect(jsonPath("$.targetFat").value(64.0))
                 .andExpect(jsonPath("$.targetCarbs").value(308.81))
                 .andExpect(jsonPath("$.userId").value(user.userId()))
+=======
+                .andExpect(jsonPath("$.status").value(201))
+                .andExpect(jsonPath("$.data.goalType").value("LOSE_WEIGHT"))
+                .andExpect(jsonPath("$.data.targetWeight").value(75.0))
+                .andExpect(jsonPath("$.data.targetCalories").value(2000))
+                .andExpect(jsonPath("$.data.userId").value(user.userId()))
+>>>>>>> main
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
+<<<<<<< HEAD
         String goalId = objectMapper.readTree(createResult).get("id").asText();
+=======
+        String goalId = objectMapper.readTree(createResult).get("data").get("id").asText();
+>>>>>>> main
 
         mockMvc.perform(get("/api/goals")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
+<<<<<<< HEAD
                 .andExpect(jsonPath("$[0].id").value(goalId));
+=======
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data").isArray());
+>>>>>>> main
 
         mockMvc.perform(get("/api/goals/" + goalId)
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
+<<<<<<< HEAD
                 .andExpect(jsonPath("$.id").value(goalId))
                 .andExpect(jsonPath("$.goalType").value("LOSE_WEIGHT"));
 
@@ -138,6 +165,16 @@ public class GoalControllerIntegrationTest {
                         .content(goalBody))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("You already set your goal today"));
+=======
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.id").value(goalId))
+                .andExpect(jsonPath("$.data.goalType").value("LOSE_WEIGHT"));
+
+        mockMvc.perform(delete("/api/goals/" + goalId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(200));
+>>>>>>> main
     }
 
     private UserContext registerAndLogin() throws Exception {
@@ -155,7 +192,11 @@ public class GoalControllerIntegrationTest {
                 }
                 """.formatted(email, password);
 
+<<<<<<< HEAD
         MvcResult registerResult = mockMvc.perform(post("/api/users")
+=======
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
+>>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk())

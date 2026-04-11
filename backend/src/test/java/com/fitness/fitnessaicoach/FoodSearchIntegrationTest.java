@@ -56,10 +56,17 @@ public class FoodSearchIntegrationTest {
                         .param("query", uniqueTerm.toUpperCase())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
+<<<<<<< HEAD
                 .andExpect(jsonPath("$.length()").value(3))
                 .andExpect(jsonPath("$[0].name").value(uniqueTerm + " breast"))
                 .andExpect(jsonPath("$[1].name").value(uniqueTerm + " rice"))
                 .andExpect(jsonPath("$[2].name").value("Grilled " + uniqueTerm));
+=======
+                .andExpect(jsonPath("$.data.length()").value(3))
+                .andExpect(jsonPath("$.data[0].name").value(uniqueTerm + " breast"))
+                .andExpect(jsonPath("$.data[1].name").value(uniqueTerm + " rice"))
+                .andExpect(jsonPath("$.data[2].name").value("Grilled " + uniqueTerm));
+>>>>>>> main
     }
 
     @Test
@@ -70,7 +77,11 @@ public class FoodSearchIntegrationTest {
                         .param("query", "   ")
                         .header("Authorization", "Bearer " + user.token()))
                 .andExpect(status().isOk())
+<<<<<<< HEAD
                 .andExpect(jsonPath("$.length()").value(0));
+=======
+                .andExpect(jsonPath("$.data.length()").value(0));
+>>>>>>> main
     }
 
     @Test
@@ -84,7 +95,11 @@ public class FoodSearchIntegrationTest {
                         .param("query", "salmon")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
+<<<<<<< HEAD
                 .andExpect(jsonPath("$.length()").value(0));
+=======
+                .andExpect(jsonPath("$.data.length()").value(0));
+>>>>>>> main
     }
 
     private void createFood(String token, String name, double calories, double protein, double carbs, double fat) throws Exception {
@@ -120,7 +135,11 @@ public class FoodSearchIntegrationTest {
                 }
                 """.formatted(email, password);
 
+<<<<<<< HEAD
         MvcResult registerResult = mockMvc.perform(post("/api/users")
+=======
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
+>>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk())

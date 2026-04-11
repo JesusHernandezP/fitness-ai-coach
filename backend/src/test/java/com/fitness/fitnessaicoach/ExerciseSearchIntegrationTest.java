@@ -119,7 +119,11 @@ public class ExerciseSearchIntegrationTest {
                 }
                 """.formatted(email, password);
 
+<<<<<<< HEAD
         mockMvc.perform(post("/api/users")
+=======
+        mockMvc.perform(post("/api/auth/register")
+>>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk());

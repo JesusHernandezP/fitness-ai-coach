@@ -1,5 +1,6 @@
 package com.fitness.fitnessaicoach.service;
 
+<<<<<<< HEAD
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
 import com.fitness.fitnessaicoach.domain.Goal;
 import com.fitness.fitnessaicoach.domain.User;
@@ -8,6 +9,12 @@ import com.fitness.fitnessaicoach.domain.UserSex;
 import com.fitness.fitnessaicoach.dto.GoalRequest;
 import com.fitness.fitnessaicoach.dto.GoalResponse;
 import com.fitness.fitnessaicoach.exception.GoalAlreadyExistsException;
+=======
+import com.fitness.fitnessaicoach.domain.Goal;
+import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.dto.GoalRequest;
+import com.fitness.fitnessaicoach.dto.GoalResponse;
+>>>>>>> main
 import com.fitness.fitnessaicoach.exception.GoalNotFoundException;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
 import com.fitness.fitnessaicoach.repository.GoalRepository;
@@ -15,10 +22,13 @@ import com.fitness.fitnessaicoach.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+<<<<<<< HEAD
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+=======
+>>>>>>> main
 import java.util.List;
 import java.util.UUID;
 
@@ -29,6 +39,7 @@ public class GoalService {
     private final GoalRepository goalRepository;
     private final UserRepository userRepository;
 
+<<<<<<< HEAD
     public GoalResponse createGoal(String email, GoalRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
@@ -43,6 +54,16 @@ public class GoalService {
                 .targetProtein(macroTargets.targetProtein())
                 .targetCarbs(macroTargets.targetCarbs())
                 .targetFat(macroTargets.targetFat())
+=======
+    public GoalResponse createGoal(GoalRequest request) {
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        Goal goal = Goal.builder()
+                .goalType(request.getGoalType())
+                .targetWeight(request.getTargetWeight())
+                .targetCalories(request.getTargetCalories())
+>>>>>>> main
                 .user(user)
                 .build();
 
@@ -50,31 +71,46 @@ public class GoalService {
         return toResponse(saved);
     }
 
+<<<<<<< HEAD
     public List<GoalResponse> getAllGoals(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         return goalRepository.findAllByUserIdOrderByCreatedAtDescIdDesc(user.getId())
+=======
+    public List<GoalResponse> getAllGoals() {
+        return goalRepository.findAll()
+>>>>>>> main
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
+<<<<<<< HEAD
     public GoalResponse getGoalById(String email, UUID id) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         Goal goal = goalRepository.findByIdAndUserId(id, user.getId())
+=======
+    public GoalResponse getGoalById(UUID id) {
+        Goal goal = goalRepository.findById(id)
+>>>>>>> main
                 .orElseThrow(() -> new GoalNotFoundException("Goal not found."));
 
         return toResponse(goal);
     }
 
+<<<<<<< HEAD
     public void deleteGoal(String email, UUID id) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         Goal goal = goalRepository.findByIdAndUserId(id, user.getId())
+=======
+    public void deleteGoal(UUID id) {
+        Goal goal = goalRepository.findById(id)
+>>>>>>> main
                 .orElseThrow(() -> new GoalNotFoundException("Goal not found."));
 
         goalRepository.delete(goal);
@@ -86,6 +122,7 @@ public class GoalService {
                 .goalType(goal.getGoalType())
                 .targetWeight(goal.getTargetWeight())
                 .targetCalories(goal.getTargetCalories())
+<<<<<<< HEAD
                 .targetProtein(goal.getTargetProtein())
                 .targetCarbs(goal.getTargetCarbs())
                 .targetFat(goal.getTargetFat())
@@ -168,4 +205,9 @@ public class GoalService {
             double targetFat
     ) {
     }
+=======
+                .userId(goal.getUser() != null ? goal.getUser().getId() : null)
+                .build();
+    }
+>>>>>>> main
 }

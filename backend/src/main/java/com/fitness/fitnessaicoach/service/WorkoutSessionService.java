@@ -13,10 +13,15 @@ import com.fitness.fitnessaicoach.repository.ExerciseRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+<<<<<<< HEAD
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+=======
+
+import java.util.List;
+>>>>>>> main
 import java.util.UUID;
 
 @Service
@@ -27,7 +32,10 @@ public class WorkoutSessionService {
     private final DailyLogRepository dailyLogRepository;
     private final ExerciseRepository exerciseRepository;
 
+<<<<<<< HEAD
     @Transactional
+=======
+>>>>>>> main
     public WorkoutSessionResponse createWorkoutSession(WorkoutSessionRequest request) {
         DailyLog dailyLog = dailyLogRepository.findById(request.getDailyLogId())
                 .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
@@ -45,7 +53,10 @@ public class WorkoutSessionService {
                 .build();
 
         WorkoutSession saved = workoutSessionRepository.save(workoutSession);
+<<<<<<< HEAD
         syncDailyLogCaloriesBurned(dailyLog.getId());
+=======
+>>>>>>> main
 
         return toResponse(saved);
     }
@@ -64,14 +75,21 @@ public class WorkoutSessionService {
         return toResponse(workoutSession);
     }
 
+<<<<<<< HEAD
     @Transactional
+=======
+>>>>>>> main
     public void deleteWorkoutSession(UUID id) {
         WorkoutSession workoutSession = workoutSessionRepository.findById(id)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException("Workout session not found."));
 
+<<<<<<< HEAD
         UUID dailyLogId = workoutSession.getDailyLog().getId();
         workoutSessionRepository.delete(workoutSession);
         syncDailyLogCaloriesBurned(dailyLogId);
+=======
+        workoutSessionRepository.delete(workoutSession);
+>>>>>>> main
     }
 
     private WorkoutSessionResponse toResponse(WorkoutSession workoutSession) {
@@ -85,6 +103,7 @@ public class WorkoutSessionService {
                 .caloriesBurned(workoutSession.getCaloriesBurned())
                 .build();
     }
+<<<<<<< HEAD
 
     private void syncDailyLogCaloriesBurned(UUID dailyLogId) {
         dailyLogRepository.findById(dailyLogId).ifPresent(dailyLog -> {
@@ -95,4 +114,6 @@ public class WorkoutSessionService {
             dailyLogRepository.save(dailyLog);
         });
     }
+=======
+>>>>>>> main
 }

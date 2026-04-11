@@ -1,12 +1,18 @@
 package com.fitness.fitnessaicoach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+<<<<<<< HEAD
 import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
+=======
+>>>>>>> main
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+<<<<<<< HEAD
 import org.springframework.boot.test.mock.mockito.MockBean;
+=======
+>>>>>>> main
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
@@ -16,7 +22,10 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+<<<<<<< HEAD
 import static org.mockito.Mockito.when;
+=======
+>>>>>>> main
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,9 +48,12 @@ public class MealItemControllerIntegrationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+<<<<<<< HEAD
     @MockBean
     private AITextGenerationClient aiTextGenerationClient;
 
+=======
+>>>>>>> main
     @Test
     void swaggerSpecShouldExposeMealItemEndpoints() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
@@ -54,7 +66,10 @@ public class MealItemControllerIntegrationTest {
 
     @Test
     void mealItemCrudEndpointsShouldWorkWithValidToken() throws Exception {
+<<<<<<< HEAD
         when(aiTextGenerationClient.getModelName()).thenReturn("llama-test");
+=======
+>>>>>>> main
         UserContext user = registerAndLogin();
         String token = user.token();
         UUID dailyLogId = createDailyLog(token, user.userId());
@@ -96,6 +111,7 @@ public class MealItemControllerIntegrationTest {
                 .andExpect(status().isNoContent());
     }
 
+<<<<<<< HEAD
     @Test
     void mealItemCreationShouldEstimateUnknownFoodAndUpdateDailyLogCalories() throws Exception {
         when(aiTextGenerationClient.generateText(org.mockito.ArgumentMatchers.anyString()))
@@ -147,6 +163,8 @@ public class MealItemControllerIntegrationTest {
                 .andExpect(jsonPath("$.caloriesConsumed").value(0.0));
     }
 
+=======
+>>>>>>> main
     private UUID createDailyLog(String token, String userId) throws Exception {
         String dailyLogBody = """
                 {
@@ -166,6 +184,10 @@ public class MealItemControllerIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+<<<<<<< HEAD
+=======
+                .get("data")
+>>>>>>> main
                 .get("id")
                 .asText());
     }
@@ -209,6 +231,10 @@ public class MealItemControllerIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+<<<<<<< HEAD
+=======
+                .get("data")
+>>>>>>> main
                 .get("id")
                 .asText());
     }
@@ -228,7 +254,11 @@ public class MealItemControllerIntegrationTest {
                 }
                 """.formatted(email, password);
 
+<<<<<<< HEAD
         MvcResult registerResult = mockMvc.perform(post("/api/users")
+=======
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
+>>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk())

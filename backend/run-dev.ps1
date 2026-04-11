@@ -3,6 +3,7 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location "$root\backend"
 
+<<<<<<< HEAD
 $composeFile = Join-Path $PWD "docker-compose.yml"
 $dbHost = if ($env:DB_HOST) { $env:DB_HOST } else { "127.0.0.1" }
 $dbPort = if ($env:DB_PORT) { [int]$env:DB_PORT } else { 5432 }
@@ -43,6 +44,11 @@ if (-not $dbReady) {
 if (-not (Test-Path "target\fitness-ai-coach-0.0.1-SNAPSHOT.jar")) {
     Write-Host "No se encontro el jar empaquetado. Ejecutando paquete de Maven..."
     .\mvnw.cmd -DskipTests package
+=======
+if (-not (Test-Path "target\fitness-ai-coach-0.0.1-SNAPSHOT.jar")) {
+    Write-Host "No se encontro el jar empaquetado. Ejecutando paquete de Maven..."
+    mvn -DskipTests package
+>>>>>>> main
 }
 
 if (-not $env:GROQ_API_KEY) {
@@ -50,6 +56,7 @@ if (-not $env:GROQ_API_KEY) {
     Write-Host '$env:GROQ_API_KEY="TU_API_KEY"'
 }
 
+<<<<<<< HEAD
 if (-not $env:DB_URL) {
     $env:DB_URL = "jdbc:postgresql://${dbHost}:$dbPort/${dbName}?sslmode=disable"
 }
@@ -60,11 +67,35 @@ if (-not $env:DB_USERNAME) {
 
 if (-not $env:DB_PASSWORD) {
     $env:DB_PASSWORD = "1234"
+=======
+if (-not $env:JWT_SECRET) {
+    $env:JWT_SECRET = [Convert]::ToBase64String((1..48 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))
+    Write-Host "Aviso: JWT_SECRET no estaba configurada. Se genero un valor temporal solo para esta sesion."
+>>>>>>> main
 }
 
 if (-not $env:GROQ_MODEL) {
     $env:GROQ_MODEL = "llama-3.1-8b-instant"
 }
 
+<<<<<<< HEAD
+=======
+if (-not $env:SPRING_DATASOURCE_URL) {
+    $env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/fitness_db"
+}
+
+if (-not $env:SPRING_DATASOURCE_USERNAME) {
+    $env:SPRING_DATASOURCE_USERNAME = "postgres"
+}
+
+if (-not $env:SPRING_DATASOURCE_PASSWORD) {
+    $env:SPRING_DATASOURCE_PASSWORD = "1234"
+}
+
+if (-not $env:JWT_SECRET) {
+    $env:JWT_SECRET = "dev-only-jwt-secret-key-with-32-bytes"
+}
+
+>>>>>>> main
 Write-Host "Arrancando en modo DEV (Swagger habilitado)."
 java '-Dspring.profiles.active=dev' -jar target\fitness-ai-coach-0.0.1-SNAPSHOT.jar

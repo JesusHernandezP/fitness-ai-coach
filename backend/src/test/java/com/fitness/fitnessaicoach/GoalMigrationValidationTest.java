@@ -50,6 +50,7 @@ public class GoalMigrationValidationTest {
         assertTrue(migrationResource.exists());
         assertTrue(migrationResource.contentLength() > 0);
     }
+<<<<<<< HEAD
 
     @Test
     void goalMacroColumnsShouldExistInTestSchema() {
@@ -73,4 +74,6 @@ public class GoalMigrationValidationTest {
         assertEquals(1, carbsCount);
         assertEquals(1, fatCount);
     }
+=======
+>>>>>>> main
 }

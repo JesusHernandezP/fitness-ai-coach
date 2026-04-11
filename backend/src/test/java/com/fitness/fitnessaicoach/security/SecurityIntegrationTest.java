@@ -36,6 +36,21 @@ class SecurityIntegrationTest {
     }
 
     @Test
+<<<<<<< HEAD
+=======
+    void groqHealthWithoutTokenShouldReturn401() throws Exception {
+        mockMvc.perform(get("/api/health/groq"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void actuatorHealthWithoutTokenShouldReturn200() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+>>>>>>> main
     void getExercisesWithoutTokenShouldReturn401() throws Exception {
         mockMvc.perform(get("/api/exercises"))
                 .andExpect(status().isUnauthorized());
@@ -107,7 +122,11 @@ class SecurityIntegrationTest {
                 }
                 """.formatted(email, password);
 
+<<<<<<< HEAD
         mockMvc.perform(post("/api/users")
+=======
+        mockMvc.perform(post("/api/auth/register")
+>>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk());

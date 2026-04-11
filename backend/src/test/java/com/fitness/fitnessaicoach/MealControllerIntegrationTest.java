@@ -109,6 +109,10 @@ public class MealControllerIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+<<<<<<< HEAD
+=======
+                .get("data")
+>>>>>>> main
                 .get("id")
                 .asText());
     }
@@ -128,7 +132,11 @@ public class MealControllerIntegrationTest {
                 }
                 """.formatted(email, password);
 
+<<<<<<< HEAD
         MvcResult registerResult = mockMvc.perform(post("/api/users")
+=======
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
+>>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk())

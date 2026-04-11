@@ -6,6 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+<<<<<<< HEAD
+=======
+import lombok.extern.slf4j.Slf4j;
+>>>>>>> main
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +20,10 @@ import java.io.IOException;
 import java.util.Collections;
 
 @Component
+<<<<<<< HEAD
+=======
+@Slf4j
+>>>>>>> main
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -42,6 +50,15 @@ public class JwtFilter extends OncePerRequestFilter {
             email = jwtService.extractEmail(token);
         } catch (JwtException | IllegalArgumentException ex) {
             SecurityContextHolder.clearContext();
+<<<<<<< HEAD
+=======
+            log.warn(
+                    "Rejected invalid token for path={} from ip={} reason={}",
+                    request.getRequestURI(),
+                    resolveClientIp(request),
+                    LogSanitizer.sanitizeExceptionMessage(ex)
+            );
+>>>>>>> main
             response.sendError(HttpStatus.UNAUTHORIZED.value(), "Invalid or expired token");
             return;
         }
@@ -53,4 +70,15 @@ public class JwtFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+<<<<<<< HEAD
+=======
+
+    private String resolveClientIp(HttpServletRequest request) {
+        String forwardedFor = request.getHeader("X-Forwarded-For");
+        if (forwardedFor != null && !forwardedFor.isBlank()) {
+            return forwardedFor.split(",")[0].trim();
+        }
+        return request.getRemoteAddr();
+    }
+>>>>>>> main
 }

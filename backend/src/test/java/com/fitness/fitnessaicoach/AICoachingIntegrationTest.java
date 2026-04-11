@@ -1,7 +1,11 @@
 package com.fitness.fitnessaicoach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+<<<<<<< HEAD
 import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
+=======
+import com.fitness.fitnessaicoach.ai.provider.groq.GroqClient;
+>>>>>>> main
 import com.fitness.fitnessaicoach.domain.AIRecommendation;
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
 import com.fitness.fitnessaicoach.repository.AIRecommendationRepository;
@@ -49,7 +53,11 @@ class AICoachingIntegrationTest {
     private AIAnalysisService aiAnalysisService;
 
     @MockBean
+<<<<<<< HEAD
     private AITextGenerationClient aiTextGenerationClient;
+=======
+    private GroqClient groqClient;
+>>>>>>> main
 
     @Test
     void swaggerSpecShouldExposeAICoachingEndpoint() throws Exception {
@@ -78,15 +86,24 @@ class AICoachingIntegrationTest {
                 .build();
 
         when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
+<<<<<<< HEAD
         when(aiTextGenerationClient.generateText(anyString())).thenReturn("Great job, keep hydration steady.");
         when(aiTextGenerationClient.getModelName()).thenReturn("llama-test");
+=======
+        when(groqClient.getCoachingResponse(anyString())).thenReturn("Great job, keep hydration steady.");
+>>>>>>> main
 
         mockMvc.perform(get("/api/ai-coach/daily-log/" + dailyLogId)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
+<<<<<<< HEAD
                 .andExpect(jsonPath("$.analysis").isString())
                 .andExpect(jsonPath("$.analysis").value(org.hamcrest.Matchers.containsString(dailyLogId.toString())))
+=======
+                .andExpect(jsonPath("$.analysis.dailyLogId").value(dailyLogId.toString()))
+                .andExpect(jsonPath("$.analysis.totalCaloriesConsumed").value(1500.0))
+>>>>>>> main
                 .andExpect(jsonPath("$.advice").value("Great job, keep hydration steady."));
 
         List<AIRecommendation> savedRecommendations = aiRecommendationRepository.findByDailyLogId(dailyLogId);
@@ -96,6 +113,7 @@ class AICoachingIntegrationTest {
         assertThat(savedRecommendations.get(0).getModel()).isNotBlank();
     }
 
+<<<<<<< HEAD
     @Test
     void aiCoachingShouldReturnStoredRecommendationWhenAvailable() throws Exception {
         String token = registerAndLogin().token();
@@ -119,6 +137,8 @@ class AICoachingIntegrationTest {
         assertThat(savedRecommendations).hasSize(1);
     }
 
+=======
+>>>>>>> main
     private UserContext registerAndLogin() throws Exception {
         String email = "ai-coach-" + UUID.randomUUID() + "@example.com";
         String password = "Passw0rd!";
@@ -134,7 +154,11 @@ class AICoachingIntegrationTest {
                 }
                 """.formatted(email, password);
 
+<<<<<<< HEAD
         mockMvc.perform(post("/api/users")
+=======
+        mockMvc.perform(post("/api/auth/register")
+>>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
                 .andExpect(status().isOk());

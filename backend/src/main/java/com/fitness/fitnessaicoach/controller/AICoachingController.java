@@ -24,8 +24,13 @@ public class AICoachingController {
     private final AICoachingService aiCoachingService;
 
     @GetMapping("/daily-log/{dailyLogId}")
+<<<<<<< HEAD
     @Operation(summary = "Get AI coaching contract for a daily log")
     public ResponseEntity<AICoachingResponse> getDailyLogCoaching(@PathVariable UUID dailyLogId) {
+=======
+    @Operation(summary = "Get analysis and AI coaching advice for a daily log")
+    public ResponseEntity<AICoachingResponse> generateCoaching(@PathVariable UUID dailyLogId) {
+>>>>>>> main
         return ResponseEntity.ok(aiCoachingService.getCoaching(dailyLogId));
     }
 }

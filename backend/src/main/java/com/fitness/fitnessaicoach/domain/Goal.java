@@ -28,12 +28,17 @@ public class Goal {
     @Column(nullable = false)
     private UserGoalType goalType;
 
+<<<<<<< HEAD
     @Column
+=======
+    @Column(nullable = false)
+>>>>>>> main
     private Double targetWeight;
 
     @Column(nullable = false)
     private Double targetCalories;
 
+<<<<<<< HEAD
     @Column
     private Double targetProtein;
 
@@ -43,6 +48,8 @@ public class Goal {
     @Column
     private Double targetFat;
 
+=======
+>>>>>>> main
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

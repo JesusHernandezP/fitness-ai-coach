@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ExerciseRepository extends JpaRepository<Exercise, UUID> {
+<<<<<<< HEAD
     java.util.Optional<Exercise> findFirstByNameIgnoreCase(String name);
+=======
+>>>>>>> main
     List<Exercise> findByMuscleGroupIgnoreCase(String muscleGroup);
     List<Exercise> findByNameContainingIgnoreCase(String query);
 

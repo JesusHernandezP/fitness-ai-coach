@@ -16,5 +16,12 @@ public class BodyMetricsResponse {
 
     private Double weight;
 
+<<<<<<< HEAD
+=======
+    private Double bodyFat;
+
+    private Double muscleMass;
+
+>>>>>>> main
     private LocalDate date;
 }

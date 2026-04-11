@@ -18,11 +18,14 @@ public class GoalResponse {
 
     private Double targetCalories;
 
+<<<<<<< HEAD
     private Double targetProtein;
 
     private Double targetCarbs;
 
     private Double targetFat;
 
+=======
+>>>>>>> main
     private UUID userId;
 }

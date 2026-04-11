@@ -70,6 +70,10 @@ Desde la raiz del proyecto:
 El script:
 - arranca el perfil `dev`
 - habilita Swagger
+<<<<<<< HEAD
+=======
+- genera un `JWT_SECRET` temporal si no existe en la sesion
+>>>>>>> main
 - usa `llama-3.1-8b-instant` como modelo por defecto
 - empaqueta el jar si no existe
 
@@ -175,4 +179,8 @@ Notas de diagnostico
   - que `GET /api/health/groq` devuelva `available=true`.
   - que el modelo configurado sea compatible y activo.
 - `GROQ_MODEL` te permite cambiar modelo sin tocar codigo.
+<<<<<<< HEAD
+=======
+- Para `backend/docker-compose.yml`, define `POSTGRES_PASSWORD` en tu entorno antes de arrancar el contenedor.
+>>>>>>> main
 - Este README esta pensado para pruebas API-first mientras no haya frontend publicado.

@@ -3,6 +3,7 @@ package com.fitness.fitnessaicoach.service;
 import com.fitness.fitnessaicoach.domain.Food;
 import com.fitness.fitnessaicoach.domain.Meal;
 import com.fitness.fitnessaicoach.domain.MealItem;
+<<<<<<< HEAD
 import com.fitness.fitnessaicoach.dto.FoodRequest;
 import com.fitness.fitnessaicoach.dto.MealItemRequest;
 import com.fitness.fitnessaicoach.dto.MealItemResponse;
@@ -11,15 +12,27 @@ import com.fitness.fitnessaicoach.exception.FoodNotFoundException;
 import com.fitness.fitnessaicoach.exception.MealItemNotFoundException;
 import com.fitness.fitnessaicoach.exception.MealNotFoundException;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
+=======
+import com.fitness.fitnessaicoach.dto.MealItemRequest;
+import com.fitness.fitnessaicoach.dto.MealItemResponse;
+import com.fitness.fitnessaicoach.exception.FoodNotFoundException;
+import com.fitness.fitnessaicoach.exception.MealItemNotFoundException;
+import com.fitness.fitnessaicoach.exception.MealNotFoundException;
+>>>>>>> main
 import com.fitness.fitnessaicoach.repository.FoodRepository;
 import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.MealRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+<<<<<<< HEAD
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
+=======
+
+import java.util.List;
+>>>>>>> main
 import java.util.UUID;
 
 @Service
@@ -29,15 +42,24 @@ public class MealItemService {
     private final MealItemRepository mealItemRepository;
     private final MealRepository mealRepository;
     private final FoodRepository foodRepository;
+<<<<<<< HEAD
     private final DailyLogRepository dailyLogRepository;
     private final AIFoodEstimationService aiFoodEstimationService;
 
     @Transactional
+=======
+
+>>>>>>> main
     public MealItemResponse createMealItem(MealItemRequest request) {
         Meal meal = mealRepository.findById(request.getMealId())
                 .orElseThrow(() -> new MealNotFoundException("Meal not found."));
 
+<<<<<<< HEAD
         Food food = resolveFood(request);
+=======
+        Food food = foodRepository.findById(request.getFoodId())
+                .orElseThrow(() -> new FoodNotFoundException("Food not found."));
+>>>>>>> main
 
         Double calculatedCalories = food.getCalories() * request.getQuantity();
 
@@ -49,7 +71,10 @@ public class MealItemService {
                 .build();
 
         MealItem saved = mealItemRepository.save(mealItem);
+<<<<<<< HEAD
         syncDailyLogCaloriesConsumed(meal.getDailyLog().getId());
+=======
+>>>>>>> main
 
         return toResponse(saved);
     }
@@ -61,14 +86,21 @@ public class MealItemService {
                 .toList();
     }
 
+<<<<<<< HEAD
     @Transactional
+=======
+>>>>>>> main
     public void deleteMealItem(UUID id) {
         MealItem mealItem = mealItemRepository.findById(id)
                 .orElseThrow(() -> new MealItemNotFoundException("Meal item not found."));
 
+<<<<<<< HEAD
         UUID dailyLogId = mealItem.getMeal().getDailyLog().getId();
         mealItemRepository.delete(mealItem);
         syncDailyLogCaloriesConsumed(dailyLogId);
+=======
+        mealItemRepository.delete(mealItem);
+>>>>>>> main
     }
 
     private MealItemResponse toResponse(MealItem mealItem) {
@@ -80,6 +112,7 @@ public class MealItemService {
                 .calculatedCalories(mealItem.getCalculatedCalories())
                 .build();
     }
+<<<<<<< HEAD
 
     private Food resolveFood(MealItemRequest request) {
         if (request.getFoodId() != null) {
@@ -127,4 +160,6 @@ public class MealItemService {
             dailyLogRepository.save(dailyLog);
         });
     }
+=======
+>>>>>>> main
 }

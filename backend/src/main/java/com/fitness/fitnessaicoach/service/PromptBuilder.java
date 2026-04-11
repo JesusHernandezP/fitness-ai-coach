@@ -1,6 +1,7 @@
 package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
+<<<<<<< HEAD
 import com.fitness.fitnessaicoach.dto.ai.AIMealSummaryResponse;
 import com.fitness.fitnessaicoach.dto.ai.AIWorkoutSummaryResponse;
 import org.springframework.stereotype.Component;
@@ -10,10 +11,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+=======
+import org.springframework.stereotype.Component;
+
+>>>>>>> main
 @Component
 public class PromptBuilder {
 
     public String buildPrompt(AIAnalysisResponse analysis) {
+<<<<<<< HEAD
         String goalType = analysis.getGoalType() != null ? analysis.getGoalType().name() : "UNKNOWN";
         String targetCalories = formatNullableNumber(analysis.getTargetCalories());
         String targetProtein = formatNullableNumber(analysis.getTargetProtein());
@@ -197,5 +203,17 @@ public class PromptBuilder {
                 .filter(part -> !part.isBlank())
                 .map(part -> Character.toUpperCase(part.charAt(0)) + part.substring(1))
                 .collect(Collectors.joining(" "));
+=======
+        String prompt = """
+                You are a professional fitness coach.
+
+                User data:
+                %s
+
+                Give short, actionable advice in 2-3 sentences.
+                """.formatted(analysis);
+
+        return prompt;
+>>>>>>> main
     }
 }

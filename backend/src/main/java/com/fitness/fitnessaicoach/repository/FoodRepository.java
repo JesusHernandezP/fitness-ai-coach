@@ -8,8 +8,11 @@ import java.util.UUID;
 
 public interface FoodRepository extends JpaRepository<Food, UUID> {
 
+<<<<<<< HEAD
     java.util.Optional<Food> findFirstByNameIgnoreCase(String name);
 
+=======
+>>>>>>> main
     List<Food> findByNameContainingIgnoreCase(String query);
 }
  

@@ -77,12 +77,18 @@ public class AIAnalysisService {
                 .goalType(goal != null ? goal.getGoalType() : null)
                 .targetWeight(goal != null ? goal.getTargetWeight() : null)
                 .targetCalories(goal != null ? goal.getTargetCalories() : null)
+<<<<<<< HEAD
                 .targetProtein(goal != null ? goal.getTargetProtein() : null)
                 .targetCarbs(goal != null ? goal.getTargetCarbs() : null)
                 .targetFat(goal != null ? goal.getTargetFat() : null)
                 .latestWeight(latestBodyMetrics != null ? latestBodyMetrics.getWeight() : null)
                 .sex(user != null ? user.getSex() : null)
                 .activityLevel(user != null ? user.getActivityLevel() : null)
+=======
+                .latestWeight(latestBodyMetrics != null ? latestBodyMetrics.getWeight() : null)
+                .latestBodyFat(latestBodyMetrics != null ? latestBodyMetrics.getBodyFat() : null)
+                .latestMuscleMass(latestBodyMetrics != null ? latestBodyMetrics.getMuscleMass() : null)
+>>>>>>> main
                 .meals(buildMealSummaries(dailyLogId))
                 .workouts(buildWorkoutSummaries(dailyLogId))
                 .build();

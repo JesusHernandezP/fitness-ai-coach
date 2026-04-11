@@ -1,5 +1,6 @@
 package com.fitness.fitnessaicoach.dto;
 
+<<<<<<< HEAD
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
 import com.fitness.fitnessaicoach.domain.UserSex;
 import jakarta.validation.constraints.DecimalMax;
@@ -15,6 +16,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+=======
+import jakarta.validation.constraints.*;
+import lombok.*;
+>>>>>>> main
 
 @Getter
 @Setter
@@ -27,6 +32,7 @@ public class UserRequest {
     private String name;
 
     @NotBlank(message = "El email es obligatorio.")
+<<<<<<< HEAD
     @Email(message = "El email no tiene un formato valido.")
     private String email;
 
@@ -40,12 +46,30 @@ public class UserRequest {
 
     @DecimalMin(value = "120.0", message = "Height must be at least 120 cm.")
     @DecimalMax(value = "220.0", message = "Height cannot be greater than 220 cm.")
+=======
+    @Email(message = "El email no tiene un formato válido.")
+    private String email;
+
+    @NotBlank(message = "La contraseña es obligatoria.")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres.")
+    private String password;
+
+    @Positive(message = "La edad debe ser un número positivo.")
+    @Max(value = 120, message = "La edad no puede superar los 120 años.")
+    private Integer age;
+
+    @Positive(message = "La altura debe ser positiva.")
+>>>>>>> main
     private Double heightCm;
 
     @Positive(message = "El peso debe ser positivo.")
     private Double weightKg;
+<<<<<<< HEAD
 
     private UserSex sex;
 
     private ActivityLevel activityLevel;
 }
+=======
+}
+>>>>>>> main
