@@ -1,0 +1,15 @@
+<div class="weight-progress-chart">
+  @if (isLoading) {
+    <div class="weight-progress-chart__state">Loading weight progress...</div>
+  } @else if (errorMessage) {
+    <div class="weight-progress-chart__state weight-progress-chart__state--error">
+      {{ errorMessage }}
+    </div>
+  } @else if (dataPoints.length === 0) {
+    <div class="weight-progress-chart__state">No weight progress data available yet.</div>
+  } @else {
+    <div class="weight-progress-chart__canvas-wrapper">
+      <canvas #chartCanvas></canvas>
+    </div>
+  }
+</div>
