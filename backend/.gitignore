@@ -1,0 +1,78 @@
+# ----------------------------------------
+# GLOBAL
+# ----------------------------------------
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.swo
+*.bak
+
+# Node modules (Angular, etc)
+node_modules/
+dist/
+tmp/
+out-tsc/
+
+# Environment files
+.env
+*.env.local
+*.env.development
+*.env.production
+
+# ----------------------------------------
+# JAVA / SPRING BOOT (backend)
+# ----------------------------------------
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Maven
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+mvnw
+mvnw.cmd
+
+# IntelliJ / Idea
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Logs
+spring.log
+
+# ----------------------------------------
+# ANDROID (Mobile app)
+# ----------------------------------------
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.aar
+
+# Android keystore (nunca subir)
+*.keystore
+*.jks
+
+# ----------------------------------------
+# DOCUMENTACIÓN
+# ----------------------------------------
+docs/**/*.pdf
+docs/**/*.docx
+docs/**/*.png
+docs/**/*.jpg
+docs/**/*.jpeg
+
+# Allow README.md files in empty folders
+!docs/README.md
+!backend/README.md
+!mobile/README.md
+!web/README.md

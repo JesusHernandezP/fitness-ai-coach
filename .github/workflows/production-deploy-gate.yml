@@ -1,0 +1,90 @@
+name: production-deploy-gate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  validate-readiness:
+    name: Validate Production Readiness
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Validate main branch execution
+        run: |
+          if [ "${GITHUB_REF}" != "refs/heads/main" ]; then
+            echo "This workflow can only run from main. Current ref: ${GITHUB_REF}"
+            exit 1
+          fi
+
+      - name: Verify required CI workflows succeeded on main
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const requiredWorkflows = [
+              { file: 'backend-ci.yml', name: 'backend-ci' },
+              { file: 'frontend-ci.yml', name: 'frontend-ci' },
+              { file: 'android-ci.yml', name: 'android-ci' }
+            ];
+
+            const failures = [];
+
+            for (const workflow of requiredWorkflows) {
+              try {
+                const response = await github.rest.actions.listWorkflowRuns({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: workflow.file,
+                  branch: 'main',
+                  status: 'completed',
+                  per_page: 1
+                });
+
+                const latestRun = response.data.workflow_runs[0];
+
+                if (!latestRun) {
+                  failures.push(`${workflow.name}: no completed runs found on main`);
+                  continue;
+                }
+
+                if (latestRun.conclusion !== 'success') {
+                  failures.push(
+                    `${workflow.name}: latest run concluded with '${latestRun.conclusion}' (${latestRun.html_url})`
+                  );
+                }
+              } catch (error) {
+                failures.push(`${workflow.name}: unable to inspect workflow runs (${error.message})`);
+              }
+            }
+
+            if (failures.length > 0) {
+              core.setFailed(`Production gate blocked:\n- ${failures.join('\n- ')}`);
+              return;
+            }
+
+            core.info('All required workflows have a successful completed run on main.');
+
+      - name: Confirm production deploy gate is ready
+        run: echo "Production deployment gate passed. No deployment has been executed."
+
+      # Placeholder for the future backend deployment.
+      # Secrets will be provided through the production environment, for example:
+      # RENDER_API_KEY, RENDER_SERVICE_ID
+      - name: Render backend deploy placeholder
+        if: ${{ false }}
+        run: echo "TODO: trigger Render backend deployment"
+
+      # Placeholder for the future frontend deployment.
+      # Secrets will be provided through the production environment, for example:
+      # VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID
+      - name: Vercel frontend deploy placeholder
+        if: ${{ false }}
+        run: echo "TODO: trigger Vercel frontend deployment"
