@@ -5,23 +5,16 @@ import com.fitness.fitnessaicoach.domain.Exercise;
 import com.fitness.fitnessaicoach.domain.WorkoutSession;
 import com.fitness.fitnessaicoach.dto.WorkoutSessionRequest;
 import com.fitness.fitnessaicoach.dto.WorkoutSessionResponse;
-import com.fitness.fitnessaicoach.exception.ExerciseNotFoundException;
 import com.fitness.fitnessaicoach.exception.DailyLogNotFoundException;
+import com.fitness.fitnessaicoach.exception.ExerciseNotFoundException;
 import com.fitness.fitnessaicoach.exception.WorkoutSessionNotFoundException;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
 import com.fitness.fitnessaicoach.repository.ExerciseRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-<<<<<<< HEAD
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
-=======
-
-import java.util.List;
->>>>>>> main
 import java.util.UUID;
 
 @Service
@@ -32,14 +25,9 @@ public class WorkoutSessionService {
     private final DailyLogRepository dailyLogRepository;
     private final ExerciseRepository exerciseRepository;
 
-<<<<<<< HEAD
-    @Transactional
-=======
->>>>>>> main
     public WorkoutSessionResponse createWorkoutSession(WorkoutSessionRequest request) {
         DailyLog dailyLog = dailyLogRepository.findById(request.getDailyLogId())
                 .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
-
         Exercise exercise = exerciseRepository.findById(request.getExerciseId())
                 .orElseThrow(() -> new ExerciseNotFoundException("Exercise not found."));
 
@@ -52,13 +40,7 @@ public class WorkoutSessionService {
                 .caloriesBurned(request.getCaloriesBurned())
                 .build();
 
-        WorkoutSession saved = workoutSessionRepository.save(workoutSession);
-<<<<<<< HEAD
-        syncDailyLogCaloriesBurned(dailyLog.getId());
-=======
->>>>>>> main
-
-        return toResponse(saved);
+        return toResponse(workoutSessionRepository.save(workoutSession));
     }
 
     public List<WorkoutSessionResponse> getAllWorkoutSessions() {
@@ -71,25 +53,13 @@ public class WorkoutSessionService {
     public WorkoutSessionResponse getWorkoutSessionById(UUID id) {
         WorkoutSession workoutSession = workoutSessionRepository.findById(id)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException("Workout session not found."));
-
         return toResponse(workoutSession);
     }
 
-<<<<<<< HEAD
-    @Transactional
-=======
->>>>>>> main
     public void deleteWorkoutSession(UUID id) {
         WorkoutSession workoutSession = workoutSessionRepository.findById(id)
                 .orElseThrow(() -> new WorkoutSessionNotFoundException("Workout session not found."));
-
-<<<<<<< HEAD
-        UUID dailyLogId = workoutSession.getDailyLog().getId();
         workoutSessionRepository.delete(workoutSession);
-        syncDailyLogCaloriesBurned(dailyLogId);
-=======
-        workoutSessionRepository.delete(workoutSession);
->>>>>>> main
     }
 
     private WorkoutSessionResponse toResponse(WorkoutSession workoutSession) {
@@ -103,17 +73,4 @@ public class WorkoutSessionService {
                 .caloriesBurned(workoutSession.getCaloriesBurned())
                 .build();
     }
-<<<<<<< HEAD
-
-    private void syncDailyLogCaloriesBurned(UUID dailyLogId) {
-        dailyLogRepository.findById(dailyLogId).ifPresent(dailyLog -> {
-            dailyLog.setCaloriesBurned(Objects.requireNonNullElse(
-                    workoutSessionRepository.sumCaloriesBurnedByDailyLogId(dailyLogId),
-                    0.0
-            ));
-            dailyLogRepository.save(dailyLog);
-        });
-    }
-=======
->>>>>>> main
 }

@@ -109,10 +109,7 @@ public class MealControllerIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
-<<<<<<< HEAD
-=======
                 .get("data")
->>>>>>> main
                 .get("id")
                 .asText());
     }
@@ -132,17 +129,14 @@ public class MealControllerIntegrationTest {
                 }
                 """.formatted(email, password);
 
-<<<<<<< HEAD
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
-=======
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
->>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText();
 
@@ -157,10 +151,11 @@ public class MealControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
 

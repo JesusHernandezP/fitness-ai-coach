@@ -3,12 +3,8 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
 spring:
-<<<<<<< HEAD
-  jpa:
-    hibernate:
-      ddl-auto: validate
-=======
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
@@ -40,13 +36,10 @@ management:
 logging:
   level:
     root: INFO
->>>>>>> main
 
 app:
   swagger:
     public: false
-<<<<<<< HEAD
-=======
   cors:
     allowed-origins: ${APP_CORS_ALLOWED_ORIGINS}
   security:
@@ -56,4 +49,3 @@ app:
 groq:
   api:
     key: ${GROQ_API_KEY}
->>>>>>> main

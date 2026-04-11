@@ -60,15 +60,6 @@ public class DailyLogSummaryIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/" + dailyLogId + "/summary")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.dailyLogId").value(dailyLogId.toString()))
-                .andExpect(jsonPath("$.date").value("2026-04-15"))
-                .andExpect(jsonPath("$.totalMeals").value(1))
-                .andExpect(jsonPath("$.totalWorkoutSessions").value(2))
-                .andExpect(jsonPath("$.totalCaloriesConsumed").value(250.0))
-                .andExpect(jsonPath("$.totalCaloriesBurned").value(175.0))
-                .andExpect(jsonPath("$.totalSteps").value(10000));
-=======
                 .andExpect(jsonPath("$.data.dailyLogId").value(dailyLogId.toString()))
                 .andExpect(jsonPath("$.data.date").value("2026-04-15"))
                 .andExpect(jsonPath("$.data.totalMeals").value(1))
@@ -76,7 +67,6 @@ public class DailyLogSummaryIntegrationTest {
                 .andExpect(jsonPath("$.data.totalCaloriesConsumed").value(250.0))
                 .andExpect(jsonPath("$.data.totalCaloriesBurned").value(175.0))
                 .andExpect(jsonPath("$.data.totalSteps").value(10000));
->>>>>>> main
     }
 
     private UUID createDailyLog(String token, String userId) throws Exception {
@@ -98,10 +88,7 @@ public class DailyLogSummaryIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
-<<<<<<< HEAD
-=======
                 .get("data")
->>>>>>> main
                 .get("id")
                 .asText());
     }
@@ -145,10 +132,7 @@ public class DailyLogSummaryIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
-<<<<<<< HEAD
-=======
                 .get("data")
->>>>>>> main
                 .get("id")
                 .asText());
     }
@@ -227,17 +211,14 @@ public class DailyLogSummaryIntegrationTest {
                 }
                 """.formatted(email, password);
 
-<<<<<<< HEAD
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
-=======
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
->>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText();
 
@@ -252,10 +233,11 @@ public class DailyLogSummaryIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
 

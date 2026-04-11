@@ -11,17 +11,9 @@ import java.util.UUID;
 public class BodyMetricsResponse {
 
     private UUID id;
-
     private UUID userId;
-
     private Double weight;
-
-<<<<<<< HEAD
-=======
     private Double bodyFat;
-
     private Double muscleMass;
-
->>>>>>> main
     private LocalDate date;
 }

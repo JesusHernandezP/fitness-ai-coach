@@ -83,7 +83,7 @@ class ErrorHandlingIntegrationTest {
     void createGoalWithInvalidPayloadShouldReturn400AndErrorsMap() throws Exception {
         String token = registerAndLogin();
         
-        // Missing userId, goalType, and invalid negative calories/weight
+        // Missing goalType and invalid negative calories/weight
         String invalidGoalBody = """
                 {
                   "targetWeight": -10,
@@ -99,7 +99,6 @@ class ErrorHandlingIntegrationTest {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.errors").exists())
-                .andExpect(jsonPath("$.errors.userId").exists())
                 .andExpect(jsonPath("$.errors.goalType").exists())
                 .andExpect(jsonPath("$.errors.targetWeight").exists())
                 .andExpect(jsonPath("$.errors.targetCalories").exists());
@@ -127,7 +126,7 @@ class ErrorHandlingIntegrationTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         String loginBody = """
                 {
@@ -143,6 +142,7 @@ class ErrorHandlingIntegrationTest {
                 .andReturn();
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
     }

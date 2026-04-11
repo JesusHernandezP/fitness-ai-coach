@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -54,7 +55,8 @@ class ExceptionConsistencyIntegrationTest {
         UUID validId = UUID.randomUUID();
 
         // Forcing a 500 error to ensure stack traces or internal messages don't leak
-        when(bodyMetricsService.getBodyMetricsById(any())).thenThrow(new RuntimeException("Super secret database connection error! Access token: XYZ"));
+        when(bodyMetricsService.getBodyMetricsById(anyString(), any(UUID.class)))
+                .thenThrow(new RuntimeException("Super secret database connection error! Access token: XYZ"));
 
         mockMvc.perform(get("/api/body-metrics/" + validId)
                         .header("Authorization", "Bearer " + token))
@@ -83,7 +85,7 @@ class ExceptionConsistencyIntegrationTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         String loginBody = """
                 {
@@ -99,6 +101,7 @@ class ExceptionConsistencyIntegrationTest {
                 .andReturn();
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
     }

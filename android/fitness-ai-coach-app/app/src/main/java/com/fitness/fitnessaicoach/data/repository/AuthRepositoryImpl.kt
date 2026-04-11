@@ -25,8 +25,8 @@ class AuthRepositoryImpl @Inject constructor(
                     password = credentials.password
                 )
             )
-            tokenStorage.saveToken(response.token)
-            AppResult.Success(response.toDomain())
+            tokenStorage.saveToken(response.data.token)
+            AppResult.Success(response.data.toDomain())
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }

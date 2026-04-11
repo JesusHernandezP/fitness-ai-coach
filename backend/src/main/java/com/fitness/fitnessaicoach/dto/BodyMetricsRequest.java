@@ -1,35 +1,18 @@
 package com.fitness.fitnessaicoach.dto;
 
-<<<<<<< HEAD
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.NotNull;
-=======
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
->>>>>>> main
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-<<<<<<< HEAD
-=======
-import java.util.UUID;
->>>>>>> main
 
 @Getter
 @Setter
 public class BodyMetricsRequest {
-
-    @NotNull
-<<<<<<< HEAD
-    @Positive(message = "Weight must be greater than 0.")
-    private Double weight;
-
-=======
-    private UUID userId;
 
     @NotNull
     @Positive(message = "Weight must be greater than 0.")
@@ -42,7 +25,6 @@ public class BodyMetricsRequest {
     @PositiveOrZero(message = "Muscle mass cannot be negative.")
     private Double muscleMass;
 
->>>>>>> main
     @NotNull
     private LocalDate date;
 }

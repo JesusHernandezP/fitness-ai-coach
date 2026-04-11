@@ -1,6 +1,5 @@
 package com.fitness.fitnessaicoach.service;
 
-<<<<<<< HEAD
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
 import com.fitness.fitnessaicoach.domain.Goal;
 import com.fitness.fitnessaicoach.domain.User;
@@ -9,12 +8,6 @@ import com.fitness.fitnessaicoach.domain.UserSex;
 import com.fitness.fitnessaicoach.dto.GoalRequest;
 import com.fitness.fitnessaicoach.dto.GoalResponse;
 import com.fitness.fitnessaicoach.exception.GoalAlreadyExistsException;
-=======
-import com.fitness.fitnessaicoach.domain.Goal;
-import com.fitness.fitnessaicoach.domain.User;
-import com.fitness.fitnessaicoach.dto.GoalRequest;
-import com.fitness.fitnessaicoach.dto.GoalResponse;
->>>>>>> main
 import com.fitness.fitnessaicoach.exception.GoalNotFoundException;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
 import com.fitness.fitnessaicoach.repository.GoalRepository;
@@ -22,13 +15,10 @@ import com.fitness.fitnessaicoach.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-<<<<<<< HEAD
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-=======
->>>>>>> main
 import java.util.List;
 import java.util.UUID;
 
@@ -39,13 +29,12 @@ public class GoalService {
     private final GoalRepository goalRepository;
     private final UserRepository userRepository;
 
-<<<<<<< HEAD
     public GoalResponse createGoal(String email, GoalRequest request) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         ensureGoalNotAlreadyCreatedToday(user.getId());
-        MacroTargets macroTargets = calculateMacroTargets(user, request.getGoalType());
+        MacroTargets macroTargets = resolveMacroTargets(user, request);
 
         Goal goal = Goal.builder()
                 .goalType(request.getGoalType())
@@ -54,63 +43,37 @@ public class GoalService {
                 .targetProtein(macroTargets.targetProtein())
                 .targetCarbs(macroTargets.targetCarbs())
                 .targetFat(macroTargets.targetFat())
-=======
-    public GoalResponse createGoal(GoalRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User not found."));
-
-        Goal goal = Goal.builder()
-                .goalType(request.getGoalType())
-                .targetWeight(request.getTargetWeight())
-                .targetCalories(request.getTargetCalories())
->>>>>>> main
                 .user(user)
                 .build();
 
-        Goal saved = goalRepository.save(goal);
-        return toResponse(saved);
+        return toResponse(goalRepository.save(goal));
     }
 
-<<<<<<< HEAD
     public List<GoalResponse> getAllGoals(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         return goalRepository.findAllByUserIdOrderByCreatedAtDescIdDesc(user.getId())
-=======
-    public List<GoalResponse> getAllGoals() {
-        return goalRepository.findAll()
->>>>>>> main
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-<<<<<<< HEAD
     public GoalResponse getGoalById(String email, UUID id) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         Goal goal = goalRepository.findByIdAndUserId(id, user.getId())
-=======
-    public GoalResponse getGoalById(UUID id) {
-        Goal goal = goalRepository.findById(id)
->>>>>>> main
                 .orElseThrow(() -> new GoalNotFoundException("Goal not found."));
 
         return toResponse(goal);
     }
 
-<<<<<<< HEAD
     public void deleteGoal(String email, UUID id) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         Goal goal = goalRepository.findByIdAndUserId(id, user.getId())
-=======
-    public void deleteGoal(UUID id) {
-        Goal goal = goalRepository.findById(id)
->>>>>>> main
                 .orElseThrow(() -> new GoalNotFoundException("Goal not found."));
 
         goalRepository.delete(goal);
@@ -122,7 +85,6 @@ public class GoalService {
                 .goalType(goal.getGoalType())
                 .targetWeight(goal.getTargetWeight())
                 .targetCalories(goal.getTargetCalories())
-<<<<<<< HEAD
                 .targetProtein(goal.getTargetProtein())
                 .targetCarbs(goal.getTargetCarbs())
                 .targetFat(goal.getTargetFat())
@@ -140,9 +102,25 @@ public class GoalService {
         }
     }
 
-    private MacroTargets calculateMacroTargets(User user, UserGoalType goalType) {
-        validateUserForTargetCalories(user);
+    private MacroTargets resolveMacroTargets(User user, GoalRequest request) {
+        if (hasProfileForMacroCalculation(user)) {
+            return calculateMacroTargets(user, request.getGoalType());
+        }
 
+        if (request.getTargetCalories() == null) {
+            throw new IllegalStateException(
+                    "User profile is missing weight, height, or age required to calculate target calories."
+            );
+        }
+
+        return new MacroTargets(roundToScale(request.getTargetCalories()), null, null, null);
+    }
+
+    private boolean hasProfileForMacroCalculation(User user) {
+        return user.getWeightKg() != null && user.getHeightCm() != null && user.getAge() != null;
+    }
+
+    private MacroTargets calculateMacroTargets(User user, UserGoalType goalType) {
         UserSex sex = user.getSex() != null ? user.getSex() : UserSex.MALE;
         ActivityLevel activityLevel = user.getActivityLevel() != null ? user.getActivityLevel() : ActivityLevel.MODERATE;
         double sexAdjustment = sex == UserSex.MALE ? 5.0 : -161.0;
@@ -163,6 +141,7 @@ public class GoalService {
             case BUILD_MUSCLE -> 2.2;
             case MAINTAIN -> 1.6;
         };
+
         double targetProtein = roundToScale(user.getWeightKg() * proteinMultiplier);
         double targetFat = roundToScale(user.getWeightKg() * 0.8);
         double carbCalories = adjustedCalories - ((targetProtein * 4) + (targetFat * 9));
@@ -174,12 +153,6 @@ public class GoalService {
                 targetCarbs,
                 targetFat
         );
-    }
-
-    private void validateUserForTargetCalories(User user) {
-        if (user.getWeightKg() == null || user.getHeightCm() == null || user.getAge() == null) {
-            throw new IllegalStateException("User profile is missing weight, height, or age required to calculate target calories.");
-        }
     }
 
     private double resolveActivityMultiplier(ActivityLevel activityLevel) {
@@ -199,15 +172,10 @@ public class GoalService {
     }
 
     private record MacroTargets(
-            double targetCalories,
-            double targetProtein,
-            double targetCarbs,
-            double targetFat
+            Double targetCalories,
+            Double targetProtein,
+            Double targetCarbs,
+            Double targetFat
     ) {
     }
-=======
-                .userId(goal.getUser() != null ? goal.getUser().getId() : null)
-                .build();
-    }
->>>>>>> main
 }

@@ -56,17 +56,10 @@ public class DailyLogCalorieBalanceIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/" + dailyLogId + "/calorie-balance")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.dailyLogId").value(dailyLogId.toString()))
-                .andExpect(jsonPath("$.caloriesConsumed").value(200.0))
-                .andExpect(jsonPath("$.caloriesBurned").value(75.0))
-                .andExpect(jsonPath("$.calorieBalance").value(125.0));
-=======
                 .andExpect(jsonPath("$.data.dailyLogId").value(dailyLogId.toString()))
                 .andExpect(jsonPath("$.data.caloriesConsumed").value(200.0))
                 .andExpect(jsonPath("$.data.caloriesBurned").value(75.0))
                 .andExpect(jsonPath("$.data.calorieBalance").value(125.0));
->>>>>>> main
     }
 
     @Test
@@ -78,17 +71,10 @@ public class DailyLogCalorieBalanceIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/" + dailyLogId + "/calorie-balance")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.dailyLogId").value(dailyLogId.toString()))
-                .andExpect(jsonPath("$.caloriesConsumed").value(0.0))
-                .andExpect(jsonPath("$.caloriesBurned").value(0.0))
-                .andExpect(jsonPath("$.calorieBalance").value(0.0));
-=======
                 .andExpect(jsonPath("$.data.dailyLogId").value(dailyLogId.toString()))
                 .andExpect(jsonPath("$.data.caloriesConsumed").value(0.0))
                 .andExpect(jsonPath("$.data.caloriesBurned").value(0.0))
                 .andExpect(jsonPath("$.data.calorieBalance").value(0.0));
->>>>>>> main
     }
 
     @Test
@@ -120,10 +106,7 @@ public class DailyLogCalorieBalanceIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
-<<<<<<< HEAD
-=======
                 .get("data")
->>>>>>> main
                 .get("id")
                 .asText());
     }
@@ -167,10 +150,7 @@ public class DailyLogCalorieBalanceIntegrationTest {
                 .andReturn();
 
         return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
-<<<<<<< HEAD
-=======
                 .get("data")
->>>>>>> main
                 .get("id")
                 .asText());
     }
@@ -249,17 +229,14 @@ public class DailyLogCalorieBalanceIntegrationTest {
                 }
                 """.formatted(email, password);
 
-<<<<<<< HEAD
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
-=======
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
->>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText();
 
@@ -274,10 +251,11 @@ public class DailyLogCalorieBalanceIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
 

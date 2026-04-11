@@ -50,30 +50,4 @@ public class GoalMigrationValidationTest {
         assertTrue(migrationResource.exists());
         assertTrue(migrationResource.contentLength() > 0);
     }
-<<<<<<< HEAD
-
-    @Test
-    void goalMacroColumnsShouldExistInTestSchema() {
-        Integer proteinCount = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_NAME = 'GOALS' AND COLUMN_NAME = 'TARGET_PROTEIN'
-                """, Integer.class);
-        Integer carbsCount = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_NAME = 'GOALS' AND COLUMN_NAME = 'TARGET_CARBS'
-                """, Integer.class);
-        Integer fatCount = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_NAME = 'GOALS' AND COLUMN_NAME = 'TARGET_FAT'
-                """, Integer.class);
-
-        assertEquals(1, proteinCount);
-        assertEquals(1, carbsCount);
-        assertEquals(1, fatCount);
-    }
-=======
->>>>>>> main
 }

@@ -119,14 +119,10 @@ public class ExerciseSearchIntegrationTest {
                 }
                 """.formatted(email, password);
 
-<<<<<<< HEAD
-        mockMvc.perform(post("/api/users")
-=======
         mockMvc.perform(post("/api/auth/register")
->>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         String loginBody = """
                 {
@@ -139,10 +135,11 @@ public class ExerciseSearchIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andReturn();
 
         return objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
     }

@@ -15,7 +15,7 @@ class GoalsRepositoryImpl @Inject constructor(
 
     override suspend fun createGoal(goal: Goal): AppResult<Goal> {
         return try {
-            AppResult.Success(goalsApi.createGoal(goal.toRequestDto()).toDomain())
+            AppResult.Success(goalsApi.createGoal(goal.toRequestDto()).data.toDomain())
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }
@@ -23,7 +23,7 @@ class GoalsRepositoryImpl @Inject constructor(
 
     override suspend fun getGoals(): AppResult<List<Goal>> {
         return try {
-            AppResult.Success(goalsApi.getGoals().map { it.toDomain() })
+            AppResult.Success(goalsApi.getGoals().data.map { it.toDomain() })
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }

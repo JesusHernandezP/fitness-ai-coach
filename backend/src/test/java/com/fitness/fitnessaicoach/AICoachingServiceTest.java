@@ -1,12 +1,8 @@
 package com.fitness.fitnessaicoach;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-<<<<<<< HEAD
-import com.fitness.fitnessaicoach.ai.provider.AITextGenerationClient;
-=======
 import com.fitness.fitnessaicoach.ai.provider.groq.GroqClient;
 import com.fitness.fitnessaicoach.config.GroqConfig;
->>>>>>> main
 import com.fitness.fitnessaicoach.domain.AIRecommendation;
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
 import com.fitness.fitnessaicoach.dto.ai.AIMealSummaryResponse;
@@ -25,18 +21,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
-<<<<<<< HEAD
-import java.util.Optional;
-=======
->>>>>>> main
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-<<<<<<< HEAD
-import static org.mockito.Mockito.never;
-=======
->>>>>>> main
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,21 +38,14 @@ class AICoachingServiceTest {
     private PromptBuilder promptBuilder;
 
     @Mock
-<<<<<<< HEAD
-    private AITextGenerationClient aiTextGenerationClient;
-=======
     private GroqClient groqClient;
->>>>>>> main
 
     @Mock
     private AIRecommendationRepository aiRecommendationRepository;
 
-<<<<<<< HEAD
-=======
     @Mock
     private GroqConfig groqConfig;
 
->>>>>>> main
     private AICoachingService aiCoachingService;
 
     @BeforeEach
@@ -72,16 +53,10 @@ class AICoachingServiceTest {
         aiCoachingService = new AICoachingService(
                 aiAnalysisService,
                 promptBuilder,
-<<<<<<< HEAD
-                aiTextGenerationClient,
-                aiRecommendationRepository,
-                new ObjectMapper()
-=======
                 groqClient,
                 aiRecommendationRepository,
                 new ObjectMapper(),
                 groqConfig
->>>>>>> main
         );
     }
 
@@ -97,37 +72,21 @@ class AICoachingServiceTest {
                 .build();
 
         String builtPrompt = "prompt-text";
-<<<<<<< HEAD
-        when(aiRecommendationRepository.findFirstByDailyLogIdOrderByCreatedAtDescIdDesc(dailyLogId)).thenReturn(Optional.empty());
-        when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
-        when(promptBuilder.buildPrompt(analysis)).thenReturn(builtPrompt);
-        when(aiTextGenerationClient.generateText("prompt-text")).thenReturn("Advice from Groq");
-        when(aiTextGenerationClient.getModelName()).thenReturn("llama-test");
-=======
         when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
         when(promptBuilder.buildPrompt(analysis)).thenReturn(builtPrompt);
         when(groqClient.getCoachingResponse("prompt-text")).thenReturn("Advice from Groq");
         when(groqConfig.getModel()).thenReturn("llama-test");
->>>>>>> main
 
         AICoachingResponse response = aiCoachingService.getCoaching(dailyLogId);
 
         ArgumentCaptor<UUID> idCaptor = ArgumentCaptor.forClass(UUID.class);
         verify(aiAnalysisService).getDailyLogAiAnalysis(idCaptor.capture());
         verify(promptBuilder).buildPrompt(analysis);
-<<<<<<< HEAD
-        verify(aiTextGenerationClient).generateText("prompt-text");
-        verify(aiRecommendationRepository).save(any(AIRecommendation.class));
-
-        assertThat(idCaptor.getValue()).isEqualTo(dailyLogId);
-        assertThat(response.getAnalysis()).contains(dailyLogId.toString());
-=======
         verify(groqClient).getCoachingResponse("prompt-text");
         verify(aiRecommendationRepository).save(any(AIRecommendation.class));
 
         assertThat(idCaptor.getValue()).isEqualTo(dailyLogId);
         assertThat(response.getAnalysis().getDailyLogId()).isEqualTo(dailyLogId);
->>>>>>> main
         assertThat(response.getAdvice()).isEqualTo("Advice from Groq");
     }
 
@@ -141,18 +100,10 @@ class AICoachingServiceTest {
                 .build();
 
         String builtPrompt = "prompt-text";
-<<<<<<< HEAD
-        when(aiRecommendationRepository.findFirstByDailyLogIdOrderByCreatedAtDescIdDesc(dailyLogId)).thenReturn(Optional.empty());
-        when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
-        when(promptBuilder.buildPrompt(analysis)).thenReturn(builtPrompt);
-        when(aiTextGenerationClient.generateText("prompt-text")).thenThrow(new IllegalStateException("groq timeout"));
-        when(aiTextGenerationClient.getModelName()).thenReturn("llama-test");
-=======
         when(aiAnalysisService.getDailyLogAiAnalysis(dailyLogId)).thenReturn(analysis);
         when(promptBuilder.buildPrompt(analysis)).thenReturn(builtPrompt);
         when(groqClient.getCoachingResponse("prompt-text")).thenThrow(new IllegalStateException("groq timeout"));
         when(groqConfig.getModel()).thenReturn("llama-test");
->>>>>>> main
 
         AICoachingResponse response = aiCoachingService.getCoaching(dailyLogId);
 
@@ -160,30 +111,4 @@ class AICoachingServiceTest {
                 .isEqualTo("AI coaching is temporarily unavailable. Please review your daily log summary and try again later.");
         verify(aiRecommendationRepository).save(any(AIRecommendation.class));
     }
-<<<<<<< HEAD
-
-    @Test
-    void getCoachingReturnsStoredRecommendationWhenAvailable() {
-        UUID dailyLogId = UUID.randomUUID();
-        AIRecommendation storedRecommendation = AIRecommendation.builder()
-                .dailyLogId(dailyLogId)
-                .analysisSnapshot("{\"dailyLogId\":\"%s\"}".formatted(dailyLogId))
-                .advice("Stored advice")
-                .model("llama-test")
-                .build();
-
-        when(aiRecommendationRepository.findFirstByDailyLogIdOrderByCreatedAtDescIdDesc(dailyLogId))
-                .thenReturn(Optional.of(storedRecommendation));
-
-        AICoachingResponse response = aiCoachingService.getCoaching(dailyLogId);
-
-        assertThat(response.getAnalysis()).isEqualTo(storedRecommendation.getAnalysisSnapshot());
-        assertThat(response.getAdvice()).isEqualTo("Stored advice");
-        verify(aiAnalysisService, never()).getDailyLogAiAnalysis(any());
-        verify(promptBuilder, never()).buildPrompt(any());
-        verify(aiTextGenerationClient, never()).generateText(any());
-        verify(aiRecommendationRepository, never()).save(any());
-    }
-=======
->>>>>>> main
 }

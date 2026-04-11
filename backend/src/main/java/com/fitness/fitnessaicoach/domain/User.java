@@ -1,11 +1,19 @@
 package com.fitness.fitnessaicoach.domain;
 
-import jakarta.persistence.*;
-import lombok.*;
-<<<<<<< HEAD
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-=======
->>>>>>> main
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -28,20 +36,13 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-<<<<<<< HEAD
     @Column(name = "password_hash", nullable = false)
-    private String password;
-=======
-    // Se guardará más adelante con BCrypt
     private String passwordHash;
->>>>>>> main
 
     private Integer age;
-
     private Double heightCm;
     private Double weightKg;
 
-<<<<<<< HEAD
     @Enumerated(EnumType.STRING)
     private UserSex sex;
 
@@ -51,8 +52,3 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 }
-=======
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-}
->>>>>>> main

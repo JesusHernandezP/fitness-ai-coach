@@ -1,22 +1,11 @@
-<<<<<<< HEAD
 package com.fitness.fitnessaicoach.service;
 
 import com.fitness.fitnessaicoach.domain.DailyLog;
 import com.fitness.fitnessaicoach.domain.User;
+import com.fitness.fitnessaicoach.dto.CalorieBalanceResponse;
 import com.fitness.fitnessaicoach.dto.DailyLogRequest;
 import com.fitness.fitnessaicoach.dto.DailyLogResponse;
-import com.fitness.fitnessaicoach.dto.CalorieBalanceResponse;
 import com.fitness.fitnessaicoach.dto.DailyLogSummaryResponseDto;
-=======
-package com.fitness.fitnessaicoach.service;
-
-import com.fitness.fitnessaicoach.domain.DailyLog;
-import com.fitness.fitnessaicoach.domain.User;
-import com.fitness.fitnessaicoach.dto.DailyLogRequest;
-import com.fitness.fitnessaicoach.dto.DailyLogResponse;
-import com.fitness.fitnessaicoach.dto.CalorieBalanceResponse;
-import com.fitness.fitnessaicoach.dto.DailyLogSummaryResponseDto;
->>>>>>> main
 import com.fitness.fitnessaicoach.exception.DailyLogNotFoundException;
 import com.fitness.fitnessaicoach.exception.UserNotFoundException;
 import com.fitness.fitnessaicoach.repository.DailyLogRepository;
@@ -25,13 +14,9 @@ import com.fitness.fitnessaicoach.repository.MealRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
 import lombok.RequiredArgsConstructor;
-<<<<<<< HEAD
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-=======
-import org.springframework.stereotype.Service;
->>>>>>> main
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -39,7 +24,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
-<<<<<<< HEAD
 
 @Service
 @RequiredArgsConstructor
@@ -55,47 +39,22 @@ public class DailyLogService {
     private final UserRepository userRepository;
 
     @Transactional
-=======
-
-@Service
-@RequiredArgsConstructor
-public class DailyLogService {
-
-    private static final int CALORIE_SCALE = 2;
-    private static final RoundingMode CALORIE_ROUNDING = RoundingMode.HALF_UP;
-
-    private final DailyLogRepository dailyLogRepository;
-    private final MealRepository mealRepository;
-    private final MealItemRepository mealItemRepository;
-    private final WorkoutSessionRepository workoutSessionRepository;
-    private final UserRepository userRepository;
-
->>>>>>> main
     public DailyLogResponse createDailyLog(DailyLogRequest request) {
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado."));
 
-<<<<<<< HEAD
         LocalDate logDate = Objects.requireNonNull(request.getLogDate(), "logDate must not be null");
-
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(user.getId(), logDate)
                 .orElseGet(DailyLog::new);
 
         dailyLog.setLogDate(logDate);
-=======
-        DailyLog dailyLog = new DailyLog();
-        dailyLog.setLogDate(request.getLogDate());
->>>>>>> main
         dailyLog.setSteps(request.getSteps());
         dailyLog.setCaloriesConsumed(request.getCaloriesConsumed());
         dailyLog.setCaloriesBurned(request.getCaloriesBurned());
         dailyLog.setUser(user);
 
-        DailyLog saved = dailyLogRepository.save(dailyLog);
-
-        return toResponse(saved);
+        return toResponse(dailyLogRepository.save(dailyLog));
     }
-<<<<<<< HEAD
 
     public List<DailyLogResponse> getAllDailyLogs() {
         return dailyLogRepository.findAll().stream()
@@ -106,14 +65,12 @@ public class DailyLogService {
     public DailyLogResponse getDailyLogById(UUID id) {
         DailyLog dailyLog = dailyLogRepository.findById(id)
                 .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
-
         return toResponse(dailyLog);
     }
 
     public void deleteDailyLog(UUID id) {
         DailyLog dailyLog = dailyLogRepository.findById(id)
                 .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
-
         dailyLogRepository.delete(dailyLog);
     }
 
@@ -154,19 +111,6 @@ public class DailyLogService {
                 .build();
     }
 
-    private int toIntSafe(long value) {
-        if (value > Integer.MAX_VALUE) {
-            throw new IllegalStateException("Daily log summary aggregate exceeds supported integer range.");
-        }
-
-        return (int) value;
-    }
-
-    private BigDecimal toBigDecimalOrZero(Double value) {
-        return BigDecimal.valueOf(value != null ? value : 0)
-                .setScale(CALORIE_SCALE, CALORIE_ROUNDING);
-    }
-
     public List<DailyLogResponse> getDailyLogsByUserId(UUID userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
@@ -176,89 +120,6 @@ public class DailyLogService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
-=======
-
-    public List<DailyLogResponse> getAllDailyLogs() {
-        return dailyLogRepository.findAll().stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    public DailyLogResponse getDailyLogById(UUID id) {
-        DailyLog dailyLog = dailyLogRepository.findById(id)
-                .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
-
-        return toResponse(dailyLog);
-    }
-
-    public void deleteDailyLog(UUID id) {
-        DailyLog dailyLog = dailyLogRepository.findById(id)
-                .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
-
-        dailyLogRepository.delete(dailyLog);
-    }
-
-    public DailyLogSummaryResponseDto getDailyLogSummary(UUID id) {
-        DailyLog dailyLog = dailyLogRepository.findById(id)
-                .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
-
-        long totalMeals = mealRepository.countByDailyLogId(id);
-        long totalWorkoutSessions = workoutSessionRepository.countByDailyLogId(id);
-        Double totalCaloriesConsumed = mealItemRepository.sumCalculatedCaloriesByDailyLogId(id);
-        Double totalCaloriesBurned = workoutSessionRepository.sumCaloriesBurnedByDailyLogId(id);
-
-        return DailyLogSummaryResponseDto.builder()
-                .dailyLogId(dailyLog.getId())
-                .date(dailyLog.getLogDate())
-                .totalMeals(toIntSafe(totalMeals))
-                .totalWorkoutSessions(toIntSafe(totalWorkoutSessions))
-                .totalCaloriesConsumed(toBigDecimalOrZero(totalCaloriesConsumed))
-                .totalCaloriesBurned(toBigDecimalOrZero(totalCaloriesBurned))
-                .totalSteps(dailyLog.getSteps() != null ? dailyLog.getSteps() : 0)
-                .build();
-    }
-
-    public CalorieBalanceResponse getDailyLogCalorieBalance(UUID id) {
-        DailyLog dailyLog = dailyLogRepository.findById(id)
-                .orElseThrow(() -> new DailyLogNotFoundException("Daily log not found."));
-
-        BigDecimal caloriesConsumed = toBigDecimalOrZero(mealItemRepository.sumCalculatedCaloriesByDailyLogId(dailyLog.getId()));
-        BigDecimal caloriesBurned = toBigDecimalOrZero(workoutSessionRepository.sumCaloriesBurnedByDailyLogId(dailyLog.getId()));
-        BigDecimal calorieBalance = caloriesConsumed.subtract(caloriesBurned)
-                .setScale(CALORIE_SCALE, CALORIE_ROUNDING);
-
-        return CalorieBalanceResponse.builder()
-                .dailyLogId(dailyLog.getId())
-                .caloriesConsumed(caloriesConsumed)
-                .caloriesBurned(caloriesBurned)
-                .calorieBalance(calorieBalance)
-                .build();
-    }
-
-    private int toIntSafe(long value) {
-        if (value > Integer.MAX_VALUE) {
-            throw new IllegalStateException("Daily log summary aggregate exceeds supported integer range.");
-        }
-
-        return (int) value;
-    }
-
-    private BigDecimal toBigDecimalOrZero(Double value) {
-        return BigDecimal.valueOf(value != null ? value : 0)
-                .setScale(CALORIE_SCALE, CALORIE_ROUNDING);
-    }
-
-    public List<DailyLogResponse> getDailyLogsByUserId(UUID userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found."));
-
-        return dailyLogRepository.findByUserId(userId).stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
->>>>>>> main
     public DailyLogResponse getDailyLogByUserIdAndDate(UUID userId, LocalDate date) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
@@ -269,16 +130,12 @@ public class DailyLogService {
         return toResponse(dailyLog);
     }
 
-<<<<<<< HEAD
     @Transactional
-=======
->>>>>>> main
     public DailyLogResponse getOrCreateTodayLog(UUID userId) {
         Objects.requireNonNull(userId, "userId must not be null");
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
-
         LocalDate today = LocalDate.now();
 
         return dailyLogRepository.findByUserIdAndLogDate(userId, today)
@@ -286,7 +143,6 @@ public class DailyLogService {
                 .orElseGet(() -> createTodayLog(user, today));
     }
 
-<<<<<<< HEAD
     @Transactional
     public DailyLogResponse getOrCreateTodayLogForAuthenticatedUser(String email) {
         Objects.requireNonNull(email, "email must not be null");
@@ -297,8 +153,6 @@ public class DailyLogService {
         return getOrCreateTodayLog(user.getId());
     }
 
-=======
->>>>>>> main
     private DailyLogResponse createTodayLog(User user, LocalDate today) {
         DailyLog dailyLog = new DailyLog();
         dailyLog.setLogDate(today);
@@ -307,25 +161,30 @@ public class DailyLogService {
         dailyLog.setCaloriesBurned(0.0);
         dailyLog.setUser(user);
 
-<<<<<<< HEAD
         try {
-            DailyLog savedDailyLog = dailyLogRepository.saveAndFlush(dailyLog);
-            return toResponse(savedDailyLog);
+            return toResponse(dailyLogRepository.saveAndFlush(dailyLog));
         } catch (DataIntegrityViolationException exception) {
             DailyLog existingLog = dailyLogRepository.findByUserIdAndLogDate(user.getId(), today)
                     .orElseThrow(() -> exception);
             return toResponse(existingLog);
         }
-=======
-        DailyLog savedDailyLog = dailyLogRepository.save(dailyLog);
-        return toResponse(savedDailyLog);
->>>>>>> main
+    }
+
+    private int toIntSafe(long value) {
+        if (value > Integer.MAX_VALUE) {
+            throw new IllegalStateException("Daily log summary aggregate exceeds supported integer range.");
+        }
+        return (int) value;
+    }
+
+    private BigDecimal toBigDecimalOrZero(Double value) {
+        return BigDecimal.valueOf(value != null ? value : 0)
+                .setScale(CALORIE_SCALE, CALORIE_ROUNDING);
     }
 
     private DailyLogResponse toResponse(DailyLog dailyLog) {
         return DailyLogResponse.builder()
                 .id(dailyLog.getId())
-<<<<<<< HEAD
                 .date(dailyLog.getLogDate())
                 .steps(dailyLog.getSteps())
                 .caloriesConsumed(dailyLog.getCaloriesConsumed())
@@ -334,13 +193,3 @@ public class DailyLogService {
                 .build();
     }
 }
-=======
-                .date(dailyLog.getLogDate())
-                .steps(dailyLog.getSteps())
-                .caloriesConsumed(dailyLog.getCaloriesConsumed())
-                .caloriesBurned(dailyLog.getCaloriesBurned())
-                .userId(dailyLog.getUser() != null ? dailyLog.getUser().getId() : null)
-                .build();
-    }
-}
->>>>>>> main

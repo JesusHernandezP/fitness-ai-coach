@@ -38,7 +38,7 @@ class UserRepositoryImpl @Inject constructor(
                     sex = user.sex ?: throw IllegalArgumentException("Sex is required."),
                     activityLevel = user.activityLevel ?: throw IllegalArgumentException("Activity level is required.")
                 )
-            ).toDomain()
+            ).data.toDomain()
 
             AppResult.Success(updatedUser)
         } catch (throwable: Throwable) {
@@ -52,7 +52,7 @@ class UserRepositoryImpl @Inject constructor(
         val userEmail = extractEmailFromJwt(token)
             ?: throw IllegalStateException("Authenticated user email could not be resolved.")
 
-        return userApi.getUsers().firstOrNull { it.email == userEmail }?.toDomain()
+        return userApi.getUsers().data.firstOrNull { it.email == userEmail }?.toDomain()
             ?: throw IllegalStateException("Authenticated user not found.")
     }
 

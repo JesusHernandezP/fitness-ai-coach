@@ -57,7 +57,7 @@ public class BodyMetricsMigrationValidationTest {
     }
 
     @Test
-    void bodyMetricsTableShouldOnlyStoreWeightHistoryColumns() {
+    void bodyMetricsTableShouldStoreExtendedCompositionColumns() {
         Integer bodyFatColumns = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM INFORMATION_SCHEMA.COLUMNS
@@ -71,7 +71,7 @@ public class BodyMetricsMigrationValidationTest {
                   AND COLUMN_NAME = 'MUSCLE_MASS'
                 """, Integer.class);
 
-        assertEquals(0, bodyFatColumns);
-        assertEquals(0, muscleMassColumns);
+        assertEquals(1, bodyFatColumns);
+        assertEquals(1, muscleMassColumns);
     }
 }

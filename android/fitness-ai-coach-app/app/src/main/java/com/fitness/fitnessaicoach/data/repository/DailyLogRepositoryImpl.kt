@@ -23,7 +23,7 @@ class DailyLogRepositoryImpl @Inject constructor(
 
     override suspend fun getTodayDailyLog(): AppResult<DailyLog> {
         return try {
-            AppResult.Success(dailyLogApi.getTodayDailyLog().toDomain())
+            AppResult.Success(dailyLogApi.getTodayDailyLog().data.toDomain())
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }
@@ -31,7 +31,7 @@ class DailyLogRepositoryImpl @Inject constructor(
 
     override suspend fun saveDailyLog(dailyLog: DailyLog): DailyLog {
         val resolvedUserId = resolveUserId(dailyLog.userId)
-        return dailyLogApi.saveDailyLog(dailyLog.toRequestDto(resolvedUserId)).toDomain()
+        return dailyLogApi.saveDailyLog(dailyLog.toRequestDto(resolvedUserId)).data.toDomain()
     }
 
     private suspend fun resolveUserId(explicitUserId: String?): String {
@@ -44,7 +44,7 @@ class DailyLogRepositoryImpl @Inject constructor(
         val userEmail = extractEmailFromJwt(token)
             ?: throw IllegalStateException("Authenticated user email could not be resolved.")
 
-        val currentUser = userApi.getUsers().firstOrNull { it.email == userEmail }
+        val currentUser = userApi.getUsers().data.firstOrNull { it.email == userEmail }
             ?: throw IllegalStateException("Authenticated user not found.")
 
         return currentUser.id

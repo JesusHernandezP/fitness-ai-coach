@@ -1,21 +1,22 @@
 package com.fitness.fitnessaicoach.controller;
 
+import com.fitness.fitnessaicoach.dto.ApiResponse;
 import com.fitness.fitnessaicoach.dto.LoginRequest;
 import com.fitness.fitnessaicoach.dto.LoginResponse;
-<<<<<<< HEAD
-import com.fitness.fitnessaicoach.service.AuthService;
-=======
 import com.fitness.fitnessaicoach.dto.UserRequest;
 import com.fitness.fitnessaicoach.dto.UserResponse;
 import com.fitness.fitnessaicoach.service.AuthService;
 import com.fitness.fitnessaicoach.service.UserService;
->>>>>>> main
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -24,20 +25,19 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-<<<<<<< HEAD
-=======
     private final UserService userService;
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user", security = {})
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody UserRequest request) {
-        return ResponseEntity.ok(userService.create(request));
+    public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody UserRequest request) {
+        UserResponse created = userService.create(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponse<>(HttpStatus.CREATED.value(), created));
     }
->>>>>>> main
 
     @PostMapping("/login")
     @Operation(summary = "Authenticate user and return JWT", security = {})
-    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(new ApiResponse<>(HttpStatus.OK.value(), authService.login(request)));
     }
 }

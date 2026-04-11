@@ -36,8 +36,6 @@ class SecurityIntegrationTest {
     }
 
     @Test
-<<<<<<< HEAD
-=======
     void groqHealthWithoutTokenShouldReturn401() throws Exception {
         mockMvc.perform(get("/api/health/groq"))
                 .andExpect(status().isUnauthorized());
@@ -50,7 +48,6 @@ class SecurityIntegrationTest {
     }
 
     @Test
->>>>>>> main
     void getExercisesWithoutTokenShouldReturn401() throws Exception {
         mockMvc.perform(get("/api/exercises"))
                 .andExpect(status().isUnauthorized());
@@ -122,14 +119,10 @@ class SecurityIntegrationTest {
                 }
                 """.formatted(email, password);
 
-<<<<<<< HEAD
-        mockMvc.perform(post("/api/users")
-=======
         mockMvc.perform(post("/api/auth/register")
->>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         String loginBody = """
                 {
@@ -142,10 +135,10 @@ class SecurityIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andReturn();
 
         JsonNode jsonNode = objectMapper.readTree(loginResult.getResponse().getContentAsString());
-        return jsonNode.get("token").asText();
+        return jsonNode.get("data").get("token").asText();
     }
 }

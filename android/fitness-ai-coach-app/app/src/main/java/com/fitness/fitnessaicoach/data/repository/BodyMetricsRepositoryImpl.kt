@@ -16,7 +16,7 @@ class BodyMetricsRepositoryImpl @Inject constructor(
 
     override suspend fun createBodyMetrics(bodyMetrics: BodyMetrics): AppResult<BodyMetrics> {
         return try {
-            AppResult.Success(bodyMetricsApi.createBodyMetrics(bodyMetrics.toRequestDto()).toDomain())
+            AppResult.Success(bodyMetricsApi.createBodyMetrics(bodyMetrics.toRequestDto()).data.toDomain())
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }
@@ -24,7 +24,7 @@ class BodyMetricsRepositoryImpl @Inject constructor(
 
     override suspend fun getBodyMetrics(): AppResult<List<BodyMetrics>> {
         return try {
-            AppResult.Success(bodyMetricsApi.getBodyMetrics().map { it.toDomain() })
+            AppResult.Success(bodyMetricsApi.getBodyMetrics().data.map { it.toDomain() })
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }
@@ -32,7 +32,7 @@ class BodyMetricsRepositoryImpl @Inject constructor(
 
     override suspend fun getWeightProgress(): AppResult<List<WeightProgressPoint>> {
         return try {
-            AppResult.Success(bodyMetricsApi.getWeightProgress().map { it.toDomain() })
+            AppResult.Success(bodyMetricsApi.getWeightProgress().data.map { it.toDomain() })
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }

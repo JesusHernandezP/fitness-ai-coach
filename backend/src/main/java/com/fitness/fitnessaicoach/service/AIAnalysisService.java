@@ -6,7 +6,6 @@ import com.fitness.fitnessaicoach.domain.Goal;
 import com.fitness.fitnessaicoach.domain.Meal;
 import com.fitness.fitnessaicoach.domain.MealItem;
 import com.fitness.fitnessaicoach.domain.MealType;
-import com.fitness.fitnessaicoach.domain.WorkoutSession;
 import com.fitness.fitnessaicoach.domain.User;
 import com.fitness.fitnessaicoach.dto.ai.AIAnalysisResponse;
 import com.fitness.fitnessaicoach.dto.ai.AIMealSummaryResponse;
@@ -51,15 +50,18 @@ public class AIAnalysisService {
         User user = dailyLog.getUser();
         UUID userId = user != null ? user.getId() : null;
 
-        BigDecimal totalCaloriesConsumed = toBigDecimalOrZero(mealItemRepository.sumCalculatedCaloriesByDailyLogId(dailyLog.getId()));
-        BigDecimal totalCaloriesBurned = toBigDecimalOrZero(workoutSessionRepository.sumCaloriesBurnedByDailyLogId(dailyLog.getId()));
+        BigDecimal totalCaloriesConsumed = toBigDecimalOrZero(
+                mealItemRepository.sumCalculatedCaloriesByDailyLogId(dailyLog.getId())
+        );
+        BigDecimal totalCaloriesBurned = toBigDecimalOrZero(
+                workoutSessionRepository.sumCaloriesBurnedByDailyLogId(dailyLog.getId())
+        );
         BigDecimal calorieBalance = totalCaloriesConsumed.subtract(totalCaloriesBurned)
                 .setScale(CALORIE_SCALE, CALORIE_ROUNDING);
 
         Goal goal = userId != null
                 ? goalRepository.findTopByUserIdOrderByCreatedAtDescIdDesc(userId).orElse(null)
                 : null;
-
         BodyMetrics latestBodyMetrics = userId != null
                 ? bodyMetricsRepository.findTopByUserIdOrderByDateDescIdDesc(userId).orElse(null)
                 : null;
@@ -77,18 +79,14 @@ public class AIAnalysisService {
                 .goalType(goal != null ? goal.getGoalType() : null)
                 .targetWeight(goal != null ? goal.getTargetWeight() : null)
                 .targetCalories(goal != null ? goal.getTargetCalories() : null)
-<<<<<<< HEAD
                 .targetProtein(goal != null ? goal.getTargetProtein() : null)
                 .targetCarbs(goal != null ? goal.getTargetCarbs() : null)
                 .targetFat(goal != null ? goal.getTargetFat() : null)
-                .latestWeight(latestBodyMetrics != null ? latestBodyMetrics.getWeight() : null)
                 .sex(user != null ? user.getSex() : null)
                 .activityLevel(user != null ? user.getActivityLevel() : null)
-=======
                 .latestWeight(latestBodyMetrics != null ? latestBodyMetrics.getWeight() : null)
                 .latestBodyFat(latestBodyMetrics != null ? latestBodyMetrics.getBodyFat() : null)
                 .latestMuscleMass(latestBodyMetrics != null ? latestBodyMetrics.getMuscleMass() : null)
->>>>>>> main
                 .meals(buildMealSummaries(dailyLogId))
                 .workouts(buildWorkoutSummaries(dailyLogId))
                 .build();
@@ -97,7 +95,6 @@ public class AIAnalysisService {
     private List<AIMealSummaryResponse> buildMealSummaries(UUID dailyLogId) {
         List<Meal> meals = mealRepository.findByDailyLogId(dailyLogId);
         List<MealItem> mealItems = mealItemRepository.findAllByDailyLogId(dailyLogId);
-
         if (meals.isEmpty()) {
             return List.of();
         }
@@ -108,7 +105,10 @@ public class AIAnalysisService {
         for (Meal meal : meals) {
             if (meal.getMealType() != null) {
                 totalItemsByMealType.putIfAbsent(meal.getMealType(), 0);
-                totalCaloriesByMealType.putIfAbsent(meal.getMealType(), BigDecimal.ZERO.setScale(CALORIE_SCALE, CALORIE_ROUNDING));
+                totalCaloriesByMealType.putIfAbsent(
+                        meal.getMealType(),
+                        BigDecimal.ZERO.setScale(CALORIE_SCALE, CALORIE_ROUNDING)
+                );
             }
         }
 
@@ -116,18 +116,17 @@ public class AIAnalysisService {
             MealType mealType = mealItem.getMeal() != null && mealItem.getMeal().getMealType() != null
                     ? mealItem.getMeal().getMealType()
                     : null;
-
             if (mealType != null) {
                 totalItemsByMealType.merge(mealType, 1, Integer::sum);
                 BigDecimal previousCalories = totalCaloriesByMealType.getOrDefault(mealType, BigDecimal.ZERO);
                 totalCaloriesByMealType.put(
                         mealType,
-                        previousCalories.add(toBigDecimalOrZero(mealItem.getCalculatedCalories())));
+                        previousCalories.add(toBigDecimalOrZero(mealItem.getCalculatedCalories()))
+                );
             }
         }
 
         List<AIMealSummaryResponse> summaries = new ArrayList<>();
-
         for (MealType mealType : MealType.values()) {
             Integer totalItems = totalItemsByMealType.get(mealType);
             if (totalItems == null) {
@@ -137,7 +136,8 @@ public class AIAnalysisService {
             summaries.add(AIMealSummaryResponse.builder()
                     .mealType(mealType.name())
                     .totalItems(totalItems)
-                    .totalCalories(totalCaloriesByMealType.getOrDefault(mealType, BigDecimal.ZERO).setScale(CALORIE_SCALE, CALORIE_ROUNDING))
+                    .totalCalories(totalCaloriesByMealType.getOrDefault(mealType, BigDecimal.ZERO)
+                            .setScale(CALORIE_SCALE, CALORIE_ROUNDING))
                     .build());
         }
 
@@ -151,8 +151,6 @@ public class AIAnalysisService {
                         .duration(session.getDuration())
                         .caloriesBurned(toBigDecimalOrZero(session.getCaloriesBurned()))
                         .build())
-                .toList()
-                .stream()
                 .sorted(Comparator.comparing(AIWorkoutSummaryResponse::getExerciseName, Comparator.nullsLast(String::compareTo)))
                 .toList();
     }

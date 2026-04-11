@@ -3,31 +3,22 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
 spring:
   datasource:
-<<<<<<< HEAD
-    url: ${DB_URL:jdbc:postgresql://127.0.0.1:5432/fitness_db?sslmode=disable}
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:1234}
-=======
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/fitness_db}
     username: ${SPRING_DATASOURCE_USERNAME:postgres}
     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
   flyway:
     enabled: false
->>>>>>> main
 
 app:
   swagger:
     public: true
-
-<<<<<<< HEAD
-=======
   security:
     jwt:
       secret: dev-secret-key-very-long-123456789
 
->>>>>>> main
 groq:
   api:
     model: llama-3.1-8b-instant

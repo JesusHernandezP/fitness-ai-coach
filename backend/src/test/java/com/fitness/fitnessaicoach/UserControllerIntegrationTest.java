@@ -46,11 +46,11 @@ class UserControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(user.userId()))
-                .andExpect(jsonPath("$.age").value(29))
-                .andExpect(jsonPath("$.heightCm").value(178.0))
-                .andExpect(jsonPath("$.sex").value("FEMALE"))
-                .andExpect(jsonPath("$.activityLevel").value("ACTIVE"));
+                .andExpect(jsonPath("$.data.id").value(user.userId()))
+                .andExpect(jsonPath("$.data.age").value(29))
+                .andExpect(jsonPath("$.data.heightCm").value(178.0))
+                .andExpect(jsonPath("$.data.sex").value("FEMALE"))
+                .andExpect(jsonPath("$.data.activityLevel").value("ACTIVE"));
     }
 
     @Test
@@ -106,10 +106,10 @@ class UserControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(goalBody))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.targetCalories").value(1555.8))
-                .andExpect(jsonPath("$.targetProtein").value(148.0))
-                .andExpect(jsonPath("$.targetFat").value(59.2))
-                .andExpect(jsonPath("$.targetCarbs").value(107.75));
+                .andExpect(jsonPath("$.data.targetCalories").value(1555.8))
+                .andExpect(jsonPath("$.data.targetProtein").value(148.0))
+                .andExpect(jsonPath("$.data.targetFat").value(59.2))
+                .andExpect(jsonPath("$.data.targetCarbs").value(107.75));
     }
 
     private UserContext registerAndLogin() throws Exception {
@@ -127,13 +127,14 @@ class UserControllerIntegrationTest {
                 }
                 """.formatted(email, password);
 
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText();
 
@@ -151,6 +152,7 @@ class UserControllerIntegrationTest {
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
 

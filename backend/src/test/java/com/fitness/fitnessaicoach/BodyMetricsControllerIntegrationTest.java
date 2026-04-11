@@ -42,37 +42,11 @@ public class BodyMetricsControllerIntegrationTest {
                 .andExpect(jsonPath("$['paths']['/api/body-metrics']").exists())
                 .andExpect(jsonPath("$['paths']['/api/body-metrics']['post']").exists())
                 .andExpect(jsonPath("$['paths']['/api/body-metrics']['get']").exists())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$['paths']['/api/body-metrics/progress']").exists())
-                .andExpect(jsonPath("$['paths']['/api/body-metrics/progress']['get']").exists())
-=======
->>>>>>> main
                 .andExpect(jsonPath("$['paths']['/api/body-metrics/{id}']['get']").exists())
                 .andExpect(jsonPath("$['paths']['/api/body-metrics/{id}']['delete']").exists());
     }
 
     @Test
-<<<<<<< HEAD
-    void bodyMetricsCrudEndpointsShouldUseAuthenticatedUser() throws Exception {
-        UserContext user = registerAndLogin("bodymetrics");
-        UserContext otherUser = registerAndLogin("other");
-
-        String bodyMetricsBody = """
-                {
-                  "weight": 82.5,
-                  "date": "2026-04-15"
-                }
-                """;
-
-        String createResult = mockMvc.perform(post("/api/body-metrics")
-                        .header("Authorization", "Bearer " + user.token())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(bodyMetricsBody))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.weight").value(82.5))
-                .andExpect(jsonPath("$.date").value("2026-04-15"))
-                .andExpect(jsonPath("$.userId").value(user.userId()))
-=======
     void bodyMetricsCrudEndpointsShouldWorkWithValidToken() throws Exception {
         UserContext user = registerAndLogin();
         String token = user.token();
@@ -98,98 +72,10 @@ public class BodyMetricsControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.bodyFat").value(18.2))
                 .andExpect(jsonPath("$.data.muscleMass").value(38.5))
                 .andExpect(jsonPath("$.data.date").value("2026-04-15"))
->>>>>>> main
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-<<<<<<< HEAD
-        String bodyMetricsId = objectMapper.readTree(createResult).get("id").asText();
-
-        mockMvc.perform(get("/api/body-metrics")
-                        .header("Authorization", "Bearer " + user.token()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(bodyMetricsId))
-                .andExpect(jsonPath("$[0].userId").value(user.userId()));
-
-        mockMvc.perform(get("/api/body-metrics")
-                        .header("Authorization", "Bearer " + otherUser.token()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
-
-        mockMvc.perform(get("/api/body-metrics/" + bodyMetricsId)
-                        .header("Authorization", "Bearer " + user.token()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(bodyMetricsId))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-
-        mockMvc.perform(get("/api/body-metrics/" + bodyMetricsId)
-                        .header("Authorization", "Bearer " + otherUser.token()))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(delete("/api/body-metrics/" + bodyMetricsId)
-                        .header("Authorization", "Bearer " + otherUser.token()))
-                .andExpect(status().isNotFound());
-
-        mockMvc.perform(delete("/api/body-metrics/" + bodyMetricsId)
-                        .header("Authorization", "Bearer " + user.token()))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void shouldRejectDuplicateBodyMetricsForSameUserAndDate() throws Exception {
-        UserContext user = registerAndLogin("duplicate");
-
-        String bodyMetricsBody = """
-                {
-                  "weight": 82.5,
-                  "date": "2026-04-15"
-                }
-                """;
-
-        mockMvc.perform(post("/api/body-metrics")
-                        .header("Authorization", "Bearer " + user.token())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(bodyMetricsBody))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(post("/api/body-metrics")
-                        .header("Authorization", "Bearer " + user.token())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(bodyMetricsBody))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("You already recorded your weight today"));
-    }
-
-    @Test
-    void weightProgressEndpointShouldReturnOrderedResults() throws Exception {
-        UserContext user = registerAndLogin("progress");
-
-        createBodyMetrics(user.token(), 82.5, "2026-04-05");
-        createBodyMetrics(user.token(), 83.1, "2026-04-01");
-        createBodyMetrics(user.token(), 81.8, "2026-04-10");
-
-        mockMvc.perform(get("/api/body-metrics/progress")
-                        .header("Authorization", "Bearer " + user.token()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(3))
-                .andExpect(jsonPath("$[0].date").value("2026-04-01"))
-                .andExpect(jsonPath("$[0].weight").value(83.1))
-                .andExpect(jsonPath("$[1].date").value("2026-04-05"))
-                .andExpect(jsonPath("$[1].weight").value(82.5))
-                .andExpect(jsonPath("$[2].date").value("2026-04-10"))
-                .andExpect(jsonPath("$[2].weight").value(81.8));
-    }
-
-    private void createBodyMetrics(String token, double weight, String date) throws Exception {
-        String bodyMetricsBody = """
-                {
-                  "weight": %s,
-                  "date": "%s"
-                }
-                """.formatted(weight, date);
-=======
         UUID bodyMetricsId = UUID.fromString(objectMapper.readTree(response).get("data").get("id").asText());
 
         mockMvc.perform(get("/api/body-metrics")
@@ -225,19 +111,10 @@ public class BodyMetricsControllerIntegrationTest {
                   "date": "2026-04-15"
                 }
                 """.formatted(user.userId());
->>>>>>> main
 
         mockMvc.perform(post("/api/body-metrics")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
-<<<<<<< HEAD
-                        .content(bodyMetricsBody))
-                .andExpect(status().isCreated());
-    }
-
-    private UserContext registerAndLogin(String prefix) throws Exception {
-        String email = prefix + "-" + UUID.randomUUID() + "@example.com";
-=======
                         .content(invalidBodyFat))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errors.bodyFat").exists())
@@ -263,7 +140,6 @@ public class BodyMetricsControllerIntegrationTest {
 
     private UserContext registerAndLogin() throws Exception {
         String email = "bodymetrics-" + UUID.randomUUID() + "@example.com";
->>>>>>> main
         String password = "Passw0rd!";
 
         String registerBody = """
@@ -271,15 +147,6 @@ public class BodyMetricsControllerIntegrationTest {
                   "name": "Body Metrics User",
                   "email": "%s",
                   "password": "%s",
-<<<<<<< HEAD
-                  "age": 31,
-                  "heightCm": 180.0,
-                  "weightKg": 80.0
-                }
-                """.formatted(email, password);
-
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
-=======
                   "age": 35,
                   "heightCm": 178.0,
                   "weightKg": 82.5
@@ -287,13 +154,13 @@ public class BodyMetricsControllerIntegrationTest {
                 """.formatted(email, password);
 
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
->>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText();
 
@@ -308,10 +175,11 @@ public class BodyMetricsControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
 

@@ -1,0 +1,43 @@
+<section class="chat">
+  <div class="chat__messages">
+    @if (isLoadingHistory) {
+      <div class="chat__state">Loading chat history...</div>
+    } @else if (errorMessage && messages.length === 0) {
+      <div class="chat__state chat__state--error">{{ errorMessage }}</div>
+    } @else if (messages.length === 0) {
+      <div class="chat__state">No messages yet. Start the conversation with your AI coach.</div>
+    } @else {
+      @for (message of messages; track trackByTimestamp($index, message)) {
+        <article
+          class="chat__bubble"
+          [class.chat__bubble--user]="message.role === 'USER'"
+          [class.chat__bubble--assistant]="message.role === 'ASSISTANT'">
+          <p class="chat__role">{{ message.role === 'USER' ? 'You' : 'AI Coach' }}</p>
+          <p class="chat__text">{{ message.message }}</p>
+        </article>
+      }
+    }
+  </div>
+
+  @if (errorMessage && messages.length > 0) {
+    <p class="chat__inline-error">{{ errorMessage }}</p>
+  }
+
+  <form class="chat__composer" (ngSubmit)="sendMessage()">
+    <input
+      type="text"
+      name="message"
+      [(ngModel)]="draftMessage"
+      [disabled]="isSending"
+      placeholder="Write a message to your AI coach" />
+    <button type="submit" [disabled]="isSending || !draftMessage.trim()">
+      @if (isSending) {
+        <span>...</span>
+      } @else {
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 12h11.17l-4.58 4.59L12 18l8-8-8-8-1.41 1.41L15.17 8H4v2z"/>
+        </svg>
+      }
+    </button>
+  </form>
+</section>

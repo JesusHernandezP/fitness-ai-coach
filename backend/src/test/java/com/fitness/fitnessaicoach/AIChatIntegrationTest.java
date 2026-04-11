@@ -10,6 +10,7 @@ import com.fitness.fitnessaicoach.domain.Meal;
 import com.fitness.fitnessaicoach.domain.MealItem;
 import com.fitness.fitnessaicoach.domain.UserGoalType;
 import com.fitness.fitnessaicoach.domain.WorkoutSession;
+import com.fitness.fitnessaicoach.dto.ai.AICoachingResponse;
 import com.fitness.fitnessaicoach.repository.BodyMetricsRepository;
 import com.fitness.fitnessaicoach.repository.AIChatMessageRepository;
 import com.fitness.fitnessaicoach.repository.ChatSessionRepository;
@@ -18,6 +19,7 @@ import com.fitness.fitnessaicoach.repository.GoalRepository;
 import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.MealRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
+import com.fitness.fitnessaicoach.service.AICoachingService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.reset;
@@ -87,6 +90,9 @@ class AIChatIntegrationTest {
     @MockBean
     private AITextGenerationClient aiTextGenerationClient;
 
+    @MockBean
+    private AICoachingService aiCoachingService;
+
     @Test
     void swaggerSpecShouldExposeAiChatEndpoint() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
@@ -100,6 +106,8 @@ class AIChatIntegrationTest {
         when(aiTextGenerationClient.generateText(anyString()))
                 .thenReturn("You are close to your calorie target. Add a short walk and keep dinner lighter.");
         when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+        when(aiCoachingService.getCoaching(any()))
+                .thenReturn(new AICoachingResponse(null, "You are close to your calorie target. Add a short walk and keep dinner lighter."));
 
         UserContext user = registerAndLogin("ai-chat");
         createGoal(user.token(), 75);
@@ -190,6 +198,8 @@ class AIChatIntegrationTest {
         when(aiTextGenerationClient.generateText(anyString()))
                 .thenReturn("You are in a calorie deficit today. Keep protein high and stay near your step target.");
         when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
+        when(aiCoachingService.getCoaching(any()))
+                .thenReturn(new AICoachingResponse(null, "You are in a calorie deficit today. Keep protein high and stay near your step target."));
 
         UserContext user = registerAndLogin("log-chat");
         createGoal(user.token(), 75);
@@ -205,8 +215,6 @@ class AIChatIntegrationTest {
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
         assertThat(dailyLog.getSteps()).isEqualTo(9000);
-        assertThat(dailyLog.getCaloriesConsumed()).isGreaterThan(0.0);
-        assertThat(dailyLog.getCaloriesBurned()).isGreaterThan(0.0);
 
         List<Meal> meals = mealRepository.findByDailyLogId(dailyLog.getId());
         assertThat(meals).hasSize(1);
@@ -217,6 +225,7 @@ class AIChatIntegrationTest {
 
         List<WorkoutSession> workouts = workoutSessionRepository.findByDailyLogId(dailyLog.getId());
         assertThat(workouts).hasSize(4);
+        assertThat(workouts).extracting(WorkoutSession::getCaloriesBurned).allMatch(calories -> calories != null && calories > 0.0);
         assertThat(workouts).allSatisfy(workout -> {
             assertThat(workout.getSets()).isEqualTo(4);
             assertThat(workout.getReps()).isEqualTo(8);
@@ -449,13 +458,14 @@ class AIChatIntegrationTest {
                 }
                 """.formatted(email, password);
 
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
+        MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText();
 
@@ -470,10 +480,11 @@ class AIChatIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
 

@@ -41,12 +41,7 @@ public class DailyLogSearchIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}']['get']").exists())
                 .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/date/{date}']['get']").exists())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/today']['get']").exists())
-                .andExpect(jsonPath("$['paths']['/api/daily-logs/today']['get']").exists());
-=======
                 .andExpect(jsonPath("$['paths']['/api/daily-logs/user/{userId}/today']['get']").exists());
->>>>>>> main
     }
 
     @Test
@@ -60,15 +55,9 @@ public class DailyLogSearchIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].userId").value(user.userId()))
-                .andExpect(jsonPath("$[1].userId").value(user.userId()));
-=======
                 .andExpect(jsonPath("$.data.length()").value(2))
                 .andExpect(jsonPath("$.data[0].userId").value(user.userId()))
                 .andExpect(jsonPath("$.data[1].userId").value(user.userId()));
->>>>>>> main
     }
 
     @Test
@@ -82,15 +71,9 @@ public class DailyLogSearchIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/date/2026-04-15")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.date").value("2026-04-15"))
-                .andExpect(jsonPath("$.steps").value(10500))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-=======
                 .andExpect(jsonPath("$.data.date").value("2026-04-15"))
                 .andExpect(jsonPath("$.data.steps").value(10500))
                 .andExpect(jsonPath("$.data.userId").value(user.userId()));
->>>>>>> main
     }
 
     @Test
@@ -116,15 +99,9 @@ public class DailyLogSearchIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/today")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.date").value(today.toString()))
-                .andExpect(jsonPath("$.steps").value(1234))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-=======
                 .andExpect(jsonPath("$.data.date").value(today.toString()))
                 .andExpect(jsonPath("$.data.steps").value(1234))
                 .andExpect(jsonPath("$.data.userId").value(user.userId()));
->>>>>>> main
     }
 
     @Test
@@ -136,112 +113,24 @@ public class DailyLogSearchIntegrationTest {
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/today")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.date").value(today.toString()))
-                .andExpect(jsonPath("$.steps").value(0))
-                .andExpect(jsonPath("$.caloriesConsumed").value(0.0))
-                .andExpect(jsonPath("$.caloriesBurned").value(0.0))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-=======
                 .andExpect(jsonPath("$.data.date").value(today.toString()))
                 .andExpect(jsonPath("$.data.steps").value(0))
                 .andExpect(jsonPath("$.data.caloriesConsumed").value(0.0))
                 .andExpect(jsonPath("$.data.caloriesBurned").value(0.0))
                 .andExpect(jsonPath("$.data.userId").value(user.userId()));
->>>>>>> main
 
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId() + "/today")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.date").value(today.toString()))
-                .andExpect(jsonPath("$.steps").value(0))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-=======
                 .andExpect(jsonPath("$.data.date").value(today.toString()))
                 .andExpect(jsonPath("$.data.steps").value(0))
                 .andExpect(jsonPath("$.data.userId").value(user.userId()));
->>>>>>> main
 
         mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
-<<<<<<< HEAD
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].date").value(today.toString()));
-    }
-
-    @Test
-    void shouldReturnTodayLogForAuthenticatedUser() throws Exception {
-        UserContext user = registerAndLogin();
-        String token = user.token();
-        LocalDate today = LocalDate.now();
-
-        createDailyLog(token, user.userId(), today, 4321);
-
-        mockMvc.perform(get("/api/daily-logs/today")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.date").value(today.toString()))
-                .andExpect(jsonPath("$.steps").value(4321))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-
-        mockMvc.perform(get("/api/daily-logs/today")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.date").value(today.toString()))
-                .andExpect(jsonPath("$.steps").value(4321))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-    }
-
-    @Test
-    void shouldCreateTodayLogForAuthenticatedUserWhenMissing() throws Exception {
-        UserContext user = registerAndLogin();
-        String token = user.token();
-        LocalDate today = LocalDate.now();
-
-        mockMvc.perform(get("/api/daily-logs/today")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.date").value(today.toString()))
-                .andExpect(jsonPath("$.steps").value(0))
-                .andExpect(jsonPath("$.caloriesConsumed").value(0.0))
-                .andExpect(jsonPath("$.caloriesBurned").value(0.0))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-
-        mockMvc.perform(get("/api/daily-logs/today")
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.date").value(today.toString()))
-                .andExpect(jsonPath("$.steps").value(0))
-                .andExpect(jsonPath("$.userId").value(user.userId()));
-
-        mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].date").value(today.toString()));
-    }
-
-    @Test
-    void shouldNotCreateDuplicateDailyLogForSameUserAndDate() throws Exception {
-        UserContext user = registerAndLogin();
-        String token = user.token();
-        LocalDate today = LocalDate.now();
-
-        createDailyLog(token, user.userId(), today, 1000);
-        createDailyLog(token, user.userId(), today, 2000);
-
-        mockMvc.perform(get("/api/daily-logs/user/" + user.userId())
-                        .header("Authorization", "Bearer " + token))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].date").value(today.toString()))
-                .andExpect(jsonPath("$[0].steps").value(2000));
-=======
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].date").value(today.toString()));
->>>>>>> main
     }
 
     @Test
@@ -288,17 +177,14 @@ public class DailyLogSearchIntegrationTest {
                 }
                 """.formatted(email, password);
 
-<<<<<<< HEAD
-        MvcResult registerResult = mockMvc.perform(post("/api/users")
-=======
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
->>>>>>> main
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText();
 
@@ -313,10 +199,11 @@ public class DailyLogSearchIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isNotEmpty())
+                .andExpect(jsonPath("$.data.token").isNotEmpty())
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
 

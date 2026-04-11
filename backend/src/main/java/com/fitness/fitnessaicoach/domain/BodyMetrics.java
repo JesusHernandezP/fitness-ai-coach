@@ -1,6 +1,14 @@
 package com.fitness.fitnessaicoach.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -11,7 +19,6 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-<<<<<<< HEAD
 @Table(
         name = "body_metrics",
         uniqueConstraints = @UniqueConstraint(
@@ -19,9 +26,6 @@ import java.util.UUID;
                 columnNames = {"user_id", "date"}
         )
 )
-=======
-@Table(name = "body_metrics")
->>>>>>> main
 @Getter
 @Setter
 @NoArgsConstructor
@@ -30,11 +34,7 @@ import java.util.UUID;
 public class BodyMetrics {
 
     @Id
-<<<<<<< HEAD
     @GeneratedValue(strategy = GenerationType.UUID)
-=======
-    @GeneratedValue
->>>>>>> main
     private UUID id;
 
     @ManyToOne(optional = false)
@@ -44,13 +44,10 @@ public class BodyMetrics {
     @Column(nullable = false)
     private Double weight;
 
-<<<<<<< HEAD
-=======
     private Double bodyFat;
 
     private Double muscleMass;
 
->>>>>>> main
     @Column(nullable = false)
     private LocalDate date;
 }

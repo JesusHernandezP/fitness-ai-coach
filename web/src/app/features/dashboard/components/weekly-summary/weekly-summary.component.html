@@ -1,0 +1,25 @@
+<div class="weekly-summary">
+  @if (isLoading) {
+    <div class="weekly-summary__state">Loading daily coaching snapshot...</div>
+  } @else if (errorMessage) {
+    <div class="weekly-summary__state weekly-summary__state--error">
+      {{ errorMessage }}
+    </div>
+  } @else if (!summaryData) {
+    <div class="weekly-summary__state">No coaching snapshot available yet.</div>
+  } @else {
+    @if (summaryLabel) {
+      <p class="weekly-summary__range">Latest log: {{ summaryLabel }}</p>
+    }
+
+    <div class="weekly-summary__section">
+      <h3>Analysis</h3>
+      <p>{{ summaryData.summary }}</p>
+    </div>
+
+    <div class="weekly-summary__section">
+      <h3>Recommendation</h3>
+      <p>{{ summaryData.recommendation }}</p>
+    </div>
+  }
+</div>

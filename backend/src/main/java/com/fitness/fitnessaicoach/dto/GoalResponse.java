@@ -11,21 +11,11 @@ import java.util.UUID;
 public class GoalResponse {
 
     private UUID id;
-
     private UserGoalType goalType;
-
     private Double targetWeight;
-
     private Double targetCalories;
-
-<<<<<<< HEAD
     private Double targetProtein;
-
     private Double targetCarbs;
-
     private Double targetFat;
-
-=======
->>>>>>> main
     private UUID userId;
 }

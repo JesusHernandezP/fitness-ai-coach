@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
+import { authGuard, guestGuard } from './core/auth/auth.guard';
+import { LoginComponent } from './features/auth/login.component';
+import { ChatComponent } from './features/chat/chat.component';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { ProfileComponent } from './features/profile/profile.component';
 
 export const routes: Routes = [
   {
@@ -8,7 +12,23 @@ export const routes: Routes = [
     redirectTo: 'dashboard'
   },
   {
+    path: 'login',
+    canActivate: [guestGuard],
+    component: LoginComponent
+  },
+  {
     path: 'dashboard',
+    canActivate: [authGuard],
     component: DashboardComponent
+  },
+  {
+    path: 'chat',
+    canActivate: [authGuard],
+    component: ChatComponent
+  },
+  {
+    path: 'profile',
+    canActivate: [authGuard],
+    component: ProfileComponent
   }
 ];

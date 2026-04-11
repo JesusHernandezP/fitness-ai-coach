@@ -1,0 +1,49 @@
+:host {
+  display: block;
+}
+
+.weekly-summary {
+  min-height: 260px;
+  display: grid;
+  gap: 16px;
+}
+
+.weekly-summary__state {
+  min-height: 260px;
+  display: grid;
+  place-items: center;
+  color: #a0a0a0;
+  border: 1px dashed #2a2a2a;
+  border-radius: 16px;
+  background: #121212;
+  text-align: center;
+  padding: 24px;
+}
+
+.weekly-summary__state--error {
+  color: #ef4444;
+}
+
+.weekly-summary__range {
+  margin: 0;
+  color: #ffe01e;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.weekly-summary__section {
+  display: grid;
+  gap: 8px;
+}
+
+.weekly-summary__section h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #ffffff;
+}
+
+.weekly-summary__section p {
+  margin: 0;
+  color: #a0a0a0;
+  line-height: 1.6;
+}

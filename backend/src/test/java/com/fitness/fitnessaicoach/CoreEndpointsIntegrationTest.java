@@ -67,14 +67,15 @@ class CoreEndpointsIntegrationTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.name").value("Integration User"))
-                .andExpect(jsonPath("$.email").value(email))
-                .andExpect(jsonPath("$.age").value(27))
-                .andExpect(jsonPath("$.heightCm").value(175.0))
-                .andExpect(jsonPath("$.weightKg").value(72.0))
-                .andExpect(jsonPath("$.createdAt").isNotEmpty());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value(201))
+                .andExpect(jsonPath("$.data.id").isNotEmpty())
+                .andExpect(jsonPath("$.data.name").value("Integration User"))
+                .andExpect(jsonPath("$.data.email").value(email))
+                .andExpect(jsonPath("$.data.age").value(27))
+                .andExpect(jsonPath("$.data.heightCm").value(175.0))
+                .andExpect(jsonPath("$.data.weightKg").value(72.0))
+                .andExpect(jsonPath("$.data.createdAt").isNotEmpty());
     }
 
     @Test
@@ -95,7 +96,7 @@ class CoreEndpointsIntegrationTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -140,8 +141,8 @@ class CoreEndpointsIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(loginBody))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").isString())
-                .andExpect(jsonPath("$.token").isNotEmpty());
+                .andExpect(jsonPath("$.data.token").isString())
+                .andExpect(jsonPath("$.data.token").isNotEmpty());
     }
 
     @Test
@@ -320,7 +321,7 @@ class CoreEndpointsIntegrationTest {
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk());
+                .andExpect(status().isCreated());
     }
 
     private String registerAndLogin() throws Exception {
@@ -343,6 +344,7 @@ class CoreEndpointsIntegrationTest {
                 .andReturn();
 
         return objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
     }
@@ -365,10 +367,11 @@ class CoreEndpointsIntegrationTest {
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(registerBody))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andReturn();
 
         String userId = objectMapper.readTree(registerResult.getResponse().getContentAsString())
+                .get("data")
                 .get("id")
                 .asText();
 
@@ -386,6 +389,7 @@ class CoreEndpointsIntegrationTest {
                 .andReturn();
 
         String token = objectMapper.readTree(loginResult.getResponse().getContentAsString())
+                .get("data")
                 .get("token")
                 .asText();
 

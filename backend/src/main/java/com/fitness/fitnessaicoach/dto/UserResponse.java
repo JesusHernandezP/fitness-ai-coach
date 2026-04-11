@@ -1,11 +1,13 @@
 package com.fitness.fitnessaicoach.dto;
 
-<<<<<<< HEAD
 import com.fitness.fitnessaicoach.domain.ActivityLevel;
 import com.fitness.fitnessaicoach.domain.UserSex;
-=======
->>>>>>> main
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -22,12 +24,7 @@ public class UserResponse {
     private Integer age;
     private Double heightCm;
     private Double weightKg;
-<<<<<<< HEAD
     private UserSex sex;
     private ActivityLevel activityLevel;
     private LocalDateTime createdAt;
 }
-=======
-    private LocalDateTime createdAt;
-}
->>>>>>> main
