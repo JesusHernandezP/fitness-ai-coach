@@ -1,1 +1,45 @@
-# ----------------------------------------# GLOBAL# ----------------------------------------*.log*.tmp*.swp*.DS_Store*.idea/*.iml*.classpath*.project*.settings/*.vscode/node_modules/dist/.env.env.*/target/out/build/# ----------------------------------------# BACKEND (Java + Spring Boot)# ----------------------------------------/backend/target//backend/*.jar/backend/*.war/backend/*.iml/backend/.mvn/wrapper/maven-wrapper.jar# ----------------------------------------# ANDROID (Mobile)# ----------------------------------------/mobile/.gradle//mobile/.idea//mobile/build//mobile/app/build//mobile/local.properties/mobile/.cxx/# ----------------------------------------# WEB (Angular)# ----------------------------------------/web/node_modules//web/dist//web/.angular//web/.env*# ----------------------------------------# LOGS# ----------------------------------------*.loglogs/
+# Global
+*.log
+*.tmp
+*.swp
+.DS_Store
+.env
+.env.*
+out/
+build/
+target/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# Root local tooling
+.android/
+.gradle/
+
+# Backend
+backend/target/
+backend/*.jar
+backend/*.war
+backend/*.iml
+backend/.mvn-local-repo/
+backend/.mvn-local-settings.xml
+
+# Web
+web/node_modules/
+web/dist/
+web/.angular/
+web/.env*
+web/web-dev.log
+
+# Android
+android/fitness-ai-coach-app/.gradle/
+android/fitness-ai-coach-app/.idea/
+android/fitness-ai-coach-app/build/
+android/fitness-ai-coach-app/app/build/
+android/fitness-ai-coach-app/local.properties
+android/fitness-ai-coach-app/.cxx/
