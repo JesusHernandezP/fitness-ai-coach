@@ -45,11 +45,11 @@ fun WeightProgressScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Weight progress",
+            text = "Progreso de peso",
             style = MaterialTheme.typography.headlineMedium
         )
         Text(
-            text = "Track how your weight changes over time.",
+            text = "Sigue como cambia tu peso con el tiempo.",
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -66,18 +66,18 @@ fun WeightProgressScreen(
             uiState.errorMessage != null -> {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(
-                        text = uiState.errorMessage ?: "Unable to load weight progress.",
+                        text = uiState.errorMessage ?: "No se pudo cargar el progreso de peso.",
                         color = MaterialTheme.colorScheme.error
                     )
                     Button(onClick = viewModel::loadWeightProgress) {
-                        Text("Retry")
+                        Text("Reintentar")
                     }
                 }
             }
 
             uiState.weights.isEmpty() -> {
                 Text(
-                    text = "No weight history available yet.",
+                    text = "Aun no hay historial de peso.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

@@ -22,10 +22,12 @@ export class WeeklySummaryComponent implements OnInit {
       next: (summary) => {
         this.summaryData = this.hasContent(summary) ? summary : null;
         this.isLoading = false;
+        console.debug('weekly-summary:data', summary);
       },
-      error: () => {
-        this.errorMessage = 'Unable to load the weekly AI summary right now.';
+      error: (error) => {
+        this.errorMessage = 'No se pudo cargar el resumen semanal de AI en este momento.';
         this.isLoading = false;
+        console.error('weekly-summary:error', error);
       }
     });
 
@@ -37,8 +39,8 @@ export class WeeklySummaryComponent implements OnInit {
       return '';
     }
 
-    const start = formatDate(this.summaryData.weekStart, 'dd MMM', 'en-US');
-    const end = formatDate(this.summaryData.weekEnd, 'dd MMM', 'en-US');
+    const start = formatDate(this.summaryData.weekStart, 'dd MMM', 'es-ES');
+    const end = formatDate(this.summaryData.weekEnd, 'dd MMM', 'es-ES');
     return start === end ? start : `${start} - ${end}`;
   }
 

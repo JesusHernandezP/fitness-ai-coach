@@ -54,7 +54,7 @@ export class ChatComponent implements OnInit {
       },
       error: () => {
         this.messages = this.messages.filter((chatMessage) => chatMessage !== optimisticUserMessage);
-        this.errorMessage = 'Unable to send your message right now.';
+        this.errorMessage = 'No se pudo enviar tu mensaje en este momento.';
         this.isSending = false;
       }
     });
@@ -84,7 +84,7 @@ export class ChatComponent implements OnInit {
         this.isLoadingHistory = false;
       },
       error: () => {
-        this.errorMessage = 'Unable to load chat history right now.';
+        this.errorMessage = 'No se pudo cargar el historial del chat en este momento.';
         this.isLoadingHistory = false;
       }
     });

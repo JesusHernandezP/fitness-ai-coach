@@ -18,7 +18,7 @@ fun LoadingView() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = "Loading today's data...",
+            text = "Cargando datos de hoy...",
             style = MaterialTheme.typography.bodyMedium
         )
     }

@@ -12,68 +12,68 @@ import { ApiService, MetabolicProfileDto } from '../../core/api/api.service';
       <article class="profile__card">
         <header class="profile__header">
           <div>
-            <p class="profile__eyebrow">Metabolic Profile</p>
-            <h2>Coach context</h2>
+            <p class="profile__eyebrow">Perfil metabolico</p>
+            <h2>Contexto del coach</h2>
           </div>
           <p class="profile__copy">
-            Keep your weight, diet type and goal aligned across web and Android.
+            Mantén tu peso, tipo de dieta y objetivo alineados entre web y Android.
           </p>
         </header>
 
         <form class="profile__form" [formGroup]="form" (ngSubmit)="save()">
           <label>
-            <span>Age</span>
+            <span>Edad</span>
             <input type="number" formControlName="age" min="15" max="80" />
           </label>
 
           <label>
-            <span>Height (cm)</span>
+            <span>Altura (cm)</span>
             <input type="number" formControlName="heightCm" min="120" max="220" step="0.1" />
           </label>
 
           <label>
-            <span>Weight (kg)</span>
+            <span>Peso (kg)</span>
             <input type="number" formControlName="weightKg" min="30" max="400" step="0.1" />
           </label>
 
           <label>
-            <span>Sex</span>
+            <span>Sexo</span>
             <select formControlName="sex">
-              <option value="">Select sex</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
+              <option value="">Selecciona sexo</option>
+              <option value="MALE">Masculino</option>
+              <option value="FEMALE">Femenino</option>
             </select>
           </label>
 
           <label>
-            <span>Activity level</span>
+            <span>Nivel de actividad</span>
             <select formControlName="activityLevel">
-              <option value="">Select activity</option>
-              <option value="SEDENTARY">Sedentary</option>
-              <option value="LIGHT">Light</option>
-              <option value="MODERATE">Moderate</option>
-              <option value="ACTIVE">Active</option>
-              <option value="VERY_ACTIVE">Very active</option>
+              <option value="">Selecciona actividad</option>
+              <option value="SEDENTARY">Sedentario</option>
+              <option value="LIGHT">Ligero</option>
+              <option value="MODERATE">Moderado</option>
+              <option value="ACTIVE">Activo</option>
+              <option value="VERY_ACTIVE">Muy activo</option>
             </select>
           </label>
 
           <label>
-            <span>Diet type</span>
+            <span>Tipo de dieta</span>
             <select formControlName="dietType">
-              <option value="">Select diet</option>
-              <option value="STANDARD">Standard</option>
+              <option value="">Selecciona dieta</option>
+              <option value="STANDARD">Estandar</option>
               <option value="KETO">Keto</option>
-              <option value="VEGETARIAN">Vegetarian</option>
+              <option value="VEGETARIAN">Vegetariana</option>
             </select>
           </label>
 
           <label class="profile__field--wide">
-            <span>Goal</span>
+            <span>Objetivo</span>
             <select formControlName="goalType">
-              <option value="">Select goal</option>
-              <option value="LOSE_WEIGHT">Lose weight</option>
-              <option value="BUILD_MUSCLE">Build muscle</option>
-              <option value="MAINTAIN">Maintain</option>
+              <option value="">Selecciona objetivo</option>
+              <option value="LOSE_WEIGHT">Perder peso</option>
+              <option value="BUILD_MUSCLE">Ganar musculo</option>
+              <option value="MAINTAIN">Mantener</option>
             </select>
           </label>
 
@@ -87,30 +87,30 @@ import { ApiService, MetabolicProfileDto } from '../../core/api/api.service';
 
           <div class="profile__actions">
             <button type="submit" [disabled]="isSaving || form.invalid">
-              {{ isSaving ? 'Saving...' : 'Save profile' }}
+              {{ isSaving ? 'Guardando...' : 'Guardar perfil' }}
             </button>
           </div>
         </form>
       </article>
 
       <article class="profile__card profile__card--summary">
-        <h3>Daily intake targets</h3>
-        <p class="profile__summary-copy">These are your goal-adjusted amounts to consume each day based on profile, diet type and objective.</p>
+        <h3>Objetivos diarios de ingesta</h3>
+        <p class="profile__summary-copy">Estos son tus objetivos diarios ajustados por perfil, tipo de dieta y objetivo.</p>
         <div class="profile__targets">
           <div>
-            <span>Calories</span>
+            <span>Calorias</span>
             <strong>{{ currentProfile?.targetCalories ?? '--' }}</strong>
           </div>
           <div>
-            <span>Protein</span>
+            <span>Proteina</span>
             <strong>{{ currentProfile?.targetProtein ?? '--' }}</strong>
           </div>
           <div>
-            <span>Carbs</span>
+            <span>Carbohidratos</span>
             <strong>{{ currentProfile?.targetCarbs ?? '--' }}</strong>
           </div>
           <div>
-            <span>Fat</span>
+            <span>Grasas</span>
             <strong>{{ currentProfile?.targetFat ?? '--' }}</strong>
           </div>
         </div>
@@ -311,7 +311,7 @@ export class ProfileComponent implements OnInit {
         });
       },
       error: () => {
-        this.errorMessage = 'Unable to load your profile right now.';
+        this.errorMessage = 'No se pudo cargar tu perfil en este momento.';
       }
     });
 
@@ -350,11 +350,11 @@ export class ProfileComponent implements OnInit {
           dietType: profile.dietType ?? '',
           goalType: profile.goalType ?? ''
         });
-        this.successMessage = 'Profile saved successfully.';
+        this.successMessage = 'Perfil guardado correctamente.';
         this.isSaving = false;
       },
       error: () => {
-        this.errorMessage = 'Unable to save your profile right now.';
+        this.errorMessage = 'No se pudo guardar tu perfil en este momento.';
         this.isSaving = false;
       }
     });

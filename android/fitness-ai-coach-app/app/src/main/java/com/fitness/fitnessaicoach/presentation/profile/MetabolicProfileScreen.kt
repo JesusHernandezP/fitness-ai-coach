@@ -50,12 +50,12 @@ fun MetabolicProfileScreen(
         item {
             Column {
                 Text(
-                    text = "Metabolic profile",
+                    text = "Perfil metabolico",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Set the profile data used for calorie and macro calculations.",
+                    text = "Configura los datos del perfil usados para calcular calorias y macros.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -65,7 +65,7 @@ fun MetabolicProfileScreen(
             OutlinedTextField(
                 value = uiState.age,
                 onValueChange = viewModel::onAgeChanged,
-                label = { Text("Age") },
+                label = { Text("Edad") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 singleLine = true
@@ -76,7 +76,7 @@ fun MetabolicProfileScreen(
             OutlinedTextField(
                 value = uiState.heightCm,
                 onValueChange = viewModel::onHeightChanged,
-                label = { Text("Height cm") },
+                label = { Text("Altura (cm)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
@@ -89,7 +89,7 @@ fun MetabolicProfileScreen(
                     value = uiState.sex,
                     onValueChange = { },
                     readOnly = true,
-                    label = { Text("Sex") },
+                    label = { Text("Sexo") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -100,7 +100,7 @@ fun MetabolicProfileScreen(
                         .fillMaxWidth()
                         .heightIn(min = 48.dp)
                 ) {
-                    Text("Select sex")
+                    Text("Seleccionar sexo")
                 }
                 DropdownMenu(
                     expanded = sexExpanded,
@@ -108,7 +108,7 @@ fun MetabolicProfileScreen(
                 ) {
                     sexOptions.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option) },
+                            text = { Text(if (option == "MALE") "Masculino" else "Femenino") },
                             onClick = {
                                 viewModel.onSexChanged(option)
                                 sexExpanded = false
@@ -125,7 +125,7 @@ fun MetabolicProfileScreen(
                     value = uiState.activityLevel,
                     onValueChange = { },
                     readOnly = true,
-                    label = { Text("Activity level") },
+                    label = { Text("Nivel de actividad") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -136,7 +136,7 @@ fun MetabolicProfileScreen(
                         .fillMaxWidth()
                         .heightIn(min = 48.dp)
                 ) {
-                    Text("Select activity level")
+                    Text("Seleccionar nivel de actividad")
                 }
                 DropdownMenu(
                     expanded = activityExpanded,
@@ -144,7 +144,17 @@ fun MetabolicProfileScreen(
                 ) {
                     activityLevelOptions.forEach { option ->
                         DropdownMenuItem(
-                            text = { Text(option) },
+                            text = {
+                                Text(
+                                    when (option) {
+                                        "SEDENTARY" -> "Sedentario"
+                                        "LIGHT" -> "Ligero"
+                                        "MODERATE" -> "Moderado"
+                                        "ACTIVE" -> "Activo"
+                                        else -> "Muy activo"
+                                    }
+                                )
+                            },
                             onClick = {
                                 viewModel.onActivityLevelChanged(option)
                                 activityExpanded = false
@@ -189,7 +199,7 @@ fun MetabolicProfileScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Save")
+                    Text("Guardar")
                 }
             }
         }

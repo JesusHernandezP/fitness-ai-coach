@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AIChatMessageResponseDto(
-    val reply: String
+    val response: String
 )

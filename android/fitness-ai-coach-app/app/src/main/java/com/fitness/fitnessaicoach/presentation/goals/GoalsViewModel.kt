@@ -83,15 +83,15 @@ class GoalsViewModel @Inject constructor(
         val targetCalories = currentState.targetCalories.toDoubleOrNull()
 
         if (goalType == null) {
-            _uiState.update { it.copy(errorMessage = "Goal type is required.") }
+            _uiState.update { it.copy(errorMessage = "El tipo de objetivo es obligatorio.") }
             return
         }
         if (currentState.targetWeight.isNotBlank() && (targetWeight == null || targetWeight <= 0.0)) {
-            _uiState.update { it.copy(errorMessage = "Target weight must be positive.") }
+            _uiState.update { it.copy(errorMessage = "El peso objetivo debe ser positivo.") }
             return
         }
         if (targetCalories == null || targetCalories <= 0.0) {
-            _uiState.update { it.copy(errorMessage = "Target calories must be positive.") }
+            _uiState.update { it.copy(errorMessage = "Las calorias objetivo deben ser positivas.") }
             return
         }
 
@@ -113,7 +113,7 @@ class GoalsViewModel @Inject constructor(
                             targetCalories = "",
                             isLoading = false,
                             errorMessage = null,
-                            successMessage = "Goal saved."
+                            successMessage = "Objetivo guardado."
                         )
                     }
                     loadGoals()

@@ -6,7 +6,7 @@ import com.fitness.fitnessaicoach.presentation.components.PlaceholderScreen
 @Composable
 fun WorkoutScreen() {
     PlaceholderScreen(
-        title = "Workout",
-        description = "Workout feature placeholder wired into the navigation graph."
+        title = "Entrenamiento",
+        description = "Seccion de entrenamiento en preparacion dentro de la navegacion."
     )
 }

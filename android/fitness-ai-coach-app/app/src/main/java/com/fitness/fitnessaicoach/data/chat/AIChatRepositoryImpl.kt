@@ -13,7 +13,7 @@ class AIChatRepositoryImpl @Inject constructor(
     override suspend fun sendMessage(message: String): AppResult<String> {
         return try {
             val response = aiChatApiService.sendMessage(AIChatMessageRequestDto(message = message))
-            AppResult.Success(response.reply)
+            AppResult.Success(response.response)
         } catch (throwable: Throwable) {
             AppResult.Error(
                 message = throwable.toErrorMessage("Unable to send message."),

@@ -19,14 +19,14 @@ fun ErrorView(
 ) {
     Column {
         Text(
-            text = "We couldn't load your daily log.",
+            text = "No se pudo cargar tu registro diario.",
             style = MaterialTheme.typography.titleLarge
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
-            text = message ?: "Please try again in a moment.",
+            text = message ?: "Intenta de nuevo en unos momentos.",
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -38,7 +38,7 @@ fun ErrorView(
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
         ) {
-            Text("Retry")
+            Text("Reintentar")
         }
     }
 }

@@ -18,6 +18,16 @@ interface DailyLogDto {
   userId: string;
 }
 
+interface DailyLogSummaryDto {
+  dailyLogId: string;
+  date: string;
+  totalMeals: number;
+  totalWorkoutSessions: number;
+  totalCaloriesConsumed: number;
+  totalCaloriesBurned: number;
+  totalSteps: number;
+}
+
 interface AICoachingResponseDto {
   analysis?: unknown;
   advice: string;
@@ -70,7 +80,7 @@ export interface SendChatMessageRequestDto {
 }
 
 export interface SendChatMessageResponseDto {
-  reply: string;
+  response: string;
 }
 
 export interface MetabolicProfileDto {
@@ -95,6 +105,7 @@ export class ApiService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = environment.apiBaseUrl;
   private readonly chatStorageKey = 'fitness-ai-coach.chat-history';
+  private readonly dietTypeStorageKeyPrefix = 'fitness-ai-coach.profile-diet-type';
 
   getWeightProgress(): Observable<BodyMetricsProgressDto[]> {
     return this.http.get<MaybeWrapped<BodyMetricsProgressDto[]>>(`${this.baseUrl}/body-metrics/progress`).pipe(
@@ -111,8 +122,18 @@ export class ApiService {
             weekStart: dailyLog.date,
             weekEnd: dailyLog.date,
             summary: this.toSummaryText(coaching.analysis),
-            recommendation: coaching.advice?.trim() || 'No recommendation available yet.'
+            recommendation: coaching.advice?.trim() || 'Aun no hay recomendacion disponible.'
           }))
+        )
+      )
+    );
+  }
+
+  getTodayActivitySummary(): Observable<DailyLogSummaryDto> {
+    return this.getTodayDailyLog().pipe(
+      switchMap((dailyLog) =>
+        this.http.get<MaybeWrapped<DailyLogSummaryDto>>(`${this.baseUrl}/daily-logs/${dailyLog.id}/summary`).pipe(
+          map((response) => this.unwrap(response))
         )
       )
     );
@@ -129,14 +150,14 @@ export class ApiService {
       createdAt: new Date().toISOString()
     };
 
-    return this.http.post<SendChatMessageResponseDto>(`${this.baseUrl}/ai-chat/message`, payload).pipe(
+    return this.http.post<SendChatMessageResponseDto>(`${this.baseUrl}/ai/chat`, payload).pipe(
       tap((response) => {
         const history = this.readChatHistory();
         history.push(
           userMessage,
           {
             role: 'ASSISTANT',
-            message: response.reply,
+            message: response.response,
             createdAt: new Date().toISOString()
           }
         );
@@ -159,6 +180,7 @@ export class ApiService {
       ),
       map(({ user, goals }) => {
         const currentGoal = goals.find((goal) => goal.userId === user.id) ?? null;
+        const storedDietType = this.readDietType(user.id);
 
         return {
           userId: user.id,
@@ -167,7 +189,7 @@ export class ApiService {
           weightKg: user.weightKg ?? null,
           sex: user.sex ?? null,
           activityLevel: user.activityLevel ?? null,
-          dietType: null,
+          dietType: storedDietType,
           goalType: currentGoal?.goalType ?? null,
           targetCalories: currentGoal?.targetCalories ?? null,
           targetProtein: currentGoal?.targetProtein ?? null,
@@ -181,12 +203,25 @@ export class ApiService {
   updateProfile(payload: MetabolicProfileDto): Observable<MetabolicProfileDto> {
     return this.getTodayDailyLog().pipe(
       switchMap((dailyLog) =>
+        forkJoin({
+          dailyLog: of(dailyLog),
+          goals: this.http.get<MaybeWrapped<GoalDto[]>>(`${this.baseUrl}/goals`).pipe(
+            map((response) => this.unwrap(response))
+          )
+        })
+      ),
+      switchMap(({ dailyLog, goals }) =>
         this.http.put<MaybeWrapped<UserDto>>(`${this.baseUrl}/users/${dailyLog.userId}`, {
           age: payload.age,
           heightCm: payload.heightCm,
+          weightKg: payload.weightKg,
           sex: payload.sex || null,
           activityLevel: payload.activityLevel || null
-        })
+        }).pipe(
+          map((response) => this.unwrap(response)),
+          tap((user) => this.writeDietType(user.id, payload.dietType || null)),
+          switchMap(() => this.syncGoal(goals, payload))
+        )
       ),
       switchMap(() => this.getProfile())
     );
@@ -216,10 +251,10 @@ export class ApiService {
     }
 
     if (analysis && typeof analysis === 'object') {
-      return 'Daily coaching context generated from your latest log.';
+      return 'Contexto diario generado a partir de tu ultimo registro.';
     }
 
-    return 'No analysis available yet.';
+    return 'Aun no hay analisis disponible.';
   }
 
   private readChatHistory(): AIChatMessageDto[] {
@@ -238,5 +273,47 @@ export class ApiService {
 
   private writeChatHistory(messages: AIChatMessageDto[]): void {
     localStorage.setItem(this.chatStorageKey, JSON.stringify(messages));
+  }
+
+  private syncGoal(goals: GoalDto[], payload: MetabolicProfileDto): Observable<unknown> {
+    const selectedGoalType = payload.goalType || null;
+    const latestGoal = goals[0] ?? null;
+
+    if (!selectedGoalType) {
+      return of(null);
+    }
+
+    const createGoal$ = this.http.post<MaybeWrapped<GoalDto>>(`${this.baseUrl}/goals`, {
+      goalType: selectedGoalType,
+      targetWeight: payload.weightKg
+    }).pipe(
+      map((response) => this.unwrap(response))
+    );
+
+    if (!latestGoal) {
+      return createGoal$;
+    }
+
+    return this.http.delete<MaybeWrapped<void>>(`${this.baseUrl}/goals/${latestGoal.id}`).pipe(
+      map((response) => this.unwrap(response)),
+      switchMap(() => createGoal$)
+    );
+  }
+
+  private readDietType(userId: string): MetabolicProfileDto['dietType'] {
+    const stored = localStorage.getItem(`${this.dietTypeStorageKeyPrefix}.${userId}`);
+    if (stored === 'STANDARD' || stored === 'KETO' || stored === 'VEGETARIAN') {
+      return stored;
+    }
+    return null;
+  }
+
+  private writeDietType(userId: string, dietType: MetabolicProfileDto['dietType'] | null): void {
+    const key = `${this.dietTypeStorageKeyPrefix}.${userId}`;
+    if (!dietType) {
+      localStorage.removeItem(key);
+      return;
+    }
+    localStorage.setItem(key, dietType);
   }
 }
