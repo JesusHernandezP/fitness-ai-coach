@@ -1,0 +1,2 @@
+ALTER TABLE daily_logs
+    ADD COLUMN IF NOT EXISTS weight_kg DOUBLE PRECISION;

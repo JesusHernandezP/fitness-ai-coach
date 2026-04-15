@@ -15,6 +15,7 @@ fun DailyLogDto.toDomain(): DailyLog = DailyLog(
     steps = steps,
     caloriesConsumed = caloriesConsumed,
     caloriesBurned = caloriesBurned,
+    weightKg = weightKg,
     userId = userId
 )
 

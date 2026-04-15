@@ -1,5 +1,16 @@
 package com.fitness.fitnessaicoach.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fitness.fitnessaicoach.domain.DailyLog;
 import com.fitness.fitnessaicoach.domain.User;
 import com.fitness.fitnessaicoach.dto.CalorieBalanceResponse;
@@ -13,17 +24,8 @@ import com.fitness.fitnessaicoach.repository.MealItemRepository;
 import com.fitness.fitnessaicoach.repository.MealRepository;
 import com.fitness.fitnessaicoach.repository.UserRepository;
 import com.fitness.fitnessaicoach.repository.WorkoutSessionRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -189,7 +191,33 @@ public class DailyLogService {
                 .steps(dailyLog.getSteps())
                 .caloriesConsumed(dailyLog.getCaloriesConsumed())
                 .caloriesBurned(dailyLog.getCaloriesBurned())
+                .weightKg(dailyLog.getWeightKg())
                 .userId(dailyLog.getUser() != null ? dailyLog.getUser().getId() : null)
                 .build();
+    }
+
+    @Transactional
+    public DailyLogResponse updateTodayWeight(String email, Double weightKg) {
+        Objects.requireNonNull(email, "email must not be null");
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        LocalDate today = LocalDate.now();
+
+        DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(user.getId(), today)
+                .orElseGet(() -> {
+                    DailyLog newLog = new DailyLog();
+                    newLog.setLogDate(today);
+                    newLog.setSteps(0);
+                    newLog.setCaloriesConsumed(0.0);
+                    newLog.setCaloriesBurned(0.0);
+                    newLog.setUser(user);
+                    return newLog;
+                });
+
+        dailyLog.setWeightKg(weightKg);
+
+        return toResponse(dailyLogRepository.save(dailyLog));
     }
 }

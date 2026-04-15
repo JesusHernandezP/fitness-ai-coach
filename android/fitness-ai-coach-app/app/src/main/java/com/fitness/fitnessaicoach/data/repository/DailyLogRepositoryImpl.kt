@@ -1,10 +1,11 @@
 package com.fitness.fitnessaicoach.data.repository
 
-import com.fitness.fitnessaicoach.core.extensions.toErrorMessage
 import com.fitness.fitnessaicoach.core.result.AppResult
+import com.fitness.fitnessaicoach.core.extensions.toErrorMessage
 import com.fitness.fitnessaicoach.data.local.datastore.TokenStorage
 import com.fitness.fitnessaicoach.data.remote.api.DailyLogApi
 import com.fitness.fitnessaicoach.data.remote.api.UserApi
+import com.fitness.fitnessaicoach.data.remote.dto.WeightUpdateRequestDto
 import com.fitness.fitnessaicoach.data.remote.mapper.toDomain
 import com.fitness.fitnessaicoach.data.remote.mapper.toRequestDto
 import com.fitness.fitnessaicoach.domain.model.DailyLog
@@ -32,6 +33,16 @@ class DailyLogRepositoryImpl @Inject constructor(
     override suspend fun saveDailyLog(dailyLog: DailyLog): DailyLog {
         val resolvedUserId = resolveUserId(dailyLog.userId)
         return dailyLogApi.saveDailyLog(dailyLog.toRequestDto(resolvedUserId)).data.toDomain()
+    }
+
+    override suspend fun updateTodayWeight(weightKg: Double): AppResult<DailyLog> {
+        return try {
+            val request = WeightUpdateRequestDto(weightKg = weightKg)
+            val response = dailyLogApi.updateTodayWeight(request)
+            AppResult.Success(response.data.toDomain())
+        } catch (throwable: Throwable) {
+            AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
+        }
     }
 
     private suspend fun resolveUserId(explicitUserId: String?): String {

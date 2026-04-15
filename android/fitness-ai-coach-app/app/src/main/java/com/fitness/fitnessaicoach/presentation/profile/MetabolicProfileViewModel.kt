@@ -13,6 +13,7 @@ import com.fitness.fitnessaicoach.domain.model.User
 import com.fitness.fitnessaicoach.domain.usecase.CreateGoalUseCase
 import com.fitness.fitnessaicoach.domain.usecase.GetCurrentUserUseCase
 import com.fitness.fitnessaicoach.domain.usecase.GetGoalsUseCase
+import com.fitness.fitnessaicoach.domain.usecase.UpdateTodayWeightUseCase
 import com.fitness.fitnessaicoach.domain.usecase.UpdateUserProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -28,6 +29,7 @@ data class MetabolicProfileUiState(
     val name: String = "",
     val email: String = "",
     val weightKg: Double? = null,
+    val weightKgInput: String = "",
     val age: String = "",
     val heightCm: String = "",
     val sex: String = "",
@@ -49,6 +51,7 @@ class MetabolicProfileViewModel @Inject constructor(
     private val updateUserProfileUseCase: UpdateUserProfileUseCase,
     private val getGoalsUseCase: GetGoalsUseCase,
     private val createGoalUseCase: CreateGoalUseCase,
+    private val updateTodayWeightUseCase: UpdateTodayWeightUseCase,
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
 
@@ -100,6 +103,10 @@ class MetabolicProfileViewModel @Inject constructor(
 
     fun onHeightChanged(value: String) {
         _uiState.update { it.copy(heightCm = value, errorMessage = null, successMessage = null) }
+    }
+
+    fun onWeightChanged(value: String) {
+        _uiState.update { it.copy(weightKgInput = value, errorMessage = null, successMessage = null) }
     }
 
     fun onSexChanged(value: String) {
@@ -167,13 +174,18 @@ class MetabolicProfileViewModel @Inject constructor(
                     }
                 }
                 is AppResult.Success -> {
-                    applyUser(userResult.data, successMessage = "Perfil guardado.")
+                    val newWeight = currentState.weightKgInput.toDoubleOrNull()
+                    val weightChanged = newWeight != null && newWeight != currentState.weightKg
+
+                    if (weightChanged) {
+                        updateTodayWeightUseCase(newWeight!!)
+                    }
 
                     if (currentState.goalType.isNotBlank()) {
                         val goalResult = createGoalUseCase(
                             Goal(
                                 goalType = GoalType.valueOf(currentState.goalType),
-                                targetWeight = currentState.weightKg,
+                                targetWeight = newWeight ?: currentState.weightKg,
                                 targetCalories = 0.0
                             )
                         )
@@ -185,10 +197,17 @@ class MetabolicProfileViewModel @Inject constructor(
                                     targetCalories = newGoal.targetCalories,
                                     targetProtein = newGoal.targetProtein,
                                     targetCarbs = newGoal.targetCarbs,
-                                    targetFat = newGoal.targetFat
+                                    targetFat = newGoal.targetFat,
+                                    isLoading = false,
+                                    errorMessage = null,
+                                    successMessage = "Perfil guardado."
                                 )
                             }
+                        } else {
+                            loadUserProfile()
                         }
+                    } else {
+                        loadUserProfile()
                     }
                 }
             }
@@ -202,6 +221,7 @@ class MetabolicProfileViewModel @Inject constructor(
                 name = user.name,
                 email = user.email,
                 weightKg = user.weightKg,
+                weightKgInput = user.weightKg?.toString().orEmpty(),
                 age = user.age?.toString().orEmpty(),
                 heightCm = user.heightCm?.toString().orEmpty(),
                 sex = user.sex.orEmpty(),

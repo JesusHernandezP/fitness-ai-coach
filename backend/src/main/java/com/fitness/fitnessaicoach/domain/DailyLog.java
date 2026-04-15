@@ -1,5 +1,8 @@
 package com.fitness.fitnessaicoach.domain;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,9 +13,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Entity
 @Table(
@@ -33,6 +33,7 @@ public class DailyLog {
     private Integer steps;
     private Double caloriesConsumed;
     private Double caloriesBurned;
+    private Double weightKg;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id", nullable = false)

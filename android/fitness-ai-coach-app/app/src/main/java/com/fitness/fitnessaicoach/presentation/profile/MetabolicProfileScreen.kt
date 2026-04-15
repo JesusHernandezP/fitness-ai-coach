@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.material3.ExperimentalMaterial3Api
 import com.fitness.fitnessaicoach.ui.theme.AccentYellow
 import com.fitness.fitnessaicoach.ui.theme.BackgroundBase
 import com.fitness.fitnessaicoach.ui.theme.CardSurface
@@ -46,6 +47,7 @@ import com.fitness.fitnessaicoach.ui.theme.OutlineColor
 import com.fitness.fitnessaicoach.ui.theme.TextLabel
 import com.fitness.fitnessaicoach.ui.theme.TextPrimary
 import com.fitness.fitnessaicoach.ui.theme.TextSecondary
+
 
 // ─── Option lists ────────────────────────────────────────────────────────────
 
@@ -165,12 +167,12 @@ private fun ProfileFormCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             OutlinedTextField(
-                value = uiState.weightKg?.toString().orEmpty(),
-                onValueChange = { },
+                value = uiState.weightKgInput,
+                onValueChange = viewModel::onWeightChanged,
                 label = { Text("Peso (kg)") },
                 modifier = Modifier.weight(1f),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true,
-                readOnly = true,
                 shape = RoundedCornerShape(14.dp),
                 colors = profileTextFieldColors()
             )
@@ -377,7 +379,7 @@ private fun SectionTitle(text: String) {
         color = AccentYellow
     )
 }
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ProfileDropdown(
     value: String,

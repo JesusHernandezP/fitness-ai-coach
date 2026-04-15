@@ -1,11 +1,11 @@
 package com.fitness.fitnessaicoach.dto;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -19,6 +19,8 @@ public class DailyLogRequest {
     private Double caloriesConsumed;
 
     private Double caloriesBurned;
+
+    private Double weightKg;
 
     @NotNull
     private UUID userId;

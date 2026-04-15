@@ -9,5 +9,6 @@ data class DailyLogDto(
     val steps: Int? = null,
     val caloriesConsumed: Double? = null,
     val caloriesBurned: Double? = null,
+    val weightKg: Double? = null,
     val userId: String? = null
 )
