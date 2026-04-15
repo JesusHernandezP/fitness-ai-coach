@@ -86,8 +86,11 @@ import { AuthService } from '../../core/auth/auth.service';
     }
 
     .login__logo {
-      width: min(100%, 320px);
+      height: 90px;
+      width: auto;
+      max-width: min(100%, 320px);
       justify-self: center;
+      object-fit: contain;
       filter: drop-shadow(0 24px 40px rgba(255, 224, 30, 0.12));
       margin-bottom: 8px;
     }

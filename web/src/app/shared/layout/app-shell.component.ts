@@ -73,10 +73,11 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
     }
 
     .shell__logo {
-      width: 52px;
-      height: 52px;
+      width: 56px;
+      height: 56px;
       object-fit: contain;
       filter: drop-shadow(0 10px 18px rgba(255, 224, 30, 0.18));
+      flex-shrink: 0;
     }
 
     .shell__header h1 {
