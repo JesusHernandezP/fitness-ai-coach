@@ -1,7 +1,7 @@
 package com.fitness.fitnessaicoach.presentation.auth
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -32,7 +31,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fitness.fitnessaicoach.R
 import com.fitness.fitnessaicoach.ui.theme.AccentYellow
 import com.fitness.fitnessaicoach.ui.theme.BackgroundBase
 import com.fitness.fitnessaicoach.ui.theme.CardSurface
@@ -216,20 +216,11 @@ fun LoginScreen(
 
 @Composable
 private fun LoginBrandMark() {
-    Box(
-        modifier = Modifier
-            .size(90.dp)
-            .clip(CircleShape)
-            .background(AccentYellow.copy(alpha = 0.14f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "FA",
-            color = AccentYellow,
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Black
-        )
-    }
+    Image(
+        painter = painterResource(id = R.drawable.logo_fitness_ai_coach),
+        contentDescription = "Fitness AI Coach",
+        modifier = Modifier.size(90.dp)
+    )
 }
 
 @Composable
