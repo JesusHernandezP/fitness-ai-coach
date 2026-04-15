@@ -1,3 +1,24 @@
+:root {
+  /* Typography scale */
+  --font-size-page-title: 2rem;
+  --font-size-section-title: 1.375rem;
+  --font-size-card-title: 1.125rem;
+  --font-size-body: 0.9375rem;
+  --font-size-label: 0.8125rem;
+
+  /* Font weights */
+  --font-weight-semibold: 600;
+
+  /* Line heights */
+  --line-height-base: 1.5;
+  --line-height-relaxed: 1.6;
+
+  /* Spacing */
+  --spacing-card: 24px;
+  --spacing-between-cards: 24px;
+  --spacing-section: 32px;
+}
+
 html, body {
   margin: 0;
   min-height: 100%;
@@ -5,6 +26,8 @@ html, body {
 
 body {
   background: #eef4f1;
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-base);
 }
 
 * {

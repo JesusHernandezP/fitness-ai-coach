@@ -149,19 +149,19 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
       .profile {
         display: grid;
         grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
-        gap: 24px;
+        gap: var(--spacing-between-cards);
       }
 
       .profile__card {
         background: #1e1e1e;
         border: 1px solid #2a2a2a;
         border-radius: 20px;
-        padding: 32px;
+        padding: var(--spacing-card);
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
       }
 
       .profile__card--main {
-        padding: 32px;
+        padding: var(--spacing-card);
       }
 
       .profile__header {
@@ -169,7 +169,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         justify-content: space-between;
         gap: 16px;
         align-items: start;
-        margin-bottom: 32px;
+        margin-bottom: var(--spacing-section);
       }
 
       .profile__summary-header {
@@ -180,6 +180,9 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
       .profile__card h3 {
         margin: 6px 0 0;
         color: #ffffff;
+        font-size: var(--font-size-section-title);
+        font-weight: var(--font-weight-semibold);
+        line-height: 1.4;
       }
 
       .profile__eyebrow {
@@ -187,7 +190,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         color: #ffe01e;
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        font-size: 0.75rem;
+        font-size: var(--font-size-label);
         font-weight: 700;
       }
 
@@ -195,12 +198,13 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         max-width: 24rem;
         margin: 0;
         color: #a0a0a0;
-        line-height: 1.5;
+        line-height: var(--line-height-base);
+        font-size: var(--font-size-body);
       }
 
       .profile__form {
         display: grid;
-        gap: 24px;
+        gap: var(--spacing-section);
       }
 
       .profile__section {
@@ -211,8 +215,8 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
 
       .profile__section-title {
         color: #ffffff;
-        font-size: 1.1rem;
-        font-weight: 700;
+        font-size: var(--font-size-card-title);
+        font-weight: var(--font-weight-semibold);
         margin-bottom: 16px;
         padding-bottom: 8px;
         border-bottom: 2px solid #ffe01e;
@@ -230,7 +234,8 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         display: grid;
         gap: 8px;
         color: #d4d4d4;
-        font-weight: 600;
+        font-weight: var(--font-weight-semibold);
+        font-size: var(--font-size-body);
       }
 
       .profile__field--wide,
@@ -249,6 +254,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         font: inherit;
         padding: 0 16px;
         outline: none;
+        font-size: var(--font-size-body);
       }
 
       .profile__form input:focus,
@@ -271,6 +277,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         align-items: center;
         justify-content: center;
         gap: 10px;
+        font-size: var(--font-size-body);
       }
 
       .profile__button-content {
@@ -290,7 +297,8 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
 
       .profile__message {
         margin: 0;
-        line-height: 1.5;
+        line-height: var(--line-height-base);
+        font-size: var(--font-size-body);
       }
 
       .profile__message--error {
@@ -311,7 +319,8 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
       .profile__summary-copy {
         margin: 12px 0 0;
         color: #a0a0a0;
-        line-height: 1.5;
+        line-height: var(--line-height-base);
+        font-size: var(--font-size-body);
       }
 
       .profile__targets div {
@@ -325,7 +334,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
 
       .profile__targets span {
         color: #a0a0a0;
-        font-size: 0.9rem;
+        font-size: var(--font-size-label);
       }
 
       .profile__targets strong {
@@ -341,7 +350,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
 
       @media (max-width: 700px) {
         .profile__card {
-          padding: 24px;
+          padding: var(--spacing-card);
         }
 
         .profile__section-grid {

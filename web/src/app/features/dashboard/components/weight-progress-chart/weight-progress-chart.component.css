@@ -52,7 +52,7 @@
   place-items: center;
   border-radius: 16px;
   text-align: center;
-  padding: 32px 24px;
+  padding: var(--spacing-section) var(--spacing-card);
 }
 
 .weight-progress-chart__state--error {
@@ -77,14 +77,15 @@
 
 .weight-progress-chart__title {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
   color: #ffffff;
+  line-height: 1.4;
 }
 
 .weight-progress-chart__subtitle {
   margin: 4px 0 0;
-  font-size: 0.85rem;
+  font-size: var(--font-size-body);
   color: #a0a0a0;
-  line-height: 1.4;
+  line-height: var(--line-height-base);
 }

@@ -53,7 +53,7 @@
   min-height: 180px;
   border-radius: 16px;
   text-align: center;
-  padding: 24px;
+  padding: var(--spacing-card);
 }
 
 .activity-overview__state--error {
@@ -76,16 +76,17 @@
 
 .activity-overview__title {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
   color: #ffffff;
+  line-height: 1.4;
 }
 
 .activity-overview__subtitle {
   margin: 4px 0 0;
-  font-size: 0.85rem;
+  font-size: var(--font-size-body);
   color: #a0a0a0;
-  line-height: 1.4;
+  line-height: var(--line-height-base);
 }
 
 .activity-overview__grid {
@@ -104,11 +105,11 @@
 }
 
 .activity-overview__label {
-  font-size: 0.85rem;
+  font-size: var(--font-size-label);
   color: #a0a0a0;
 }
 
 .activity-overview__value {
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
 }

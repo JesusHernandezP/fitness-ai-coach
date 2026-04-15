@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,6 +42,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fitness.fitnessaicoach.ui.theme.AccentYellow
+import com.fitness.fitnessaicoach.ui.theme.BackgroundBase
+import com.fitness.fitnessaicoach.ui.theme.CardSurface
+import com.fitness.fitnessaicoach.ui.theme.CardSurfaceVariant
+import com.fitness.fitnessaicoach.ui.theme.ErrorRed
+import com.fitness.fitnessaicoach.ui.theme.OutlineColor
+import com.fitness.fitnessaicoach.ui.theme.TextSecondary
+import com.fitness.fitnessaicoach.ui.theme.TextPrimary
 
 @Composable
 fun LoginScreen(
@@ -59,47 +68,62 @@ fun LoginScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .statusBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+            .statusBarsPadding(),
         contentAlignment = Alignment.Center
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp),
             shape = RoundedCornerShape(28.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f)
+                containerColor = CardSurface.copy(alpha = 0.92f)
             ),
-            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.75f)),
-            elevation = CardDefaults.cardElevation(defaultElevation = 12.dp)
+            border = BorderStroke(1.dp, OutlineColor),
+            elevation = CardDefaults.cardElevation(defaultElevation = 20.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .padding(36.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
                 LoginBrandMark()
 
                 Text(
+                    text = "Fitness AI Coach",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AccentYellow,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+
+                Text(
                     text = "Bienvenido de vuelta",
-                    style = MaterialTheme.typography.headlineMedium,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Tu coach de bolsillo",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "Inicia sesion para continuar tu progreso, chat y coaching sincronizado.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    lineHeight = 42.sp,
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Tu coach de bolsillo",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = AccentYellow,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = "Inicia sesion para continuar tu progreso, chat y coaching sincronizado.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = TextSecondary,
+                    lineHeight = 24.sp,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
                     value = uiState.email,
@@ -133,8 +157,8 @@ fun LoginScreen(
                 uiState.errorMessage?.let { message ->
                     Text(
                         text = message,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
+                        color = ErrorRed,
+                        style = MaterialTheme.typography.bodyLarge,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -147,16 +171,25 @@ fun LoginScreen(
                         .heightIn(min = 54.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
+                        containerColor = AccentYellow,
+                        contentColor = BackgroundBase
                     )
                 ) {
                     if (uiState.isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(vertical = 2.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = BackgroundBase
+                            )
+                            Text(
+                                "Iniciando sesion...",
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     } else {
                         Text("Entrar", fontWeight = FontWeight.Bold)
                     }
@@ -169,9 +202,9 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .heightIn(min = 54.dp),
                     shape = RoundedCornerShape(16.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    border = BorderStroke(1.dp, OutlineColor),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onSurface
+                        contentColor = TextPrimary
                     )
                 ) {
                     Text("Crear cuenta", fontWeight = FontWeight.SemiBold)
@@ -187,13 +220,13 @@ private fun LoginBrandMark() {
         modifier = Modifier
             .size(90.dp)
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f)),
+            .background(AccentYellow.copy(alpha = 0.14f)),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "FA",
-            color = MaterialTheme.colorScheme.primary,
-            fontSize = 28.sp,
+            color = AccentYellow,
+            fontSize = 32.sp,
             fontWeight = FontWeight.Black
         )
     }
@@ -201,15 +234,15 @@ private fun LoginBrandMark() {
 
 @Composable
 private fun loginTextFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedContainerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.55f),
-    unfocusedContainerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.55f),
-    disabledContainerColor = MaterialTheme.colorScheme.background.copy(alpha = 0.4f),
-    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-    disabledTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    focusedBorderColor = MaterialTheme.colorScheme.primary,
-    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-    focusedLabelColor = MaterialTheme.colorScheme.primary,
-    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    cursorColor = MaterialTheme.colorScheme.primary
+    focusedContainerColor = CardSurfaceVariant,
+    unfocusedContainerColor = CardSurfaceVariant,
+    disabledContainerColor = CardSurfaceVariant.copy(alpha = 0.7f),
+    focusedTextColor = TextPrimary,
+    unfocusedTextColor = TextPrimary,
+    disabledTextColor = TextSecondary,
+    focusedBorderColor = AccentYellow,
+    unfocusedBorderColor = OutlineColor,
+    focusedLabelColor = TextSecondary,
+    unfocusedLabelColor = TextSecondary,
+    cursorColor = AccentYellow
 )

@@ -82,7 +82,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         min-height: 100vh;
         display: grid;
         place-items: center;
-        padding: 32px;
+        padding: var(--spacing-section);
       }
 
       .login__card {
@@ -91,9 +91,9 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         border-radius: 28px;
         box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
         width: min(520px, 92vw);
-        padding: 36px;
+        padding: var(--spacing-section);
         display: grid;
-        gap: 24px;
+        gap: var(--spacing-section);
       }
 
       .login__header {
@@ -117,14 +117,15 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         color: #ffe01e;
         text-transform: uppercase;
         letter-spacing: 0.16em;
-        font-size: 0.78rem;
+        font-size: var(--font-size-label);
         font-weight: 700;
       }
 
       h1 {
         margin: 0;
-        font-size: 2.6rem;
-        line-height: 1;
+        font-size: var(--font-size-page-title);
+        font-weight: var(--font-weight-semibold);
+        line-height: 1.4;
       }
 
       .login__slogan {
@@ -137,8 +138,8 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
       .login__copy {
         margin: 0;
         color: #a0a0a0;
-        line-height: 1.6;
-        font-size: 1rem;
+        line-height: var(--line-height-relaxed);
+        font-size: var(--font-size-body);
       }
 
       .login__form {
@@ -150,7 +151,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
         display: grid;
         gap: 8px;
         color: #a0a0a0;
-        font-size: 0.95rem;
+        font-size: var(--font-size-body);
       }
 
       input {
@@ -203,6 +204,7 @@ import { SpinnerComponent } from '../../shared/components/spinner/spinner.compon
       .login__error {
         margin: 0;
         color: #ef4444;
+        font-size: var(--font-size-body);
       }
 
       @media (max-width: 600px) {

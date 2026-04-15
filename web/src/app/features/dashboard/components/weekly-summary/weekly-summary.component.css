@@ -68,7 +68,7 @@
   place-items: center;
   border-radius: 16px;
   text-align: center;
-  padding: 32px 24px;
+  padding: var(--spacing-section) var(--spacing-card);
 }
 
 .weekly-summary__state--error {
@@ -93,23 +93,24 @@
 
 .weekly-summary__title {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: var(--font-size-card-title);
+  font-weight: var(--font-weight-semibold);
   color: #ffffff;
+  line-height: 1.4;
 }
 
 .weekly-summary__subtitle {
   margin: 4px 0 0;
-  font-size: 0.85rem;
+  font-size: var(--font-size-body);
   color: #a0a0a0;
-  line-height: 1.4;
+  line-height: var(--line-height-base);
 }
 
 .weekly-summary__range {
   margin: 0;
   color: #ffe01e;
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
 }
 
 .weekly-summary__section {
@@ -119,12 +120,13 @@
 
 .weekly-summary__section h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: var(--font-size-card-title);
   color: #ffffff;
 }
 
 .weekly-summary__section p {
   margin: 0;
   color: #a0a0a0;
-  line-height: 1.6;
+  line-height: var(--line-height-relaxed);
+  font-size: var(--font-size-body);
 }

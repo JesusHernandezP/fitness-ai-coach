@@ -82,7 +82,9 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 
     .shell__header h1 {
       margin: 4px 0 0;
-      font-size: 2rem;
+      font-size: var(--font-size-page-title);
+      font-weight: var(--font-weight-semibold);
+      line-height: 1.4;
     }
 
     .shell__eyebrow {
@@ -90,7 +92,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
       color: #ffe01e;
       text-transform: uppercase;
       letter-spacing: 0.12em;
-      font-size: 0.75rem;
+      font-size: var(--font-size-label);
       font-weight: 700;
     }
 
@@ -114,7 +116,8 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
       border-radius: 12px;
       color: #ffffff;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-body);
     }
 
     .shell__nav a.is-active,
@@ -124,7 +127,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
     }
 
     .shell__content {
-      padding: 32px;
+      padding: var(--spacing-section);
     }
 
     @media (max-width: 900px) {

@@ -1,8 +1,11 @@
 package com.fitness.fitnessaicoach.presentation.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,14 +14,20 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,6 +37,12 @@ import com.fitness.fitnessaicoach.core.result.AppResult
 import com.fitness.fitnessaicoach.presentation.home.components.DailyLogSummary
 import com.fitness.fitnessaicoach.presentation.home.components.ErrorView
 import com.fitness.fitnessaicoach.presentation.home.components.LoadingView
+import com.fitness.fitnessaicoach.ui.theme.AccentYellow
+import com.fitness.fitnessaicoach.ui.theme.CardSurface
+import com.fitness.fitnessaicoach.ui.theme.OutlineColor
+import com.fitness.fitnessaicoach.ui.theme.OutlineStrong
+import com.fitness.fitnessaicoach.ui.theme.TextPrimary
+import com.fitness.fitnessaicoach.ui.theme.TextSecondary
 
 @Composable
 fun HomeScreen(
@@ -50,76 +65,126 @@ fun HomeScreen(
                 .padding(innerPadding)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Button(
-                onClick = onOpenProfile,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp)
+            // Navigation Cards Row 1
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                Text("Perfil")
+                NavigationCard(
+                    onClick = onOpenProfile,
+                    title = "Perfil",
+                    modifier = Modifier.weight(1f)
+                )
+                NavigationCard(
+                    onClick = onOpenBodyMetrics,
+                    title = "Medidas corporales",
+                    modifier = Modifier.weight(1f)
+                )
             }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onOpenBodyMetrics,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp)
-            ) {
-                Text("Medidas corporales")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onOpenGoals,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp)
-            ) {
-                Text("Objetivos")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onOpenAIChat,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 48.dp)
-            ) {
-                Text("Chat con el coach AI")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
 
+            // Navigation Cards Row 2
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                NavigationCard(
+                    onClick = onOpenGoals,
+                    title = "Objetivos",
+                    modifier = Modifier.weight(1f)
+                )
+                NavigationCard(
+                    onClick = onOpenAIChat,
+                    title = "Chat con el coach AI",
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            // Daily Log Card
             when (val state = dailyLogState) {
                 AppResult.Loading -> {
-                    LoadingView()
+                    LoadingCard { LoadingView() }
                 }
 
                 is AppResult.Error -> {
-                    ErrorView(
-                        message = state.message,
-                        onRetry = { viewModel.loadTodayDailyLog() }
-                    )
+                    LoadingCard {
+                        ErrorView(
+                            message = state.message,
+                            onRetry = { viewModel.loadTodayDailyLog() }
+                        )
+                    }
                 }
 
                 is AppResult.Success -> {
-                    DailyLogSummary(
-                        log = state.data,
-                        onSaveClick = { updatedLog -> viewModel.saveDailyLog(updatedLog) }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = CardSurface
+                        ),
+                        border = BorderStroke(1.dp, OutlineColor),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "Registro diario",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = TextPrimary
+                            )
+                            DailyLogSummary(
+                                log = state.data,
+                                onSaveClick = { updatedLog -> viewModel.saveDailyLog(updatedLog) }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // AI Coaching Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = CardSurface
+                ),
+                border = BorderStroke(2.dp, OutlineStrong),
+                elevation = CardDefaults.cardElevation(defaultElevation = 10.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
                     Text(
                         text = "Coach AI",
-                        style = MaterialTheme.typography.titleLarge
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = TextPrimary
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
+
                     when (val coachingState = aiCoachingState) {
                         AppResult.Loading -> {
-                            Column {
-                                CircularProgressIndicator()
-                                Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(
+                                    color = AccentYellow,
+                                    strokeWidth = 2.dp
+                                )
                                 Text(
                                     text = "Generando recomendacion...",
-                                    style = MaterialTheme.typography.bodyMedium
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = TextSecondary
                                 )
                             }
                         }
@@ -127,7 +192,8 @@ fun HomeScreen(
                         is AppResult.Error -> {
                             Text(
                                 text = "Recomendacion de AI no disponible",
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = TextSecondary
                             )
                         }
 
@@ -135,15 +201,16 @@ fun HomeScreen(
                             if (coachingState.data.analysis.isNotBlank()) {
                                 Text(
                                     text = coachingState.data.analysis,
-                                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 22.sp),
+                                    color = TextSecondary,
                                     textAlign = TextAlign.Start,
                                     modifier = Modifier.fillMaxWidth()
                                 )
-                                Spacer(modifier = Modifier.height(16.dp))
                             }
                             Text(
                                 text = coachingState.data.advice,
                                 style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+                                color = TextPrimary,
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -151,6 +218,66 @@ fun HomeScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun NavigationCard(
+    onClick: () -> Unit,
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.heightIn(min = 100.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = CardSurface
+        ),
+        border = BorderStroke(1.dp, OutlineColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        onClick = onClick
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingCard(content: @Composable () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = CardSurface
+        ),
+        border = BorderStroke(1.dp, OutlineColor),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = "Cargando...",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = TextPrimary
+            )
+            content()
         }
     }
 }
