@@ -27,7 +27,7 @@ class AuthTokenInterceptor @Inject constructor(
     private companion object {
         private val UNAUTHENTICATED_PATHS = setOf(
             "/api/auth/login",
-            "/api/users"
+            "/api/auth/register"
         )
     }
 }

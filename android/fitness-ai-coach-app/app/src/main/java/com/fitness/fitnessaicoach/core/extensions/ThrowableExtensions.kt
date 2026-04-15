@@ -21,7 +21,7 @@ fun Throwable.toErrorMessage(defaultMessage: String = "Unexpected error"): Strin
             }.getOrNull()
 
             when (code()) {
-                401 -> "Invalid email or password."
+                401 -> backendMessage ?: "Invalid email or password."
                 409 -> backendMessage ?: message()
                 else -> backendMessage ?: message()
             }.takeIf { it.isNotBlank() } ?: defaultMessage
