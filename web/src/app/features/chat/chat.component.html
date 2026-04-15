@@ -1,5 +1,5 @@
 <section class="chat">
-  <div class="chat__messages">
+  <div #messagesContainer class="chat__messages">
     @if (isLoadingHistory) {
       <div class="chat__state">Cargando historial del chat...</div>
     } @else if (errorMessage && messages.length === 0) {
@@ -12,7 +12,10 @@
           class="chat__bubble"
           [class.chat__bubble--user]="message.role === 'USER'"
           [class.chat__bubble--assistant]="message.role === 'ASSISTANT'">
-          <p class="chat__role">{{ message.role === 'USER' ? 'Tu' : 'Coach AI' }}</p>
+          <div class="chat__meta">
+            <p class="chat__role">{{ message.role === 'USER' ? 'Tu' : 'Coach AI' }}</p>
+            <time class="chat__timestamp">{{ formatMessageTimestamp(message.createdAt) }}</time>
+          </div>
           <p class="chat__text">{{ message.message }}</p>
         </article>
       }

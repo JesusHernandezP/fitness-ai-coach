@@ -5,22 +5,23 @@
 
 .chat {
   display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
   gap: 16px;
-  min-height: 420px;
+  min-height: calc(100vh - 180px);
+  max-height: calc(100vh - 180px);
 }
 
 .chat__messages {
-  min-height: 320px;
-  max-height: 420px;
   overflow-y: auto;
   display: grid;
   gap: 12px;
-  padding: 4px;
+  align-content: start;
+  padding: 4px 4px 8px;
   scrollbar-color: #333333 #121212;
 }
 
 .chat__state {
-  min-height: 320px;
+  min-height: 100%;
   display: grid;
   place-items: center;
   color: #a0a0a0;
@@ -43,6 +44,14 @@
   box-shadow: 0 18px 28px rgba(0, 0, 0, 0.18);
 }
 
+.chat__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
 .chat__bubble--assistant {
   justify-self: start;
   background: #1e1e1e;
@@ -58,12 +67,19 @@
 }
 
 .chat__role {
-  margin: 0 0 6px;
+  margin: 0;
   font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   opacity: 0.8;
+}
+
+.chat__timestamp {
+  color: #a0a0a0;
+  font-size: 0.78rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .chat__text {
@@ -77,6 +93,14 @@
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 12px;
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding: 12px;
+  border: 1px solid #2a2a2a;
+  border-radius: 20px;
+  background: rgba(11, 12, 16, 0.94);
+  backdrop-filter: blur(12px);
 }
 
 .chat__composer input {
@@ -124,6 +148,11 @@
 }
 
 @media (max-width: 700px) {
+  .chat {
+    min-height: calc(100vh - 210px);
+    max-height: calc(100vh - 210px);
+  }
+
   .chat__bubble {
     max-width: 90%;
   }
