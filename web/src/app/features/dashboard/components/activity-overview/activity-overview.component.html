@@ -1,34 +1,41 @@
 <div class="activity-overview">
   @if (isLoading) {
-    <div class="activity-overview__state">Cargando resumen de actividad...</div>
+  <div class="activity-overview__skeleton">
+    @for (i of [1, 2, 3, 4, 5]; track i) {
+    <div class="activity-overview__skeleton-item">
+      <div class="activity-overview__skeleton-label"></div>
+      <div class="activity-overview__skeleton-value"></div>
+    </div>
+    }
+  </div>
   } @else if (errorMessage) {
-    <div class="activity-overview__state activity-overview__state--error">
-      {{ errorMessage }}
-    </div>
+  <div class="activity-overview__state activity-overview__state--error">
+    {{ errorMessage }}
+  </div>
   } @else if (!overview) {
-    <div class="activity-overview__state">Sin datos aun.</div>
+  <div class="activity-overview__state">Sin datos aun.</div>
   } @else {
-    <div class="activity-overview__grid">
-      <div class="activity-overview__item">
-        <span class="activity-overview__label">Pasos</span>
-        <span class="activity-overview__value">{{ overview.totalSteps }}</span>
-      </div>
-      <div class="activity-overview__item">
-        <span class="activity-overview__label">Comidas</span>
-        <span class="activity-overview__value">{{ overview.totalMeals }}</span>
-      </div>
-      <div class="activity-overview__item">
-        <span class="activity-overview__label">Entrenos</span>
-        <span class="activity-overview__value">{{ overview.totalWorkoutSessions }}</span>
-      </div>
-      <div class="activity-overview__item">
-        <span class="activity-overview__label">Calorias consumidas</span>
-        <span class="activity-overview__value">{{ overview.totalCaloriesConsumed }}</span>
-      </div>
-      <div class="activity-overview__item">
-        <span class="activity-overview__label">Calorias quemadas</span>
-        <span class="activity-overview__value">{{ overview.totalCaloriesBurned }}</span>
-      </div>
+  <div class="activity-overview__grid">
+    <div class="activity-overview__item">
+      <span class="activity-overview__label">Pasos</span>
+      <span class="activity-overview__value">{{ overview.totalSteps }}</span>
     </div>
+    <div class="activity-overview__item">
+      <span class="activity-overview__label">Comidas</span>
+      <span class="activity-overview__value">{{ overview.totalMeals }}</span>
+    </div>
+    <div class="activity-overview__item">
+      <span class="activity-overview__label">Entrenos</span>
+      <span class="activity-overview__value">{{ overview.totalWorkoutSessions }}</span>
+    </div>
+    <div class="activity-overview__item">
+      <span class="activity-overview__label">Calorias consumidas</span>
+      <span class="activity-overview__value">{{ overview.totalCaloriesConsumed }}</span>
+    </div>
+    <div class="activity-overview__item">
+      <span class="activity-overview__label">Calorias quemadas</span>
+      <span class="activity-overview__value">{{ overview.totalCaloriesBurned }}</span>
+    </div>
+  </div>
   }
 </div>

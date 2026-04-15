@@ -1,25 +1,37 @@
 <div class="weekly-summary">
   @if (isLoading) {
-    <div class="weekly-summary__state">Cargando resumen diario de coaching...</div>
+  <div class="weekly-summary__skeleton">
+    <div class="weekly-summary__skeleton-range"></div>
+    <div class="weekly-summary__skeleton-section">
+      <div class="weekly-summary__skeleton-title"></div>
+      <div class="weekly-summary__skeleton-text"></div>
+      <div class="weekly-summary__skeleton-text weekly-summary__skeleton-text--short"></div>
+    </div>
+    <div class="weekly-summary__skeleton-section">
+      <div class="weekly-summary__skeleton-title"></div>
+      <div class="weekly-summary__skeleton-text"></div>
+      <div class="weekly-summary__skeleton-text weekly-summary__skeleton-text--short"></div>
+    </div>
+  </div>
   } @else if (errorMessage) {
-    <div class="weekly-summary__state weekly-summary__state--error">
-      {{ errorMessage }}
-    </div>
+  <div class="weekly-summary__state weekly-summary__state--error">
+    {{ errorMessage }}
+  </div>
   } @else if (!summaryData) {
-    <div class="weekly-summary__state">Aun no hay resumen disponible.</div>
+  <div class="weekly-summary__state">Aun no hay resumen disponible.</div>
   } @else {
-    @if (summaryLabel) {
-      <p class="weekly-summary__range">Ultimo registro: {{ summaryLabel }}</p>
-    }
+  @if (summaryLabel) {
+  <p class="weekly-summary__range">Ultimo registro: {{ summaryLabel }}</p>
+  }
 
-    <div class="weekly-summary__section">
-      <h3>Analisis</h3>
-      <p>{{ summaryData.summary }}</p>
-    </div>
+  <div class="weekly-summary__section">
+    <h3>Analisis</h3>
+    <p>{{ summaryData.summary }}</p>
+  </div>
 
-    <div class="weekly-summary__section">
-      <h3>Recomendacion</h3>
-      <p>{{ summaryData.recommendation }}</p>
-    </div>
+  <div class="weekly-summary__section">
+    <h3>Recomendacion</h3>
+    <p>{{ summaryData.recommendation }}</p>
+  </div>
   }
 </div>

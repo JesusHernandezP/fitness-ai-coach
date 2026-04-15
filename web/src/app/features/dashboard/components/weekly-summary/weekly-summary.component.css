@@ -8,6 +8,60 @@
   gap: 16px;
 }
 
+.weekly-summary__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 8px 0;
+}
+
+.weekly-summary__skeleton-range {
+  height: 18px;
+  width: 50%;
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.weekly-summary__skeleton-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.weekly-summary__skeleton-title {
+  height: 20px;
+  width: 35%;
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.weekly-summary__skeleton-text {
+  height: 14px;
+  width: 100%;
+  background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+.weekly-summary__skeleton-text--short {
+  width: 75%;
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
 .weekly-summary__state {
   min-height: 260px;
   display: grid;

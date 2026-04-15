@@ -1,15 +1,18 @@
 <div class="weight-progress-chart">
   @if (isLoading) {
-    <div class="weight-progress-chart__state">Cargando progreso de peso...</div>
+  <div class="weight-progress-chart__skeleton">
+    <div class="weight-progress-chart__skeleton-title"></div>
+    <div class="weight-progress-chart__skeleton-chart"></div>
+  </div>
   } @else if (errorMessage) {
-    <div class="weight-progress-chart__state weight-progress-chart__state--error">
-      {{ errorMessage }}
-    </div>
+  <div class="weight-progress-chart__state weight-progress-chart__state--error">
+    {{ errorMessage }}
+  </div>
   } @else if (dataPoints.length === 0) {
-    <div class="weight-progress-chart__state">Aun no hay datos de progreso de peso.</div>
+  <div class="weight-progress-chart__state">Aun no hay datos de progreso de peso.</div>
   } @else {
-    <div class="weight-progress-chart__canvas-wrapper">
-      <canvas #chartCanvas></canvas>
-    </div>
+  <div class="weight-progress-chart__canvas-wrapper">
+    <canvas #chartCanvas></canvas>
+  </div>
   }
 </div>
