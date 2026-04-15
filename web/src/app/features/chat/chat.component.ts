@@ -55,9 +55,15 @@ export class ChatComponent implements OnInit {
     this.scrollToBottom();
 
     this.apiService.sendChatMessage({ message }).subscribe({
-      next: () => {
+      next: (response) => {
+        const assistantMessage: ChatMessage = {
+          role: 'ASSISTANT',
+          message: response.response,
+          createdAt: new Date().toISOString(),
+        };
+        this.messages = [...this.messages, assistantMessage];
         this.isSending = false;
-        this.loadHistory(false);
+        this.scrollToBottom();
       },
       error: () => {
         this.messages = this.messages.filter(
