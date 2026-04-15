@@ -20,16 +20,7 @@ fun RootNavHost(
         modifier = modifier
     ) {
         composable(RootDestination.Dashboard.route) {
-            HomeScreen(
-                onOpenProfile = {
-                    navController.navigate(RootDestination.Profile.route)
-                },
-                onOpenBodyMetrics = { },
-                onOpenGoals = { },
-                onOpenAIChat = {
-                    navController.navigate(RootDestination.Chat.route)
-                }
-            )
+            HomeScreen()
         }
 
         composable(RootDestination.Chat.route) {
