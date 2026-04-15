@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fitness.fitnessaicoach.core.result.AppResult
 import com.fitness.fitnessaicoach.domain.usecase.LoginUseCase
+import dagger.Lazy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,7 @@ data class LoginUiState(
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginUseCase: LoginUseCase
+    private val loginUseCase: Lazy<LoginUseCase>
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
@@ -54,7 +55,12 @@ class LoginViewModel @Inject constructor(
                 state.copy(isLoading = true, errorMessage = null)
             }
 
-            when (val result = loginUseCase(currentState.email.trim(), currentState.password)) {
+            when (
+                val result = loginUseCase.get().invoke(
+                    currentState.email.trim(),
+                    currentState.password
+                )
+            ) {
                 AppResult.Loading -> Unit
 
                 is AppResult.Success -> {

@@ -6,6 +6,11 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
+val debugApiBaseUrl = "http://10.0.2.2:8080/api/"
+val releaseApiBaseUrlProvider = providers.gradleProperty("androidReleaseApiBaseUrl")
+    .orElse(providers.environmentVariable("ANDROID_RELEASE_API_BASE_URL"))
+    .orElse(debugApiBaseUrl)
+
 android {
     namespace = "com.fitness.fitnessaicoach"
     compileSdk = 36
@@ -18,17 +23,24 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        buildConfigField(
-            "String",
-            "API_BASE_URL",
-            "\"http://10.0.2.2:8080/api/\""
-        )
     }
 
     buildTypes {
+        debug {
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                "\"$debugApiBaseUrl\""
+            )
+        }
+
         release {
             isMinifyEnabled = false
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                "\"${releaseApiBaseUrlProvider.get()}\""
+            )
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

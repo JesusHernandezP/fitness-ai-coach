@@ -1,4 +1,4 @@
-CREATE TABLE chat_sessions (
+CREATE TABLE IF NOT EXISTS chat_sessions (
     id UUID NOT NULL,
     user_id UUID NOT NULL,
     created_at TIMESTAMP(6) WITHOUT TIME ZONE NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE chat_sessions (
     CONSTRAINT fk_chat_sessions_user FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE chat_messages (
+CREATE TABLE IF NOT EXISTS chat_messages (
     id UUID NOT NULL,
     session_id UUID NOT NULL,
     role VARCHAR(255) NOT NULL,
@@ -18,8 +18,8 @@ CREATE TABLE chat_messages (
     CONSTRAINT chat_messages_role_check CHECK (role IN ('USER', 'AI'))
 );
 
-CREATE INDEX idx_chat_sessions_user_last_activity
+CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_last_activity
     ON chat_sessions (user_id, last_activity_at DESC);
 
-CREATE INDEX idx_chat_messages_session_created_at
+CREATE INDEX IF NOT EXISTS idx_chat_messages_session_created_at
     ON chat_messages (session_id, created_at DESC);
