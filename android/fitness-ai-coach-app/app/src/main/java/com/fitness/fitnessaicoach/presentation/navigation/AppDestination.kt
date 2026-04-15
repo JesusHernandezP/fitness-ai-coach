@@ -2,6 +2,7 @@ package com.fitness.fitnessaicoach.presentation.navigation
 
 sealed class AppDestination(val route: String) {
     data object Login : AppDestination("login")
+    data object Register : AppDestination("register")
     data object Home : AppDestination("home")
     data object Profile : AppDestination("profile")
     data object BodyMetrics : AppDestination("bodyMetrics")

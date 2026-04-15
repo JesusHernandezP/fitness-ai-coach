@@ -5,6 +5,7 @@ import com.fitness.fitnessaicoach.core.result.AppResult
 import com.fitness.fitnessaicoach.data.local.datastore.TokenStorage
 import com.fitness.fitnessaicoach.data.remote.api.AuthApi
 import com.fitness.fitnessaicoach.data.remote.dto.LoginRequestDto
+import com.fitness.fitnessaicoach.data.remote.dto.RegisterRequestDto
 import com.fitness.fitnessaicoach.data.remote.mapper.toDomain
 import com.fitness.fitnessaicoach.domain.model.AuthToken
 import com.fitness.fitnessaicoach.domain.model.UserCredentials
@@ -27,6 +28,15 @@ class AuthRepositoryImpl @Inject constructor(
             )
             tokenStorage.saveToken(response.data.token)
             AppResult.Success(response.data.toDomain())
+        } catch (throwable: Throwable) {
+            AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
+        }
+    }
+
+    override suspend fun register(name: String, email: String, password: String): AppResult<Unit> {
+        return try {
+            authApi.register(RegisterRequestDto(name = name, email = email, password = password))
+            AppResult.Success(Unit)
         } catch (throwable: Throwable) {
             AppResult.Error(message = throwable.toErrorMessage(), throwable = throwable)
         }

@@ -48,22 +48,21 @@ import com.fitness.fitnessaicoach.ui.theme.CardSurface
 import com.fitness.fitnessaicoach.ui.theme.CardSurfaceVariant
 import com.fitness.fitnessaicoach.ui.theme.ErrorRed
 import com.fitness.fitnessaicoach.ui.theme.OutlineColor
-import com.fitness.fitnessaicoach.ui.theme.TextSecondary
 import com.fitness.fitnessaicoach.ui.theme.TextPrimary
+import com.fitness.fitnessaicoach.ui.theme.TextSecondary
 
 @Composable
-fun LoginScreen(
-    onLoginSuccess: () -> Unit,
-    onCreateAccount: () -> Unit = {},
-    successMessage: String? = null,
-    viewModel: LoginViewModel = hiltViewModel()
+fun RegisterScreen(
+    onRegisterSuccess: () -> Unit,
+    onBack: () -> Unit,
+    viewModel: RegisterViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(uiState.isLoginSuccessful) {
-        if (uiState.isLoginSuccessful) {
-            onLoginSuccess()
-            viewModel.onLoginSuccessHandled()
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            viewModel.onSuccessHandled()
+            onRegisterSuccess()
         }
     }
 
@@ -91,7 +90,11 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                LoginBrandMark()
+                Image(
+                    painter = painterResource(id = R.drawable.logo_fitness_ai_coach),
+                    contentDescription = "Fitness AI Coach",
+                    modifier = Modifier.size(90.dp)
+                )
 
                 Text(
                     text = "Fitness AI Coach",
@@ -102,7 +105,7 @@ fun LoginScreen(
                 )
 
                 Text(
-                    text = "Bienvenido de vuelta",
+                    text = "Crear cuenta",
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.SemiBold,
                     lineHeight = 42.sp,
@@ -110,22 +113,27 @@ fun LoginScreen(
                 )
 
                 Text(
-                    text = "Tu coach de bolsillo",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = AccentYellow,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "Inicia sesion para continuar tu progreso, chat y coaching sincronizado.",
+                    text = "Empieza tu progreso hoy.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = TextSecondary,
-                    lineHeight = 24.sp,
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedTextField(
+                    value = uiState.name,
+                    onValueChange = viewModel::onNameChanged,
+                    label = { Text("Nombre") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Next
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = registerTextFieldColors()
+                )
 
                 OutlinedTextField(
                     value = uiState.email,
@@ -138,7 +146,7 @@ fun LoginScreen(
                         imeAction = ImeAction.Next
                     ),
                     shape = RoundedCornerShape(16.dp),
-                    colors = loginTextFieldColors()
+                    colors = registerTextFieldColors()
                 )
 
                 OutlinedTextField(
@@ -153,7 +161,7 @@ fun LoginScreen(
                         imeAction = ImeAction.Done
                     ),
                     shape = RoundedCornerShape(16.dp),
-                    colors = loginTextFieldColors()
+                    colors = registerTextFieldColors()
                 )
 
                 uiState.errorMessage?.let { message ->
@@ -165,17 +173,8 @@ fun LoginScreen(
                     )
                 }
 
-                successMessage?.let { message ->
-                    Text(
-                        text = message,
-                        color = AccentYellow,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-
                 Button(
-                    onClick = viewModel::login,
+                    onClick = viewModel::register,
                     enabled = !uiState.isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -196,18 +195,15 @@ fun LoginScreen(
                                 strokeWidth = 2.dp,
                                 color = BackgroundBase
                             )
-                            Text(
-                                "Iniciando sesion...",
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text("Creando cuenta...", fontWeight = FontWeight.Bold)
                         }
                     } else {
-                        Text("Entrar", fontWeight = FontWeight.Bold)
+                        Text("Crear cuenta", fontWeight = FontWeight.Bold)
                     }
                 }
 
                 OutlinedButton(
-                    onClick = onCreateAccount,
+                    onClick = onBack,
                     enabled = !uiState.isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -218,7 +214,7 @@ fun LoginScreen(
                         contentColor = TextPrimary
                     )
                 ) {
-                    Text("Crear cuenta", fontWeight = FontWeight.SemiBold)
+                    Text("Ya tengo cuenta", fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -226,16 +222,7 @@ fun LoginScreen(
 }
 
 @Composable
-private fun LoginBrandMark() {
-    Image(
-        painter = painterResource(id = R.drawable.logo_fitness_ai_coach),
-        contentDescription = "Fitness AI Coach",
-        modifier = Modifier.size(120.dp)
-    )
-}
-
-@Composable
-private fun loginTextFieldColors() = OutlinedTextFieldDefaults.colors(
+private fun registerTextFieldColors() = OutlinedTextFieldDefaults.colors(
     focusedContainerColor = CardSurfaceVariant,
     unfocusedContainerColor = CardSurfaceVariant,
     disabledContainerColor = CardSurfaceVariant.copy(alpha = 0.7f),
