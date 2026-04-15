@@ -110,7 +110,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
     }
 
     .shell__nav a {
-      padding: 12px 14px;
+      padding: 8px 16px;
       border-radius: 12px;
       color: #ffffff;
       text-decoration: none;
@@ -124,7 +124,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
     }
 
     .shell__content {
-      padding: 24px;
+      padding: 32px;
     }
 
     @media (max-width: 900px) {

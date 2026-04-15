@@ -21,9 +21,9 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid #1f1f1f;
   border-radius: 16px;
-  padding: 12px 14px;
+  padding: 16px;
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .activity-overview__label {
