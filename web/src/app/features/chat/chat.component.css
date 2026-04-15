@@ -14,7 +14,7 @@
 .chat__messages {
   overflow-y: auto;
   display: grid;
-  gap: 8px;
+  gap: 16px;
   align-content: start;
   padding: 8px;
   scrollbar-color: #333333 #121212;
@@ -38,10 +38,11 @@
 }
 
 .chat__bubble {
-  max-width: 78%;
-  padding: 16px;
+  max-width: 70%;
+  padding: 12px 16px;
   border-radius: 18px;
-  box-shadow: 0 18px 28px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  line-height: 1.6;
 }
 
 .chat__meta {
@@ -55,14 +56,16 @@
 .chat__bubble--assistant {
   justify-self: start;
   background: #1e1e1e;
-  border: 1px solid #2a2a2a;
-  border-left: 4px solid #ffe01e;
+  border: 1px solid #3a3520;
+  border-left: 3px solid #ffe01e;
+  border-radius: 18px 18px 18px 6px;
 }
 
 .chat__bubble--user {
   justify-self: end;
-  background: #17191f;
-  border: 1px solid #2a2a2a;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 18px 18px 6px 18px;
   color: #ffffff;
 }
 
@@ -84,7 +87,7 @@
 
 .chat__text {
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.65;
   white-space: pre-wrap;
   color: #ffffff;
 }
@@ -154,7 +157,7 @@
   }
 
   .chat__bubble {
-    max-width: 90%;
+    max-width: 85%;
   }
 
   .chat__composer {
