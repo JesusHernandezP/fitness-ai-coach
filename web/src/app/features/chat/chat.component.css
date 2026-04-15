@@ -24,17 +24,51 @@
   min-height: 100%;
   display: grid;
   place-items: center;
-  color: #a0a0a0;
-  border: 1px dashed #2a2a2a;
   border-radius: 16px;
-  background: #121212;
   text-align: center;
-  padding: 24px;
+  padding: 40px 24px;
 }
 
-.chat__state--error,
-.chat__inline-error {
+.chat__state--loading {
+  gap: 16px;
+  color: #a0a0a0;
+}
+
+.chat__state--error {
+  gap: 12px;
   color: #ef4444;
+  border: 1px dashed #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.chat__state--empty {
+  gap: 12px;
+  color: #a0a0a0;
+  border: 1px dashed #2a2a2a;
+  background: #121212;
+}
+
+.chat__icon {
+  width: 64px;
+  height: 64px;
+  opacity: 0.5;
+}
+
+.chat__state-title,
+.chat__state-text {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.chat__state-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.chat__state-text {
+  font-size: 0.95rem;
+  color: #a0a0a0;
 }
 
 .chat__bubble {

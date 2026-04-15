@@ -50,14 +50,41 @@
   min-height: 260px;
   display: grid;
   place-items: center;
-  color: #49645d;
-  border: 1px dashed #c9dbd4;
   border-radius: 16px;
-  background: #f8fbfa;
   text-align: center;
-  padding: 24px;
+  padding: 32px 24px;
 }
 
 .weight-progress-chart__state--error {
-  color: #a33d3d;
+  color: #ef4444;
+  border: 1px dashed #ef4444;
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.weight-progress-chart__state--empty {
+  color: #a0a0a0;
+  border: 1px dashed #2a2a2a;
+  background: #121212;
+  gap: 8px;
+}
+
+.weight-progress-chart__icon {
+  width: 48px;
+  height: 48px;
+  opacity: 0.6;
+  margin-bottom: 8px;
+}
+
+.weight-progress-chart__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.weight-progress-chart__subtitle {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #a0a0a0;
+  line-height: 1.4;
 }

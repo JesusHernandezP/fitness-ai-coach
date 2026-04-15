@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AIChatMessageDto, ApiService } from '../../core/api/api.service';
+import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 
 type ChatMessage = {
   role: 'USER' | 'ASSISTANT';
@@ -12,9 +13,9 @@ type ChatMessage = {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, SpinnerComponent],
   templateUrl: './chat.component.html',
-  styleUrl: './chat.component.css'
+  styleUrl: './chat.component.css',
 })
 export class ChatComponent implements OnInit {
   private readonly apiService = inject(ApiService);
@@ -46,7 +47,7 @@ export class ChatComponent implements OnInit {
     const optimisticUserMessage: ChatMessage = {
       role: 'USER',
       message,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     this.messages = [...this.messages, optimisticUserMessage];
@@ -59,10 +60,12 @@ export class ChatComponent implements OnInit {
         this.loadHistory(false);
       },
       error: () => {
-        this.messages = this.messages.filter((chatMessage) => chatMessage !== optimisticUserMessage);
+        this.messages = this.messages.filter(
+          (chatMessage) => chatMessage !== optimisticUserMessage,
+        );
         this.errorMessage = 'No se pudo enviar tu mensaje en este momento.';
         this.isSending = false;
-      }
+      },
     });
   }
 
@@ -78,7 +81,7 @@ export class ChatComponent implements OnInit {
 
     const time = new Intl.DateTimeFormat('es-ES', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     }).format(date);
 
     const now = new Date();
@@ -93,7 +96,7 @@ export class ChatComponent implements OnInit {
 
     const day = new Intl.DateTimeFormat('es-ES', {
       day: '2-digit',
-      month: '2-digit'
+      month: '2-digit',
     }).format(date);
 
     return `${time} · ${day}`;
@@ -103,7 +106,7 @@ export class ChatComponent implements OnInit {
     return {
       role: message.role,
       message: message.message,
-      createdAt: message.createdAt ?? new Date().toISOString()
+      createdAt: message.createdAt ?? new Date().toISOString(),
     };
   }
 
@@ -122,7 +125,7 @@ export class ChatComponent implements OnInit {
       error: () => {
         this.errorMessage = 'No se pudo cargar el historial del chat en este momento.';
         this.isLoadingHistory = false;
-      }
+      },
     });
   }
 

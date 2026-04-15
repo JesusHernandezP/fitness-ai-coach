@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ApiService, MetabolicProfileDto } from '../../core/api/api.service';
+import { SpinnerComponent } from '../../shared/components/spinner/spinner.component';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, SpinnerComponent],
   template: `
     <section class="profile">
       <article class="profile__card profile__card--main">
@@ -97,7 +98,14 @@ import { ApiService, MetabolicProfileDto } from '../../core/api/api.service';
 
           <div class="profile__actions">
             <button type="submit" [disabled]="isSaving || form.invalid">
-              {{ isSaving ? 'Guardando...' : 'Guardar perfil' }}
+              @if (isSaving) {
+                <span class="profile__button-content">
+                  <app-spinner size="small" />
+                  <span>Guardando...</span>
+                </span>
+              } @else {
+                Guardar perfil
+              }
             </button>
           </div>
         </form>
@@ -259,6 +267,16 @@ import { ApiService, MetabolicProfileDto } from '../../core/api/api.service';
         font-weight: 700;
         cursor: pointer;
         transition: transform 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .profile__button-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .profile__actions button:hover:not(:disabled) {

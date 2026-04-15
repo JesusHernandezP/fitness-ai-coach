@@ -6,10 +6,22 @@
   </div>
   } @else if (errorMessage) {
   <div class="weight-progress-chart__state weight-progress-chart__state--error">
+    <svg class="weight-progress-chart__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
     {{ errorMessage }}
   </div>
   } @else if (dataPoints.length === 0) {
-  <div class="weight-progress-chart__state">Aun no hay datos de progreso de peso.</div>
+  <div class="weight-progress-chart__state weight-progress-chart__state--empty">
+    <svg class="weight-progress-chart__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path d="M3 3v18h18" />
+      <path d="M7 16l4-8 4 4 5-9" />
+    </svg>
+    <p class="weight-progress-chart__title">Aún no hay datos de progreso</p>
+    <p class="weight-progress-chart__subtitle">Completa tu perfil para comenzar el seguimiento</p>
+  </div>
   } @else {
   <div class="weight-progress-chart__canvas-wrapper">
     <canvas #chartCanvas></canvas>

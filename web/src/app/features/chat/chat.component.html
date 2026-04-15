@@ -1,11 +1,28 @@
 <section class="chat">
   <div #messagesContainer class="chat__messages">
     @if (isLoadingHistory) {
-    <div class="chat__state">Cargando historial del chat...</div>
+    <div class="chat__state chat__state--loading">
+      <app-spinner size="large" />
+      <p class="chat__state-text">Cargando historial...</p>
+    </div>
     } @else if (errorMessage && messages.length === 0) {
-    <div class="chat__state chat__state--error">{{ errorMessage }}</div>
+    <div class="chat__state chat__state--error">
+      <svg class="chat__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+      </svg>
+      <p class="chat__state-text">{{ errorMessage }}</p>
+    </div>
     } @else if (messages.length === 0) {
-    <div class="chat__state">Aun no hay mensajes. Inicia la conversacion con tu coach AI.</div>
+    <div class="chat__state chat__state--empty">
+      <svg class="chat__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        <path d="M8 10h.01M12 10h.01M16 10h.01" />
+      </svg>
+      <p class="chat__state-title">Tu coach AI está listo</p>
+      <p class="chat__state-text">Puedes preguntarme sobre nutrición, entrenamiento o hábitos</p>
+    </div>
     } @else {
     @for (message of messages; track trackByTimestamp($index, message)) {
     <article class="chat__bubble" [class.chat__bubble--user]="message.role === 'USER'"
