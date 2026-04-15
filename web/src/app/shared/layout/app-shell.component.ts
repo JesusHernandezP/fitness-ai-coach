@@ -1,6 +1,5 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-shell',
@@ -16,11 +15,6 @@ import { AuthService } from '../../core/auth/auth.service';
               <p class="shell__eyebrow">Fitness AI Coach</p>
               <h1>{{ currentSectionTitle() }}</h1>
             </div>
-          </div>
-
-          <div class="shell__actions">
-            <a routerLink="/chat" class="shell__cta">Abrir chat</a>
-            <button type="button" class="shell__logout" (click)="logout()">Cerrar sesion</button>
           </div>
         </header>
 
@@ -99,24 +93,6 @@ import { AuthService } from '../../core/auth/auth.service';
       font-weight: 700;
     }
 
-    .shell__actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .shell__cta {
-      min-height: 44px;
-      padding: 10px 18px;
-      border-radius: 12px;
-      background: #ffe01e;
-      color: #111318;
-      text-decoration: none;
-      font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-    }
-
     .shell__body {
       display: grid;
       grid-template-columns: 220px 1fr;
@@ -150,18 +126,6 @@ import { AuthService } from '../../core/auth/auth.service';
       padding: 24px;
     }
 
-    .shell__logout {
-      min-height: 44px;
-      padding: 0 18px;
-      border-radius: 12px;
-      border: 1px solid #2a2a2a;
-      background: #121212;
-      color: #ffffff;
-      font: inherit;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
     @media (max-width: 900px) {
       .shell__body {
         grid-template-columns: 1fr;
@@ -183,7 +147,6 @@ import { AuthService } from '../../core/auth/auth.service';
 })
 export class AppShellComponent {
   private readonly router = inject(Router);
-  private readonly authService = inject(AuthService);
 
   protected showShell(): boolean {
     return this.router.url !== '/login';
@@ -199,9 +162,5 @@ export class AppShellComponent {
     }
 
     return 'Panel';
-  }
-
-  protected logout(): void {
-    this.authService.logout();
   }
 }
