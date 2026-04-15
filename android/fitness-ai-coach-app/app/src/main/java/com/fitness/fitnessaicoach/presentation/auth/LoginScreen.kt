@@ -230,7 +230,7 @@ private fun LoginBrandMark() {
     Image(
         painter = painterResource(id = R.drawable.logo_fitness_ai_coach),
         contentDescription = "Fitness AI Coach",
-        modifier = Modifier.size(120.dp)
+        modifier = Modifier.size(180.dp)
     )
 }
 
