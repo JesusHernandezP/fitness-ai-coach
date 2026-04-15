@@ -48,12 +48,12 @@ fun GoalsScreen(
         item {
             Column {
                 Text(
-                    text = "Goals",
+                    text = "Objetivos",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Set your current fitness objective and calorie target.",
+                    text = "Define tu objetivo actual y tu meta de calorias.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -65,7 +65,7 @@ fun GoalsScreen(
                     value = uiState.goalType?.name?.replace('_', ' ') ?: "",
                     onValueChange = { },
                     readOnly = true,
-                    label = { Text("Goal type") },
+                    label = { Text("Tipo de objetivo") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true
                 )
@@ -76,7 +76,7 @@ fun GoalsScreen(
                         .fillMaxWidth()
                         .heightIn(min = 48.dp)
                 ) {
-                    Text("Select goal type")
+                    Text("Seleccionar tipo de objetivo")
                 }
                 DropdownMenu(
                     expanded = expanded,
@@ -84,7 +84,15 @@ fun GoalsScreen(
                 ) {
                     GoalType.entries.forEach { goalType ->
                         DropdownMenuItem(
-                            text = { Text(goalType.name.replace('_', ' ')) },
+                            text = {
+                                Text(
+                                    when (goalType) {
+                                        GoalType.LOSE_WEIGHT -> "Perder peso"
+                                        GoalType.BUILD_MUSCLE -> "Ganar musculo"
+                                        GoalType.MAINTAIN -> "Mantener"
+                                    }
+                                )
+                            },
                             onClick = {
                                 viewModel.onGoalTypeChanged(goalType)
                                 expanded = false
@@ -99,7 +107,7 @@ fun GoalsScreen(
             OutlinedTextField(
                 value = uiState.targetWeight,
                 onValueChange = viewModel::onTargetWeightChanged,
-                label = { Text("Target weight (optional)") },
+                label = { Text("Peso objetivo (opcional)") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
@@ -110,7 +118,7 @@ fun GoalsScreen(
             OutlinedTextField(
                 value = uiState.targetCalories,
                 onValueChange = viewModel::onTargetCaloriesChanged,
-                label = { Text("Target calories") },
+                label = { Text("Calorias objetivo") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
@@ -151,14 +159,14 @@ fun GoalsScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Save")
+                    Text("Guardar")
                 }
             }
         }
 
         item {
             Text(
-                text = "Saved goals",
+                text = "Objetivos guardados",
                 style = MaterialTheme.typography.titleLarge
             )
         }
@@ -171,7 +179,7 @@ fun GoalsScreen(
                 ) {
                     CircularProgressIndicator()
                     Text(
-                        text = "Loading your goals...",
+                        text = "Cargando tus objetivos...",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -179,7 +187,7 @@ fun GoalsScreen(
         } else if (uiState.goals.isEmpty()) {
             item {
                 Text(
-                    text = "No goals yet. Add one to keep your plan focused.",
+                    text = "Aun no hay objetivos. Agrega uno para mantener el plan enfocado.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -191,11 +199,15 @@ fun GoalsScreen(
                         .padding(vertical = 4.dp)
                 ) {
                     Text(
-                        text = goal.goalType.name.replace('_', ' '),
+                        text = when (goal.goalType) {
+                            GoalType.LOSE_WEIGHT -> "Perder peso"
+                            GoalType.BUILD_MUSCLE -> "Ganar musculo"
+                            GoalType.MAINTAIN -> "Mantener"
+                        },
                         style = MaterialTheme.typography.titleSmall
                     )
-                    Text("Target calories: ${goal.targetCalories}")
-                    Text("Target weight: ${goal.targetWeight?.toString() ?: "-"}")
+                    Text("Calorias objetivo: ${goal.targetCalories}")
+                    Text("Peso objetivo: ${goal.targetWeight?.toString() ?: "-"}")
                 }
             }
         }

@@ -58,7 +58,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
             ) {
-                Text("Profile")
+                Text("Perfil")
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
@@ -67,7 +67,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
             ) {
-                Text("Body metrics")
+                Text("Medidas corporales")
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
@@ -76,7 +76,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
             ) {
-                Text("Goals")
+                Text("Objetivos")
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
@@ -85,7 +85,7 @@ fun HomeScreen(
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
             ) {
-                Text("Chat with AI Coach")
+                Text("Chat con el coach AI")
             }
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -108,7 +108,7 @@ fun HomeScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "AI Coach",
+                        text = "Coach AI",
                         style = MaterialTheme.typography.titleLarge
                     )
                     Spacer(modifier = Modifier.height(16.dp))
@@ -118,7 +118,7 @@ fun HomeScreen(
                                 CircularProgressIndicator()
                                 Spacer(modifier = Modifier.height(8.dp))
                                 Text(
-                                    text = "Generating recommendation...",
+                                    text = "Generando recomendacion...",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -126,7 +126,7 @@ fun HomeScreen(
 
                         is AppResult.Error -> {
                             Text(
-                                text = "AI recommendation unavailable",
+                                text = "Recomendacion de AI no disponible",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }

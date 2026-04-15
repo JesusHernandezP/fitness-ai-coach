@@ -35,7 +35,7 @@ fun DailyLogSummary(
 
     Column {
         Text(
-            text = "Today's summary",
+            text = "Resumen de hoy",
             style = MaterialTheme.typography.titleLarge
         )
 
@@ -44,7 +44,7 @@ fun DailyLogSummary(
         OutlinedTextField(
             value = caloriesConsumed,
             onValueChange = { caloriesConsumed = it },
-            label = { Text("Calories consumed") }
+            label = { Text("Calorias consumidas") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -52,7 +52,7 @@ fun DailyLogSummary(
         OutlinedTextField(
             value = caloriesBurned,
             onValueChange = { caloriesBurned = it },
-            label = { Text("Calories burned") }
+            label = { Text("Calorias quemadas") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -60,12 +60,12 @@ fun DailyLogSummary(
         OutlinedTextField(
             value = steps,
             onValueChange = { steps = it },
-            label = { Text("Steps") }
+            label = { Text("Pasos") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Text("Date: ${log.date}")
+        Text("Fecha: ${log.date}")
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -82,7 +82,7 @@ fun DailyLogSummary(
                 .fillMaxWidth()
                 .heightIn(min = 48.dp)
         ) {
-            Text("Save daily log")
+            Text("Guardar registro diario")
         }
     }
 }

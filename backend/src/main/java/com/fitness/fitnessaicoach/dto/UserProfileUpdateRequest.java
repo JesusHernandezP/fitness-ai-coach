@@ -27,6 +27,10 @@ public class UserProfileUpdateRequest {
     @DecimalMax(value = "220.0", message = "Height cannot be greater than 220 cm.")
     private Double heightCm;
 
+    @DecimalMin(value = "30.0", message = "Weight must be at least 30 kg.")
+    @DecimalMax(value = "400.0", message = "Weight cannot be greater than 400 kg.")
+    private Double weightKg;
+
     private UserSex sex;
 
     private ActivityLevel activityLevel;

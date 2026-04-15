@@ -1,0 +1,37 @@
+.activity-overview {
+  display: grid;
+  gap: 16px;
+}
+
+.activity-overview__state {
+  color: #b0b0b0;
+}
+
+.activity-overview__state--error {
+  color: #ef4444;
+}
+
+.activity-overview__grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.activity-overview__item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid #1f1f1f;
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.activity-overview__label {
+  font-size: 0.85rem;
+  color: #a0a0a0;
+}
+
+.activity-overview__value {
+  font-size: 1.1rem;
+  font-weight: 600;
+}

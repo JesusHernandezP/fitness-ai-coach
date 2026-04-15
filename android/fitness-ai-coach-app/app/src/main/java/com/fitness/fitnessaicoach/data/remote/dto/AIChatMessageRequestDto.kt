@@ -4,5 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AIChatMessageRequestDto(
-    val message: String
+    val message: String,
+    val conversationId: String? = null
 )

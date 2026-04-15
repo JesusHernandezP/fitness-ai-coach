@@ -11,27 +11,27 @@ import { AuthService } from '../../core/auth/auth.service';
   imports: [CommonModule, FormsModule],
   template: `
     <section class="login">
-      <div class="login__hero">
-        <img src="/logo-fitness-ai-coach.png" alt="Fitness AI Coach" class="login__logo" />
-        <p class="login__eyebrow">Fitness AI Coach</p>
-        <h1>{{ isRegisterMode ? 'Create your account' : 'Welcome back' }}</h1>
-        <p class="login__slogan">Your pocket coach</p>
-        <p class="login__copy">
-          {{ isRegisterMode
-            ? 'Start with email and password. Your progress and coaching stay aligned across web and Android.'
-            : 'Sign in to continue your progress, chat, and synchronized coaching.' }}
-        </p>
-      </div>
+      <div class="login__card">
+        <div class="login__header">
+          <img src="/logo-fitness-ai-coach.png" alt="Fitness AI Coach" class="login__logo" />
+          <p class="login__eyebrow">Fitness AI Coach</p>
+          <h1>{{ isRegisterMode ? 'Crea tu cuenta' : 'Bienvenido de vuelta' }}</h1>
+          <p class="login__slogan">Tu coach de bolsillo</p>
+          <p class="login__copy">
+            {{ isRegisterMode
+              ? 'Empieza con correo y contrasena. Tu progreso y coaching se mantienen alineados entre web y Android.'
+              : 'Inicia sesion para continuar tu progreso, chat y coaching sincronizado.' }}
+          </p>
+        </div>
 
-      <div class="login__panel">
         <form class="login__form" (ngSubmit)="submit()">
           <label>
-            <span>Email</span>
+            <span>Correo</span>
             <input type="email" name="email" [(ngModel)]="email" [disabled]="isLoading" required />
           </label>
 
           <label>
-            <span>Password</span>
+            <span>Contrasena</span>
             <input type="password" name="password" [(ngModel)]="password" [disabled]="isLoading" required />
           </label>
 
@@ -40,11 +40,11 @@ import { AuthService } from '../../core/auth/auth.service';
           }
 
           <button type="submit" [disabled]="isLoading || !email.trim() || !password.trim()">
-            {{ isLoading ? (isRegisterMode ? 'Creating account...' : 'Signing in...') : (isRegisterMode ? 'Create account' : 'Enter') }}
+            {{ isLoading ? (isRegisterMode ? 'Creando cuenta...' : 'Iniciando sesion...') : (isRegisterMode ? 'Crear cuenta' : 'Entrar') }}
           </button>
 
           <button type="button" class="login__ghost" (click)="toggleMode()" [disabled]="isLoading">
-            {{ isRegisterMode ? 'I already have an account' : 'Create account' }}
+            {{ isRegisterMode ? 'Ya tengo una cuenta' : 'Crear cuenta' }}
           </button>
         </form>
       </div>
@@ -64,30 +64,25 @@ import { AuthService } from '../../core/auth/auth.service';
     .login {
       min-height: 100vh;
       display: grid;
-      grid-template-columns: minmax(320px, 1.1fr) minmax(320px, 0.9fr);
-      gap: 28px;
-      align-items: center;
+      place-items: center;
       padding: 32px;
     }
 
-    .login__hero,
-    .login__panel {
+    .login__card {
       background: rgba(30, 30, 30, 0.92);
       border: 1px solid #2a2a2a;
       border-radius: 28px;
       box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-    }
-
-    .login__hero {
+      width: min(520px, 92vw);
       padding: 36px;
       display: grid;
-      gap: 12px;
-      align-content: center;
-      min-height: 520px;
+      gap: 24px;
     }
 
-    .login__panel {
-      padding: 32px;
+    .login__header {
+      display: grid;
+      gap: 10px;
+      text-align: center;
     }
 
     .login__logo {
@@ -121,7 +116,6 @@ import { AuthService } from '../../core/auth/auth.service';
 
     .login__copy {
       margin: 0;
-      max-width: 34rem;
       color: #a0a0a0;
       line-height: 1.6;
       font-size: 1rem;
@@ -181,13 +175,13 @@ import { AuthService } from '../../core/auth/auth.service';
       color: #ef4444;
     }
 
-    @media (max-width: 980px) {
-      .login {
-        grid-template-columns: 1fr;
+    @media (max-width: 600px) {
+      .login__card {
+        padding: 28px 22px;
       }
 
-      .login__hero {
-        min-height: auto;
+      h1 {
+        font-size: 2.1rem;
       }
     }
   `]
@@ -239,8 +233,8 @@ export class LoginComponent {
       error: () => {
         this.isLoading = false;
         this.errorMessage = this.isRegisterMode
-          ? 'Unable to create the account. Check the email, password, and backend connection.'
-          : 'Unable to sign in. Check your credentials and backend connection.';
+          ? 'No se pudo crear la cuenta. Revisa el correo, la contrasena y la conexion al backend.'
+          : 'No se pudo iniciar sesion. Revisa tus credenciales y la conexion al backend.';
       }
     });
   }

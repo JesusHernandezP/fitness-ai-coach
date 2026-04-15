@@ -30,6 +30,7 @@ export class WeightProgressChartComponent implements AfterViewInit, OnDestroy {
       next: (progress) => {
         this.dataPoints = progress;
         this.isLoading = false;
+        console.debug('weight-progress:data', progress);
 
         if (progress.length === 0) {
           return;
@@ -37,9 +38,10 @@ export class WeightProgressChartComponent implements AfterViewInit, OnDestroy {
 
         this.renderChart(progress);
       },
-      error: () => {
-        this.errorMessage = 'Unable to load weight progress right now.';
+      error: (error) => {
+        this.errorMessage = 'No se pudo cargar el progreso de peso en este momento.';
         this.isLoading = false;
+        console.error('weight-progress:error', error);
       }
     });
 
@@ -64,7 +66,7 @@ export class WeightProgressChartComponent implements AfterViewInit, OnDestroy {
         labels: progress.map((point) => point.date),
         datasets: [
           {
-            label: 'Weight (kg)',
+            label: 'Peso (kg)',
             data: progress.map((point) => point.weight),
             borderColor: '#2c6a5b',
             backgroundColor: 'rgba(44, 106, 91, 0.14)',

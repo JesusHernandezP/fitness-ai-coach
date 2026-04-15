@@ -97,8 +97,8 @@ class AIChatIntegrationTest {
     void swaggerSpecShouldExposeAiChatEndpoint() throws Exception {
         mockMvc.perform(get("/v3/api-docs"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$['paths']['/api/ai-chat/message']").exists())
-                .andExpect(jsonPath("$['paths']['/api/ai-chat/message']['post']").exists());
+                .andExpect(jsonPath("$['paths']['/api/ai/chat']").exists())
+                .andExpect(jsonPath("$['paths']['/api/ai/chat']['post']").exists());
     }
 
     @Test
@@ -137,7 +137,7 @@ class AIChatIntegrationTest {
     @Test
     void aiChatShouldKeepOnlyLastTwentyStoredMessagesPerSession() throws Exception {
         when(aiTextGenerationClient.generateText(anyString()))
-                .thenReturn("Keep your calories steady and hit your step target tomorrow.");
+                .thenReturn("Manten tus calorias estables y alcanza tu meta de pasos manana.");
         when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
 
         UserContext user = registerAndLogin("trim-chat");
@@ -155,7 +155,7 @@ class AIChatIntegrationTest {
 
         assertThat(messages).hasSize(20);
         assertThat(messages.get(0).getContent()).isEqualTo("Message 2");
-        assertThat(messages.get(1).getContent()).isEqualTo("Keep your calories steady and hit your step target tomorrow.");
+        assertThat(messages.get(1).getContent()).isEqualTo("Manten tus calorias estables y alcanza tu meta de pasos manana.");
         assertThat(messages.get(messages.size() - 2).getContent()).isEqualTo("Message 11");
         assertThat(messages.get(messages.size() - 1).getRole()).isEqualTo(ChatRole.AI);
     }
@@ -183,34 +183,35 @@ class AIChatIntegrationTest {
         verify(aiTextGenerationClient, atLeastOnce()).generateText(promptCaptor.capture());
 
         String prompt = promptCaptor.getValue();
-        assertThat(prompt).contains("USER: Message 3");
-        assertThat(prompt).contains("AI: Context-aware reply.");
+        assertThat(prompt).contains("USER: Message 9");
+        assertThat(prompt).contains("ASSISTANT: Context-aware reply.");
         assertThat(prompt).contains("USER: Message 11");
-        assertThat(prompt).contains("Latest user message:");
+        assertThat(prompt).contains("CURRENT USER MESSAGE:");
         assertThat(prompt).contains("Message 12");
-        assertThat(prompt).doesNotContain("USER: Message 1\r\n");
+        assertThat(prompt).doesNotContain("USER: Message 1" + System.lineSeparator());
+        assertThat(prompt).doesNotContain("USER: Message 8");
         assertThat(prompt).doesNotContain("USER: Message 12");
-        assertThat(prompt.indexOf("USER: Message 3")).isLessThan(prompt.indexOf("USER: Message 11"));
+        assertThat(prompt.indexOf("USER: Message 9")).isLessThan(prompt.indexOf("USER: Message 11"));
     }
 
     @Test
     void aiChatShouldLogFoodWorkoutStepsWeightAndAnswerProgressQuestion() throws Exception {
         when(aiTextGenerationClient.generateText(anyString()))
-                .thenReturn("You are in a calorie deficit today. Keep protein high and stay near your step target.");
+                .thenReturn("Estas en deficit calorico hoy. Manten la proteina alta y mantente cerca de tu meta de pasos.");
         when(aiTextGenerationClient.getModelName()).thenReturn("test-model");
         when(aiCoachingService.getCoaching(any()))
-                .thenReturn(new AICoachingResponse(null, "You are in a calorie deficit today. Keep protein high and stay near your step target."));
+                .thenReturn(new AICoachingResponse(null, "Estas en deficit calorico hoy. Manten la proteina alta y mantente cerca de tu meta de pasos."));
 
         UserContext user = registerAndLogin("log-chat");
         createGoal(user.token(), 75);
         createFood(user.token(), "eggs", 78.0);
         createFood(user.token(), "toast", 90.0);
 
-        sendMessageExpectingReply(user.token(), "2 eggs and toast", "Logged 2 food item(s) for snack. Quantity total: 3.");
-        sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Logged 4 workout exercise(s) for \"Pull\" with 4x8.");
-        sendMessageExpectingReply(user.token(), "9000 steps today", "Logged 9000 steps for today.");
-        sendMessageExpectingReply(user.token(), "weight 78.5 kg", "Logged your weight at 78.5 kg for today.");
-        sendMessageExpectingReply(user.token(), "am I in deficit?", "You are in a calorie deficit today. Keep protein high and stay near your step target.");
+        sendMessageExpectingReply(user.token(), "2 eggs and toast", "Registre 2 alimento(s) para merienda. Cantidad total: 3.");
+        sendMessageExpectingReply(user.token(), "pull workout 4 exercises 4x8 heavy", "Registre 4 ejercicios de entrenamiento para \"Pull\" con 4x8.");
+        sendMessageExpectingReply(user.token(), "9000 steps today", "Registre 9000 pasos para hoy.");
+        sendMessageExpectingReply(user.token(), "weight 78.5 kg", "Registre tu peso en 78.5 kg para hoy.");
+        sendMessageExpectingReply(user.token(), "am I in deficit?", "Estas en deficit calorico hoy. Manten la proteina alta y mantente cerca de tu meta de pasos.");
 
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
@@ -249,12 +250,12 @@ class AIChatIntegrationTest {
         createFood(user.token(), "eggs", 78.0);
         createFood(user.token(), "rice", 130.0);
 
-        sendMessageExpectingReply(user.token(), "I ate 3 eggs and rice", "Logged 2 food item(s) for snack. Quantity total: 4.");
-        sendMessageExpectingReply(user.token(), "today I walked 8000 steps", "Logged 8000 steps for today.");
-        sendMessageExpectingReply(user.token(), "did push workout 4 exercises 4x8", "Logged 4 workout exercise(s) for \"Push\" with 4x8.");
-        sendMessageExpectingReply(user.token(), "burned 500 calories", "Logged 500 calories burned for today.");
-        sendMessageExpectingReply(user.token(), "my weight is 82kg", "Logged your weight at 82.0 kg for today.");
-        sendMessageExpectingReply(user.token(), "I want to gain muscle", "Set your goal to build muscle.");
+        sendMessageExpectingReply(user.token(), "I ate 3 eggs and rice", "Registre 2 alimento(s) para merienda. Cantidad total: 4.");
+        sendMessageExpectingReply(user.token(), "today I walked 8000 steps", "Registre 8000 pasos para hoy.");
+        sendMessageExpectingReply(user.token(), "did push workout 4 exercises 4x8", "Registre 4 ejercicios de entrenamiento para \"Push\" con 4x8.");
+        sendMessageExpectingReply(user.token(), "burned 500 calories", "Registre 500 calorias quemadas para hoy.");
+        sendMessageExpectingReply(user.token(), "my weight is 82kg", "Registre tu peso en 82.0 kg para hoy.");
+        sendMessageExpectingReply(user.token(), "I want to gain muscle", "Estableci tu objetivo en ganar musculo.");
 
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
@@ -291,10 +292,10 @@ class AIChatIntegrationTest {
 
         UserContext user = registerAndLogin("workout-chat");
 
-        sendMessageExpectingReply(user.token(), "pull day 4 exercises 4x8", "Logged 4 workout exercise(s) for \"Pull\" with 4x8.");
-        sendMessageExpectingReply(user.token(), "3x10 bench press", "Logged workout \"Bench Press\" with 3x10.");
-        sendMessageExpectingReply(user.token(), "did cardio 30 minutes", "Logged workout \"Cardio\" with 3x10.");
-        sendMessageExpectingReply(user.token(), "ran 20 minutes", "Logged workout \"Running\" with 3x10.");
+        sendMessageExpectingReply(user.token(), "pull day 4 exercises 4x8", "Registre 4 ejercicios de entrenamiento para \"Pull\" con 4x8.");
+        sendMessageExpectingReply(user.token(), "3x10 bench press", "Registre el entrenamiento \"Bench Press\" con 3x10.");
+        sendMessageExpectingReply(user.token(), "did cardio 30 minutes", "Registre el entrenamiento \"Cardio\" con 3x10.");
+        sendMessageExpectingReply(user.token(), "ran 20 minutes", "Registre el entrenamiento \"Running\" con 3x10.");
 
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
@@ -328,8 +329,8 @@ class AIChatIntegrationTest {
         createFood(user.token(), "rice", 130.0);
         createFood(user.token(), "bread", 265.0);
 
-        sendMessageExpectingReply(user.token(), "2 eggs and 150g rice", "Logged 2 food item(s) for snack. Quantity total: 152.");
-        sendMessageExpectingReply(user.token(), "2 slices bread", "Logged 1 food item(s) for snack. Quantity total: 2.");
+        sendMessageExpectingReply(user.token(), "2 eggs and 150g rice", "Registre 2 alimento(s) para merienda. Cantidad total: 152.");
+        sendMessageExpectingReply(user.token(), "2 slices bread", "Registre 1 alimento(s) para merienda. Cantidad total: 2.");
 
         DailyLog dailyLog = dailyLogRepository.findByUserIdAndLogDate(UUID.fromString(user.userId()), java.time.LocalDate.now())
                 .orElseThrow();
@@ -354,12 +355,12 @@ class AIChatIntegrationTest {
                 }
                 """.formatted(message);
 
-        mockMvc.perform(post("/api/ai-chat/message")
+        mockMvc.perform(post("/api/ai/chat")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reply").isString());
+                .andExpect(jsonPath("$.response").isString());
     }
 
     private void sendMessageExpectingReply(String token, String message, String expectedReply) throws Exception {
@@ -369,12 +370,12 @@ class AIChatIntegrationTest {
                 }
                 """.formatted(message);
 
-        mockMvc.perform(post("/api/ai-chat/message")
+        mockMvc.perform(post("/api/ai/chat")
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(body))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reply").value(expectedReply));
+                .andExpect(jsonPath("$.response").value(expectedReply));
     }
 
     private void createGoal(String token, double targetWeight) throws Exception {

@@ -78,19 +78,19 @@ class MetabolicProfileViewModel @Inject constructor(
         val heightCm = currentState.heightCm.toDoubleOrNull()
 
         if (age == null || age !in 15..80) {
-            _uiState.update { it.copy(errorMessage = "Age must be between 15 and 80.") }
+            _uiState.update { it.copy(errorMessage = "La edad debe estar entre 15 y 80.") }
             return
         }
         if (heightCm == null || heightCm < 120.0 || heightCm > 220.0) {
-            _uiState.update { it.copy(errorMessage = "Height must be between 120 and 220 cm.") }
+            _uiState.update { it.copy(errorMessage = "La altura debe estar entre 120 y 220 cm.") }
             return
         }
         if (currentState.sex.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Sex is required.") }
+            _uiState.update { it.copy(errorMessage = "El sexo es obligatorio.") }
             return
         }
         if (currentState.activityLevel.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Activity level is required.") }
+            _uiState.update { it.copy(errorMessage = "El nivel de actividad es obligatorio.") }
             return
         }
 
@@ -111,7 +111,7 @@ class MetabolicProfileViewModel @Inject constructor(
             when (val result = updateUserProfileUseCase(user)) {
                 AppResult.Loading -> Unit
                 is AppResult.Success -> {
-                    applyUser(result.data, successMessage = "Profile saved.")
+                    applyUser(result.data, successMessage = "Perfil guardado.")
                 }
                 is AppResult.Error -> {
                     _uiState.update {

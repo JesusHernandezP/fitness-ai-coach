@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface ChatSessionRepository extends JpaRepository<ChatSession, UUID> {
 
     Optional<ChatSession> findTopByUserIdOrderByLastActivityAtDescIdDesc(UUID userId);
+
+    Optional<ChatSession> findByIdAndUserId(UUID id, UUID userId);
 }

@@ -82,7 +82,7 @@ class BodyMetricsViewModel @Inject constructor(
         val weight = currentState.weight.toDoubleOrNull()
 
         if (weight == null || weight <= 0.0) {
-            _uiState.update { it.copy(errorMessage = "Weight must be positive.") }
+            _uiState.update { it.copy(errorMessage = "El peso debe ser positivo.") }
             return
         }
 
@@ -101,7 +101,7 @@ class BodyMetricsViewModel @Inject constructor(
                             isLoading = false,
                             weight = "",
                             date = LocalDate.now().toString(),
-                            successMessage = "Body metrics saved.",
+                            successMessage = "Medidas corporales guardadas.",
                             errorMessage = null
                         )
                     }

@@ -1,18 +1,18 @@
 <section class="chat">
   <div class="chat__messages">
     @if (isLoadingHistory) {
-      <div class="chat__state">Loading chat history...</div>
+      <div class="chat__state">Cargando historial del chat...</div>
     } @else if (errorMessage && messages.length === 0) {
       <div class="chat__state chat__state--error">{{ errorMessage }}</div>
     } @else if (messages.length === 0) {
-      <div class="chat__state">No messages yet. Start the conversation with your AI coach.</div>
+      <div class="chat__state">Aun no hay mensajes. Inicia la conversacion con tu coach AI.</div>
     } @else {
       @for (message of messages; track trackByTimestamp($index, message)) {
         <article
           class="chat__bubble"
           [class.chat__bubble--user]="message.role === 'USER'"
           [class.chat__bubble--assistant]="message.role === 'ASSISTANT'">
-          <p class="chat__role">{{ message.role === 'USER' ? 'You' : 'AI Coach' }}</p>
+          <p class="chat__role">{{ message.role === 'USER' ? 'Tu' : 'Coach AI' }}</p>
           <p class="chat__text">{{ message.message }}</p>
         </article>
       }
@@ -29,7 +29,7 @@
       name="message"
       [(ngModel)]="draftMessage"
       [disabled]="isSending"
-      placeholder="Write a message to your AI coach" />
+      placeholder="Escribe un mensaje para tu coach AI" />
     <button type="submit" [disabled]="isSending || !draftMessage.trim()">
       @if (isSending) {
         <span>...</span>

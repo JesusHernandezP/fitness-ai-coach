@@ -42,12 +42,12 @@ fun BodyMetricsScreen(
         item {
             Column {
                 Text(
-                    text = "Body metrics",
+                    text = "Medidas corporales",
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Track your weight history.",
+                    text = "Registra tu historial de peso.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -60,7 +60,7 @@ fun BodyMetricsScreen(
                     .fillMaxWidth()
                     .heightIn(min = 48.dp)
             ) {
-                Text("View progress chart")
+                Text("Ver grafico de progreso")
             }
         }
 
@@ -68,7 +68,7 @@ fun BodyMetricsScreen(
             OutlinedTextField(
                 value = uiState.weight,
                 onValueChange = viewModel::onWeightChanged,
-                label = { Text("Weight") },
+                label = { Text("Peso") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 singleLine = true
@@ -79,7 +79,7 @@ fun BodyMetricsScreen(
             OutlinedTextField(
                 value = uiState.date,
                 onValueChange = {},
-                label = { Text("Date") },
+                label = { Text("Fecha") },
                 modifier = Modifier.fillMaxWidth(),
                 readOnly = true,
                 singleLine = true
@@ -120,14 +120,14 @@ fun BodyMetricsScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text("Save")
+                    Text("Guardar")
                 }
             }
         }
 
         item {
             Text(
-                text = "History",
+                text = "Historial",
                 style = MaterialTheme.typography.titleLarge
             )
         }
@@ -137,18 +137,18 @@ fun BodyMetricsScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Weight progress",
+                    text = "Progreso de peso",
                     style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(
-                    text = "Current weight: ${uiState.currentWeight?.toString() ?: "-"}"
+                    text = "Peso actual: ${uiState.currentWeight?.toString() ?: "-"}"
                 )
                 Text(
-                    text = "Previous weight: ${uiState.previousWeight?.toString() ?: "-"}"
+                    text = "Peso anterior: ${uiState.previousWeight?.toString() ?: "-"}"
                 )
                 Text(
-                    text = "Difference: ${uiState.weightDifference?.toString() ?: "-"}"
+                    text = "Diferencia: ${uiState.weightDifference?.toString() ?: "-"}"
                 )
             }
         }
@@ -161,7 +161,7 @@ fun BodyMetricsScreen(
                 ) {
                     CircularProgressIndicator()
                     Text(
-                        text = "Loading your body metrics...",
+                        text = "Cargando tus medidas corporales...",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }
@@ -169,7 +169,7 @@ fun BodyMetricsScreen(
         } else if (uiState.bodyMetrics.isEmpty()) {
             item {
                 Text(
-                    text = "No body metrics yet. Save your first entry to start tracking progress.",
+                    text = "Aun no hay medidas corporales. Guarda tu primer registro para empezar a ver progreso.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -184,7 +184,7 @@ fun BodyMetricsScreen(
                         text = metric.date,
                         style = MaterialTheme.typography.titleSmall
                     )
-                    Text("Weight: ${metric.weight}")
+                    Text("Peso: ${metric.weight}")
                 }
             }
         }

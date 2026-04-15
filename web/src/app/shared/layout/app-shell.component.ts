@@ -19,21 +19,21 @@ import { AuthService } from '../../core/auth/auth.service';
           </div>
 
           <div class="shell__actions">
-            <a routerLink="/chat" class="shell__cta">Open chat</a>
-            <button type="button" class="shell__logout" (click)="logout()">Log out</button>
+            <a routerLink="/chat" class="shell__cta">Abrir chat</a>
+            <button type="button" class="shell__logout" (click)="logout()">Cerrar sesion</button>
           </div>
         </header>
 
         <div class="shell__body">
           <nav class="shell__nav" aria-label="Primary">
             <a routerLink="/dashboard" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
-              Dashboard
+              Panel
             </a>
             <a routerLink="/chat" routerLinkActive="is-active">
               Chat
             </a>
             <a routerLink="/profile" routerLinkActive="is-active">
-              Profile
+              Perfil
             </a>
           </nav>
 
@@ -191,14 +191,14 @@ export class AppShellComponent {
 
   protected currentSectionTitle(): string {
     if (this.router.url.startsWith('/chat')) {
-      return 'AI Chat';
+      return 'Chat con AI';
     }
 
     if (this.router.url.startsWith('/profile')) {
-      return 'Profile';
+      return 'Perfil';
     }
 
-    return 'Dashboard';
+    return 'Panel';
   }
 
   protected logout(): void {

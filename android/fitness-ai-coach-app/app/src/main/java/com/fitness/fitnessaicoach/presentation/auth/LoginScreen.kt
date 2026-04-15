@@ -47,18 +47,18 @@ fun LoginScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
     ) {
         Text(
-            text = "Login",
+            text = "Iniciar sesion",
             style = MaterialTheme.typography.headlineMedium
         )
         Text(
-            text = "Sign in to retrieve and store your JWT token.",
+            text = "Inicia sesion para obtener y guardar tu token JWT.",
             style = MaterialTheme.typography.bodyMedium
         )
 
         OutlinedTextField(
             value = uiState.email,
             onValueChange = viewModel::onEmailChanged,
-            label = { Text("Email") },
+            label = { Text("Correo") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             keyboardOptions = KeyboardOptions(
@@ -70,7 +70,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = uiState.password,
             onValueChange = viewModel::onPasswordChanged,
-            label = { Text("Password") },
+            label = { Text("Contrasena") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             visualTransformation = PasswordVisualTransformation(),
@@ -101,7 +101,7 @@ fun LoginScreen(
                     strokeWidth = 2.dp
                 )
             } else {
-                Text("Login")
+                Text("Iniciar sesion")
             }
         }
     }

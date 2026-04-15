@@ -61,10 +61,21 @@ public class UserService {
         User user = userRepository.findByIdAndEmail(id, email)
                 .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado."));
 
-        user.setAge(request.getAge());
-        user.setHeightCm(request.getHeightCm());
-        user.setSex(request.getSex());
-        user.setActivityLevel(request.getActivityLevel());
+        if (request.getAge() != null) {
+            user.setAge(request.getAge());
+        }
+        if (request.getHeightCm() != null) {
+            user.setHeightCm(request.getHeightCm());
+        }
+        if (request.getWeightKg() != null) {
+            user.setWeightKg(request.getWeightKg());
+        }
+        if (request.getSex() != null) {
+            user.setSex(request.getSex());
+        }
+        if (request.getActivityLevel() != null) {
+            user.setActivityLevel(request.getActivityLevel());
+        }
 
         return toResponse(userRepository.save(user));
     }

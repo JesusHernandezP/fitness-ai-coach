@@ -81,7 +81,7 @@ fun AIChatScreen(
                     OutlinedTextField(
                         value = inputText,
                         onValueChange = { inputText = it },
-                        label = { Text("Message") },
+                        label = { Text("Mensaje") },
                         modifier = Modifier.weight(1f),
                         enabled = !uiState.isLoading,
                         maxLines = 4
@@ -93,7 +93,7 @@ fun AIChatScreen(
                         },
                         enabled = inputText.isNotBlank() && !uiState.isLoading
                     ) {
-                        Text("Send")
+                        Text("Enviar")
                     }
                 }
             }
@@ -105,7 +105,7 @@ fun AIChatScreen(
                 .padding(innerPadding)
         ) {
             Text(
-                text = "Chat with AI Coach",
+                text = "Chat con el coach AI",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
@@ -120,7 +120,7 @@ fun AIChatScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Start the conversation. Try: today I ate chicken and rice",
+                        text = "Inicia la conversacion. Prueba: hoy comi pollo y arroz",
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
@@ -158,7 +158,7 @@ fun AIChatScreen(
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
                                     Text(
-                                        text = "AI Coach is replying...",
+                                        text = "El coach AI esta respondiendo...",
                                         style = MaterialTheme.typography.bodySmall
                                     )
                                 }
@@ -194,7 +194,7 @@ private fun ChatBubble(message: AIChatMessageItem) {
             horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
         ) {
             Text(
-                text = if (isUser) "You" else "AI Coach",
+                text = if (isUser) "Tu" else "Coach AI",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp)
